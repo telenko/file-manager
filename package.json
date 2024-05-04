@@ -13,7 +13,8 @@
     "react": "18.1.0",
     "react-native": "0.70.6",
     "react-native-file-viewer": "^2.1.5",
-    "react-native-fs": "^2.20.0"
+    "react-native-fs": "^2.20.0",
+    "react-native-manage-external-storage": "^0.1.8"
   },
   "devDependencies": {
     "@babel/core": "^7.12.9",

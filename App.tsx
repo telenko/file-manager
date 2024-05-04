@@ -2,26 +2,27 @@ import React, {useEffect, useRef, useState} from 'react';
 import {
   StyleSheet,
   Text,
-  useColorScheme,
+  // useColorScheme,
   View,
-  Linking,
+  // Linking,
   Button,
   ScrollView,
-  Platform,
+  // Platform,
 } from 'react-native';
 import * as RNFS from 'react-native-fs';
-import {PermissionsAndroid} from 'react-native';
+// import {PermissionsAndroid} from 'react-native';
 import FileViewer from 'react-native-file-viewer';
+import ManageExternalStorage from 'react-native-manage-external-storage';
 // import Share from 'react-native-share';
 
-const generateContentUri = async (filePath: string) => {
-  try {
-    return `content://${filePath}`;
-  } catch (error) {
-    console.error('Error generating content URI:', error);
-    return null;
-  }
-};
+// const generateContentUri = async (filePath: string) => {
+//   try {
+//     return `content://${filePath}`;
+//   } catch (error) {
+//     console.error('Error generating content URI:', error);
+//     return null;
+//   }
+// };
 
 // const shareFile = async (contentUri: string, mimeType: string) => {
 //   try {
@@ -34,22 +35,24 @@ const generateContentUri = async (filePath: string) => {
 
 const requestStoragePermission = async () => {
   try {
-    const granted = await PermissionsAndroid.requestMultiple([
-      PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
-      PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES,
-      PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
-    ]);
-    if (
-      Object.values(granted).every(
-        grant => grant === PermissionsAndroid.RESULTS.GRANTED,
-      )
-    ) {
-      console.log('Storage permission granted');
-      // Access PDF files here
-      return true;
-    } else {
-      console.log('Storage permission denied');
-    }
+    await ManageExternalStorage();
+    return true;
+    // const granted = await PermissionsAndroid.requestMultiple([
+    //   PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
+    //   PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES,
+    //   PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+    // ]);
+    // if (
+    //   Object.values(granted).every(
+    //     grant => grant === PermissionsAndroid.RESULTS.GRANTED,
+    //   )
+    // ) {
+    //   console.log('Storage permission granted');
+    //   // Access PDF files here
+    //   return true;
+    // } else {
+    //   console.log('Storage permission denied');
+    // }
   } catch (error) {
     console.error('Error requesting storage permission:', error);
   }
@@ -59,27 +62,27 @@ const requestStoragePermission = async () => {
 // import FileOpener from 'react-native-file-opener';
 
 // Function to get the MIME type of a file
-const getMimeType = async (filePath: string) => {
-  try {
-    // const res = await RNFetchBlob.fs.readFile(filePath, 'base64');
-    // const type = RNFetchBlob.config(res);
-    const extension = filePath.split('.').pop()?.toLowerCase();
-    const mimeTypes: Record<string, string> = {
-      // Add more file extensions and corresponding MIME types as needed
-      jpg: 'image/jpeg',
-      jpeg: 'image/jpeg',
-      png: 'image/png',
-      gif: 'image/gif',
-      pdf: 'application/pdf',
-      // Add more here...
-    };
+// const getMimeType = async (filePath: string) => {
+//   try {
+//     // const res = await RNFetchBlob.fs.readFile(filePath, 'base64');
+//     // const type = RNFetchBlob.config(res);
+//     const extension = filePath.split('.').pop()?.toLowerCase();
+//     const mimeTypes: Record<string, string> = {
+//       // Add more file extensions and corresponding MIME types as needed
+//       jpg: 'image/jpeg',
+//       jpeg: 'image/jpeg',
+//       png: 'image/png',
+//       gif: 'image/gif',
+//       pdf: 'application/pdf',
+//       // Add more here...
+//     };
 
-    return mimeTypes[extension ?? ''] || 'application/octet-stream'; // Default to binary if MIME type not found
-  } catch (error) {
-    console.error('Error getting MIME type:', error);
-    return null;
-  }
-};
+//     return mimeTypes[extension ?? ''] || 'application/octet-stream'; // Default to binary if MIME type not found
+//   } catch (error) {
+//     console.error('Error getting MIME type:', error);
+//     return null;
+//   }
+// };
 
 const openFile = async (filePath: string) => {
   try {
@@ -103,7 +106,7 @@ const openFile = async (filePath: string) => {
 };
 
 const App = () => {
-  const isDarkMode = useColorScheme() === 'dark';
+  // const isDarkMode = useColorScheme() === 'dark';
   const [files, setFiles] = useState<RNFS.ReadDirItem[]>();
   const [curDir, setCurDir] = useState<string>(
     RNFS.ExternalStorageDirectoryPath,
@@ -137,7 +140,7 @@ const App = () => {
           setCurDir(RNFS.ExternalStorageDirectoryPath);
         }}
       />
-      <ScrollView>
+      <ScrollView style={{ height: 600 }}>
         {files?.map(file => (
           <Text
             key={file.path}
