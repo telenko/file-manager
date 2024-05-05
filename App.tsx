@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {
   StyleSheet,
   Text,
@@ -8,6 +8,8 @@ import {
   Button,
   ScrollView,
   Alert,
+  Image,
+  FlatList,
   // Share,
   // Platform,
 } from 'react-native';
@@ -16,6 +18,34 @@ import * as RNFS from 'react-native-fs';
 import FileViewer from 'react-native-file-viewer';
 import ManageExternalStorage from 'react-native-manage-external-storage';
 import Share from 'react-native-share';
+
+const renderPreview = (name: string, path: string) => {
+  // Check if the file is an image
+  if (
+    name.endsWith('.jpg') ||
+    name.endsWith('.jpeg') ||
+    name.endsWith('.png')
+  ) {
+    return (
+      <Image source={{uri: `file://${path}`}} style={{width: 50, height: 50}} />
+    );
+  }
+  // Check if the file is a video
+  else if (
+    name.endsWith('.mp4') ||
+    name.endsWith('.avi') ||
+    name.endsWith('.mov')
+  ) {
+    // return (
+    //   <Video
+    //     source={{uri: `file://${path}`}}
+    //     style={{width: 50, height: 50}}
+    //     paused={true} // Autoplay can be enabled if needed
+    //   />
+    // );
+  }
+  return null;
+};
 
 const isItemHidden = (itemName: string): boolean => {
   return itemName.startsWith('.');
@@ -137,6 +167,83 @@ const App = () => {
     })();
   }, [curDir]);
 
+  const [visibleFiles, setVisibleFiles] = useState<number[]>([]);
+
+  const onViewableItemsChanged = useCallback(({viewableItems}: any) => {
+    console.log(viewableItems);
+    // @ts-ignore
+    setVisibleFiles(viewableItems.map(item => item.index));
+  }, []);
+
+  const renderItem = ({
+    item: file,
+    index,
+  }: {
+    item: RNFS.ReadDirItem;
+    index: number;
+  }) => {
+    // const isVisible = visibleFiles.includes(index);
+
+    // if (!isVisible) {
+    //   return null;
+    // }
+
+    return (
+      <Text
+        key={file.path}
+        style={file.isDirectory() ? styles.folder : styles.file}
+        onPress={() => {
+          if (file.isFile()) {
+            openFile(file.path);
+          } else {
+            setCurDir(file.path);
+          }
+        }}>
+        {renderPreview(file.name, file.path)}
+        {file.name}
+        {file.isFile() ? (
+          <>
+            <Button
+              title="Send"
+              onPress={() => {
+                Share.open({
+                  title: 'Share File',
+                  // message: `Sharing file: ${file.name}`,
+                  url: `file://${file.path}`, // Assuming path is the file path
+                })
+                  .then(console.log)
+                  .catch(console.error);
+              }}
+            />
+            <Button
+              title="Delete"
+              onPress={() => {
+                Alert.alert(
+                  'Confirm Deletion',
+                  `Are you sure you want to delete ${file.name}?`,
+                  [
+                    {
+                      text: 'Cancel',
+                      style: 'cancel',
+                    },
+                    {
+                      text: 'Delete',
+                      onPress: () => {
+                        RNFS.unlink(file.path);
+                      },
+                      style: 'destructive',
+                    },
+                  ],
+                  {cancelable: true},
+                );
+              }}
+            />
+          </>
+        ) : null}
+      </Text>
+    );
+  };
+
   return (
     <View style={styles.sectionContainer}>
       <Text>File manager app v2</Text>
@@ -146,61 +253,17 @@ const App = () => {
           setCurDir(RNFS.ExternalStorageDirectoryPath);
         }}
       />
-      <ScrollView style={{height: 600}}>
-        {files?.map(file => (
-          <Text
-            key={file.path}
-            style={file.isDirectory() ? styles.folder : styles.file}
-            onPress={() => {
-              if (file.isFile()) {
-                openFile(file.path);
-              } else {
-                setCurDir(file.path);
-              }
-            }}>
-            {file.name}
-            {file.isFile() ? (
-              <>
-                <Button
-                  title="Send"
-                  onPress={() => {
-                    Share.open({
-                      title: 'Share File',
-                      // message: `Sharing file: ${file.name}`,
-                      url: `file://${file.path}`, // Assuming path is the file path
-                    })
-                      .then(console.log)
-                      .catch(console.error);
-                  }}
-                />
-                <Button
-                  title="Delete"
-                  onPress={() => {
-                    Alert.alert(
-                      'Confirm Deletion',
-                      `Are you sure you want to delete ${file.name}?`,
-                      [
-                        {
-                          text: 'Cancel',
-                          style: 'cancel',
-                        },
-                        {
-                          text: 'Delete',
-                          onPress: () => {
-                            RNFS.unlink(file.path);
-                          },
-                          style: 'destructive',
-                        },
-                      ],
-                      {cancelable: true},
-                    );
-                  }}
-                />
-              </>
-            ) : null}
-          </Text>
-        ))}
-      </ScrollView>
+      <FlatList
+        style={{height: 600}}
+        data={files}
+        renderItem={renderItem}
+        keyExtractor={(item, index) => index.toString()}
+        // onViewableItemsChanged={onViewableItemsChanged}
+        // viewabilityConfig={{
+        //   itemVisiblePercentThreshold: 50, // Adjust as needed
+        // }}
+        maxToRenderPerBatch={20}
+      />
     </View>
   );
 };
