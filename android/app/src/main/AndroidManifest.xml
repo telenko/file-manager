@@ -38,6 +38,11 @@
       </provider>
     </application>
     <queries>
+      <package android:name="com.example.store" />
+      <package android:name="com.example.services" />
+
+      <!--for example, to share via instagram -->
+      <package android:name="com.instagram.android" />
       <intent>
         <action android:name="android.intent.action.VIEW" />
            <data android:mimeType="*/*" />

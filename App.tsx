@@ -7,13 +7,19 @@ import {
   // Linking,
   Button,
   ScrollView,
+  Alert,
+  // Share,
   // Platform,
 } from 'react-native';
 import * as RNFS from 'react-native-fs';
 // import {PermissionsAndroid} from 'react-native';
 import FileViewer from 'react-native-file-viewer';
 import ManageExternalStorage from 'react-native-manage-external-storage';
-// import Share from 'react-native-share';
+import Share from 'react-native-share';
+
+const isItemHidden = (itemName: string): boolean => {
+  return itemName.startsWith('.');
+};
 
 // const generateContentUri = async (filePath: string) => {
 //   try {
@@ -126,7 +132,7 @@ const App = () => {
         return;
       }
       RNFS.readDir(curDir).then(r => {
-        setFiles(r);
+        setFiles(r.filter(item => !isItemHidden(item.name)));
       });
     })();
   }, [curDir]);
@@ -140,7 +146,7 @@ const App = () => {
           setCurDir(RNFS.ExternalStorageDirectoryPath);
         }}
       />
-      <ScrollView style={{ height: 600 }}>
+      <ScrollView style={{height: 600}}>
         {files?.map(file => (
           <Text
             key={file.path}
@@ -153,6 +159,45 @@ const App = () => {
               }
             }}>
             {file.name}
+            {file.isFile() ? (
+              <>
+                <Button
+                  title="Send"
+                  onPress={() => {
+                    Share.open({
+                      title: 'Share File',
+                      // message: `Sharing file: ${file.name}`,
+                      url: `file://${file.path}`, // Assuming path is the file path
+                    })
+                      .then(console.log)
+                      .catch(console.error);
+                  }}
+                />
+                <Button
+                  title="Delete"
+                  onPress={() => {
+                    Alert.alert(
+                      'Confirm Deletion',
+                      `Are you sure you want to delete ${file.name}?`,
+                      [
+                        {
+                          text: 'Cancel',
+                          style: 'cancel',
+                        },
+                        {
+                          text: 'Delete',
+                          onPress: () => {
+                            RNFS.unlink(file.path);
+                          },
+                          style: 'destructive',
+                        },
+                      ],
+                      {cancelable: true},
+                    );
+                  }}
+                />
+              </>
+            ) : null}
           </Text>
         ))}
       </ScrollView>

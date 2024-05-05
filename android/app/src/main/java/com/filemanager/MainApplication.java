@@ -15,6 +15,8 @@ import java.util.List;
 import com.rnfs.RNFSPackage;
 import com.vinzscam.reactnativefileviewer.RNFileViewerPackage;
 import com.filemanager.PermissionFilePackage;
+import cl.json.RNSharePackage;
+import cl.json.ShareApplication;
 
 
 public class MainApplication extends Application implements ReactApplication {
@@ -32,7 +34,7 @@ public class MainApplication extends Application implements ReactApplication {
           List<ReactPackage> packages = new PackageList(this).getPackages();
           // Packages that cannot be autolinked yet can be added manually here, for example:
           // packages.add(new MyReactNativePackage());
-          packages.add(new PermissionFilePackage()); 
+          packages.add(new PermissionFilePackage());
           return packages;
         }
 
