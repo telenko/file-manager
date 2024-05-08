@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useRef, useState} from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   StyleSheet,
   Text,
@@ -18,6 +18,10 @@ import * as RNFS from 'react-native-fs';
 import FileViewer from 'react-native-file-viewer';
 import ManageExternalStorage from 'react-native-manage-external-storage';
 import Share from 'react-native-share';
+import BreadCrumbs from './src/common/components/BreadCrumbs';
+import { usePathBreadCrumbs } from './src/common/hooks/usePathBreadCrumbs';
+import { PaperProvider } from 'react-native-paper';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 const renderPreview = (name: string, path: string) => {
   // Check if the file is an image
@@ -27,7 +31,10 @@ const renderPreview = (name: string, path: string) => {
     name.endsWith('.png')
   ) {
     return (
-      <Image source={{uri: `file://${path}`}} style={{width: 50, height: 50}} />
+      <Image
+        source={{ uri: `file://${path}` }}
+        style={{ width: 50, height: 50 }}
+      />
     );
   }
   // Check if the file is a video
@@ -169,7 +176,7 @@ const App = () => {
 
   const [visibleFiles, setVisibleFiles] = useState<number[]>([]);
 
-  const onViewableItemsChanged = useCallback(({viewableItems}: any) => {
+  const onViewableItemsChanged = useCallback(({ viewableItems }: any) => {
     console.log(viewableItems);
     // @ts-ignore
     setVisibleFiles(viewableItems.map(item => item.index));
@@ -234,7 +241,7 @@ const App = () => {
                       style: 'destructive',
                     },
                   ],
-                  {cancelable: true},
+                  { cancelable: true },
                 );
               }}
             />
@@ -244,27 +251,34 @@ const App = () => {
     );
   };
 
+  const breadCrumbs = usePathBreadCrumbs(curDir);
+
   return (
-    <View style={styles.sectionContainer}>
-      <Text>File manager app v2</Text>
-      <Button
-        title="Home"
-        onPress={() => {
-          setCurDir(RNFS.ExternalStorageDirectoryPath);
-        }}
-      />
-      <FlatList
-        style={{height: 600}}
-        data={files}
-        renderItem={renderItem}
-        keyExtractor={(item, index) => index.toString()}
-        // onViewableItemsChanged={onViewableItemsChanged}
-        // viewabilityConfig={{
-        //   itemVisiblePercentThreshold: 50, // Adjust as needed
-        // }}
-        maxToRenderPerBatch={20}
-      />
-    </View>
+    // <SafeAreaProvider>
+      <PaperProvider>
+        <View style={styles.sectionContainer}>
+          <BreadCrumbs items={breadCrumbs} />
+          <Text>File manager app v2</Text>
+          <Button
+            title="Home"
+            onPress={() => {
+              setCurDir(RNFS.ExternalStorageDirectoryPath);
+            }}
+          />
+          <FlatList
+            style={{ height: 600 }}
+            data={files}
+            renderItem={renderItem}
+            keyExtractor={(item, index) => index.toString()}
+            // onViewableItemsChanged={onViewableItemsChanged}
+            // viewabilityConfig={{
+            //   itemVisiblePercentThreshold: 50, // Adjust as needed
+            // }}
+            maxToRenderPerBatch={20}
+          />
+        </View>
+      </PaperProvider>
+    // </SafeAreaProvider>
   );
 };
 
@@ -273,8 +287,8 @@ const styles = StyleSheet.create({
     marginTop: 32,
     paddingHorizontal: 24,
   },
-  folder: {padding: 10, backgroundColor: 'darkgrey', margin: 10},
-  file: {padding: 10, backgroundColor: 'white', margin: 10},
+  folder: { padding: 10, backgroundColor: 'darkgrey', margin: 10 },
+  file: { padding: 10, backgroundColor: 'white', margin: 10 },
   sectionDescription: {
     marginTop: 8,
     fontSize: 18,

@@ -17,6 +17,7 @@ import com.vinzscam.reactnativefileviewer.RNFileViewerPackage;
 import com.filemanager.PermissionFilePackage;
 import cl.json.RNSharePackage;
 import cl.json.ShareApplication;
+import com.th3rdwave.safeareacontext.SafeAreaContextPackage;
 
 
 public class MainApplication extends Application implements ReactApplication {
@@ -35,6 +36,7 @@ public class MainApplication extends Application implements ReactApplication {
           // Packages that cannot be autolinked yet can be added manually here, for example:
           // packages.add(new MyReactNativePackage());
           packages.add(new PermissionFilePackage());
+          packages.add(new SafeAreaContextPackage());
           return packages;
         }
 
