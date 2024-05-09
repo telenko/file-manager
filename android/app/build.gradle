@@ -254,6 +254,7 @@ dependencies {
     implementation project(':react-native-share')
     implementation project(':react-native-safe-area-context')
     implementation project(':react-native-vector-icons')
+    implementation project(':react-native-screens')
 
     implementation fileTree(dir: "libs", include: ["*.jar"])
 

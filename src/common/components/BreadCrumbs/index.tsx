@@ -19,6 +19,7 @@ const BreadCrumbs: React.FC<BreadCrumbsProps> = ({ items }) => {
         <View key={item.id} style={styles.itemContainer}>
           <Chip
             mode="flat"
+            onPress={() => item.onPress?.(item.id)}
             style={
               index === items.length - 1 ? styles.activeItem : styles.item
             }>

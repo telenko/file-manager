@@ -18,6 +18,7 @@ import com.filemanager.PermissionFilePackage;
 import cl.json.RNSharePackage;
 import cl.json.ShareApplication;
 import com.th3rdwave.safeareacontext.SafeAreaContextPackage;
+import com.swmansion.rnscreens.RNScreensPackage;
 
 
 public class MainApplication extends Application implements ReactApplication {

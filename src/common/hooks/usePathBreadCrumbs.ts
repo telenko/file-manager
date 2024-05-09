@@ -5,11 +5,11 @@ import { FileApi } from '../../services/FileApi';
 import { removePrefixIfExists } from '../utils/string';
 
 export const usePathBreadCrumbs = (dirPath: string): BreadCrumbItem[] => {
-  //   const navigation = useNavigation();
+  const navigation = useNavigation();
   const result = useMemo<BreadCrumbItem[]>(() => {
     const rootPath = FileApi.ROOT_PATH;
     const resPath = `storage/${removePrefixIfExists(rootPath, dirPath)}`;
-    const pathItems = resPath.split('/').filter(item => item !== ''); // Split path and filter out empty strings
+    const pathItems = dirPath.split('/').filter(item => item !== ''); // Split path and filter out empty strings
     const breadCrumbs: BreadCrumbItem[] = [];
     let accumulatedPath = '';
 
@@ -19,14 +19,16 @@ export const usePathBreadCrumbs = (dirPath: string): BreadCrumbItem[] => {
         name: pathItems[i],
         id: accumulatedPath,
         onPress: id => {
-          //   navigation.navigate('Home', {
-          //     route: id,
-          //   });
+          console.log("PA", id);
+          navigation.navigate('Home', {
+            // @ts-ignore
+            route: id,
+          });
         },
       });
     }
 
     return breadCrumbs;
-  }, [dirPath /**navigation*/]);
+  }, [dirPath, navigation]);
   return result;
 };

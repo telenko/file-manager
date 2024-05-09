@@ -1,36 +1,44 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { DirItem, FileApi } from '../../services/FileApi';
+import FilePathBreadCrumb from './FilePathBreadCrumb';
+import { useNavigation } from '../../common/hooks/useNavigation';
+import { VirtualizedList, View, StyleSheet } from 'react-native';
+import { HomeScreenContext } from './HomeScreenContext';
+import DirectoryItemView from './DirectoryItemView';
 
 export type HomeScreenProps = {
-  route?: string;
+  route: { params: { route: string } };
 };
 
-type HomeScreenContext = {
-  route: string;
-  dirLoading: boolean;
-  dirError: Error | null;
-  dirItems: DirItem[];
-};
-
-const HomeScreenContext = React.createContext<HomeScreenContext>({
-  route: FileApi.ROOT_PATH,
-  dirLoading: false,
-  dirError: null,
-  dirItems: [],
-});
-
-const HomeScreen: React.FC<HomeScreenProps> = ({ route }) => {
+const HomeScreen: React.FC<HomeScreenProps> = ({
+  route: {
+    params: { route },
+  },
+}) => {
+  const navigator = useNavigation();
   const [dirItems, setDirItems] = useState<DirItem[]>([]);
   const [dirLoading, setDirLoading] = useState<boolean>(false);
   const [dirError, setDirError] = useState<Error | null>(null);
+  const openDirectory = useCallback(
+    (dir: DirItem) => {
+      if (!dir.isDirectory()) {
+        return;
+      }
+      // @TODO Andrii solve parametrization typings
+      // @ts-ignore
+      navigator.navigate('Home', { route: dir.path });
+    },
+    [navigator],
+  );
   const value = useMemo<HomeScreenContext>(
     () => ({
       route: route ?? FileApi.ROOT_PATH,
       dirItems,
       dirLoading,
       dirError,
+      openDirectory,
     }),
-    [route, dirItems, dirLoading, dirError],
+    [route, dirItems, dirLoading, dirError, openDirectory],
   );
 
   useEffect(() => {
@@ -50,8 +58,29 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ route }) => {
   }, [route]);
 
   return (
-    <HomeScreenContext.Provider value={value}></HomeScreenContext.Provider>
+    <HomeScreenContext.Provider value={value}>
+      <View style={styles.container}>
+        <FilePathBreadCrumb />
+        <VirtualizedList
+          initialNumToRender={10}
+          data={dirItems}
+          renderItem={({ item }) => (
+            <DirectoryItemView key={item.path} item={item} />
+          )}
+          keyExtractor={(item: DirItem) => item.path}
+          getItemCount={data => data.length}
+          getItem={(data, index) => data[index]}
+        />
+      </View>
+    </HomeScreenContext.Provider>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+  },
+});
 
 export default HomeScreen;
