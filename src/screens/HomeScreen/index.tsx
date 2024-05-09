@@ -53,6 +53,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
       setDirLoading(true);
       setDirError(null);
       setDirItems([]);
+      // @ts-ignore
+      await new Promise(r => setTimeout(r, 100));
       try {
         const newDirItems = await FileApi.readDir(route ?? FileApi.ROOT_PATH);
         setDirItems(newDirItems.filter(file => !FileApi.isItemHidden(file)));
@@ -85,7 +87,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
         </View>
         <VirtualizedList
           initialNumToRender={10}
-          maxToRenderPerBatch={5}
+          maxToRenderPerBatch={20}
           removeClippedSubviews
           updateCellsBatchingPeriod={700}
           data={dirItems}

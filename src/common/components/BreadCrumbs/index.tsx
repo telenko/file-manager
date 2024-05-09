@@ -1,10 +1,12 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { Chip, Icon, MD3Colors } from 'react-native-paper';
 
 export type BreadCrumbItem = {
   id: string;
   name: string;
+  needTranslate?: boolean;
   onPress?: (id: string) => void;
 };
 
@@ -13,6 +15,7 @@ type BreadCrumbsProps = {
 };
 
 const BreadCrumbs: React.FC<BreadCrumbsProps> = ({ items }) => {
+  const { t } = useTranslation();
   return (
     <ScrollView horizontal contentContainerStyle={styles.container}>
       {items.map((item, index) => (
@@ -23,7 +26,7 @@ const BreadCrumbs: React.FC<BreadCrumbsProps> = ({ items }) => {
             style={
               index === items.length - 1 ? styles.activeItem : styles.item
             }>
-            {item.name}
+            {item.needTranslate ? t(item.name) : item.name}
           </Chip>
           {index >= 0 && index < items.length - 1 ? (
             <Icon size={20} source="chevron-right" />

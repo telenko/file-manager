@@ -14,7 +14,8 @@ export const usePathBreadCrumbs = (dirPath: string): BreadCrumbItem[] => {
     let accumulatedPath = '';
 
     breadCrumbs.push({
-      name: translate('deviceRoot'),
+      name: 'deviceRoot',
+      needTranslate: true,
       id: rootPath,
       onPress: id => {
         navigation.navigate('Home', {
