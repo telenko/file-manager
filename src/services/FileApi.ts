@@ -19,4 +19,14 @@ export const FileApi = {
   isItemHidden: (dirItem: DirItem) => {
     return dirItem.name.startsWith('.');
   },
+  isFileImage: (file: DirItem): boolean => {
+    if (!file.isFile()) {
+      return false;
+    }
+    return (
+      file.name.endsWith('.jpg') ||
+      file.name.endsWith('.jpeg') ||
+      file.name.endsWith('.png')
+    );
+  },
 };

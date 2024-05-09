@@ -5,6 +5,7 @@ import { useNavigation } from '../../common/hooks/useNavigation';
 import { VirtualizedList, View, StyleSheet } from 'react-native';
 import { HomeScreenContext } from './HomeScreenContext';
 import DirectoryItemView from './DirectoryItemView';
+import { ScrollView } from 'react-native-gesture-handler';
 
 export type HomeScreenProps = {
   route: { params: { route: string } };
@@ -47,7 +48,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
       setDirError(null);
       try {
         const newDirItems = await FileApi.readDir(route ?? FileApi.ROOT_PATH);
-        setDirItems(newDirItems);
+        setDirItems(newDirItems.filter(file => !FileApi.isItemHidden(file)));
       } catch (e) {
         setDirError(e as Error);
         setDirItems([]);
@@ -60,7 +61,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
   return (
     <HomeScreenContext.Provider value={value}>
       <View style={styles.container}>
-        <FilePathBreadCrumb />
+        <View style={styles.breadCrumbsContainer}>
+          <FilePathBreadCrumb />
+        </View>
         <VirtualizedList
           initialNumToRender={10}
           data={dirItems}
@@ -80,6 +83,10 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'column',
     justifyContent: 'space-between',
+    padding: 10,
+  },
+  breadCrumbsContainer: {
+    marginBottom: 10,
   },
 });
 
