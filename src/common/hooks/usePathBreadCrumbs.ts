@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { BreadCrumbItem } from '../components/BreadCrumbs';
 import { useNavigation } from './useNavigation';
 import { FileApi } from '../../services/FileApi';
-import { removePrefixIfExists } from '../utils/string';
+import { translate } from '../../i18n/i18n';
 
 export const usePathBreadCrumbs = (dirPath: string): BreadCrumbItem[] => {
   const navigation = useNavigation();
@@ -14,7 +14,7 @@ export const usePathBreadCrumbs = (dirPath: string): BreadCrumbItem[] => {
     let accumulatedPath = '';
 
     breadCrumbs.push({
-      name: 'Storage',
+      name: translate('deviceRoot'),
       id: rootPath,
       onPress: id => {
         navigation.navigate('Home', {

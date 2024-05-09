@@ -51,4 +51,4 @@ const styles = StyleSheet.create({
   file: {},
 });
 
-export default DirectoryItemView;
+export default React.memo(DirectoryItemView);

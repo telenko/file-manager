@@ -2,10 +2,16 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { DirItem, FileApi } from '../../services/FileApi';
 import FilePathBreadCrumb from './FilePathBreadCrumb';
 import { useNavigation } from '../../common/hooks/useNavigation';
-import { VirtualizedList, View, StyleSheet } from 'react-native';
+import {
+  VirtualizedList,
+  View,
+  StyleSheet,
+  ListRenderItem,
+} from 'react-native';
 import { HomeScreenContext } from './HomeScreenContext';
 import DirectoryItemView from './DirectoryItemView';
 import { ScrollView } from 'react-native-gesture-handler';
+import { ReadDirItem } from 'react-native-fs';
 
 export type HomeScreenProps = {
   route: { params: { route: string } };
@@ -27,7 +33,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
       }
       // @TODO Andrii solve parametrization typings
       // @ts-ignore
-      navigator.navigate('Home', { route: dir.path });
+      navigator.push('Home', { route: dir.path });
     },
     [navigator],
   );
@@ -46,6 +52,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
     (async () => {
       setDirLoading(true);
       setDirError(null);
+      setDirItems([]);
       try {
         const newDirItems = await FileApi.readDir(route ?? FileApi.ROOT_PATH);
         setDirItems(newDirItems.filter(file => !FileApi.isItemHidden(file)));
@@ -58,6 +65,18 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
     })();
   }, [route]);
 
+  // virtualized memoized contents
+  const renderItem: ListRenderItem<ReadDirItem> = useCallback(
+    ({ item }) => <DirectoryItemView key={item.path} item={item} />,
+    [],
+  );
+  const keyExtractor = useCallback((item: DirItem) => item.path, []);
+  const getItemCount = useCallback((data: DirItem[]) => data.length, []);
+  const getItem = useCallback(
+    (data: DirItem[], index: number) => data[index],
+    [],
+  );
+
   return (
     <HomeScreenContext.Provider value={value}>
       <View style={styles.container}>
@@ -66,13 +85,14 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
         </View>
         <VirtualizedList
           initialNumToRender={10}
+          maxToRenderPerBatch={5}
+          removeClippedSubviews
+          updateCellsBatchingPeriod={700}
           data={dirItems}
-          renderItem={({ item }) => (
-            <DirectoryItemView key={item.path} item={item} />
-          )}
-          keyExtractor={(item: DirItem) => item.path}
-          getItemCount={data => data.length}
-          getItem={(data, index) => data[index]}
+          renderItem={renderItem}
+          keyExtractor={keyExtractor}
+          getItemCount={getItemCount}
+          getItem={getItem}
         />
       </View>
     </HomeScreenContext.Provider>
