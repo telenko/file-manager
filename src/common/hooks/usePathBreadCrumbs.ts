@@ -2,7 +2,6 @@ import { useMemo } from 'react';
 import { BreadCrumbItem } from '../components/BreadCrumbs';
 import { useNavigation } from './useNavigation';
 import { FileApi } from '../../services/FileApi';
-import { translate } from '../../i18n/i18n';
 
 export const usePathBreadCrumbs = (dirPath: string): BreadCrumbItem[] => {
   const navigation = useNavigation();
@@ -17,11 +16,9 @@ export const usePathBreadCrumbs = (dirPath: string): BreadCrumbItem[] => {
       name: 'deviceRoot',
       needTranslate: true,
       id: rootPath,
-      onPress: id => {
-        navigation.navigate('Home', {
-          // @ts-ignore
-          route: id,
-        });
+      onPress: () => {
+        // @ts-ignore
+        navigation.popToTop();
       },
     });
     for (let i = 0; i < pathItems.length; i++) {
@@ -30,11 +27,9 @@ export const usePathBreadCrumbs = (dirPath: string): BreadCrumbItem[] => {
         breadCrumbs.push({
           name: pathItems[i],
           id: accumulatedPath,
-          onPress: id => {
-            navigation.navigate('Home', {
-              // @ts-ignore
-              route: id,
-            });
+          onPress: () => {
+            // @ts-ignore
+            navigation.pop(pathItems.length - i - 1);
           },
         });
       }

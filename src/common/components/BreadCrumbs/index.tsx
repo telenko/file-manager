@@ -21,6 +21,7 @@ const BreadCrumbs: React.FC<BreadCrumbsProps> = ({ items }) => {
       {items.map((item, index) => (
         <View key={item.id} style={styles.itemContainer}>
           <Chip
+            selected={index === items.length - 1}
             mode="flat"
             onPress={() => item.onPress?.(item.id)}
             style={
@@ -49,7 +50,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   item: {
-    backgroundColor: MD3Colors.neutral70,
+    backgroundColor: MD3Colors.neutral80,
   },
   activeItem: {
     backgroundColor: MD3Colors.neutral90,

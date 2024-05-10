@@ -12,6 +12,8 @@ import { HomeScreenContext } from './HomeScreenContext';
 import DirectoryItemView from './DirectoryItemView';
 import { ScrollView } from 'react-native-gesture-handler';
 import { ReadDirItem } from 'react-native-fs';
+import { ActivityIndicator, MD2Colors, Text } from 'react-native-paper';
+import LoadingIndicator from '../../common/components/LoadingIndicator';
 
 export type HomeScreenProps = {
   route: { params: { route: string } };
@@ -85,17 +87,21 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
         <View style={styles.breadCrumbsContainer}>
           <FilePathBreadCrumb />
         </View>
-        <VirtualizedList
-          initialNumToRender={10}
-          maxToRenderPerBatch={20}
-          removeClippedSubviews
-          updateCellsBatchingPeriod={700}
-          data={dirItems}
-          renderItem={renderItem}
-          keyExtractor={keyExtractor}
-          getItemCount={getItemCount}
-          getItem={getItem}
-        />
+        {dirLoading ? (
+          <LoadingIndicator />
+        ) : (
+          <VirtualizedList
+            initialNumToRender={10}
+            maxToRenderPerBatch={20}
+            removeClippedSubviews
+            updateCellsBatchingPeriod={700}
+            data={dirItems}
+            renderItem={renderItem}
+            keyExtractor={keyExtractor}
+            getItemCount={getItemCount}
+            getItem={getItem}
+          />
+        )}
       </View>
     </HomeScreenContext.Provider>
   );
@@ -106,9 +112,16 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     justifyContent: 'space-between',
     padding: 10,
+    flex: 1,
   },
   breadCrumbsContainer: {
     marginBottom: 10,
+  },
+  loadingContainer: {
+    flexDirection: 'column',
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 

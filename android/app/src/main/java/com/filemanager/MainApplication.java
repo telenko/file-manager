@@ -19,6 +19,7 @@ import cl.json.RNSharePackage;
 import cl.json.ShareApplication;
 import com.th3rdwave.safeareacontext.SafeAreaContextPackage;
 import com.swmansion.rnscreens.RNScreensPackage;
+import com.reactlibrary.createthumbnail.CreateThumbnailPackage;
 
 
 public class MainApplication extends Application implements ReactApplication {
@@ -38,6 +39,7 @@ public class MainApplication extends Application implements ReactApplication {
           // packages.add(new MyReactNativePackage());
           packages.add(new PermissionFilePackage());
           packages.add(new SafeAreaContextPackage());
+          packages.add(new CreateThumbnailPackage());
           return packages;
         }
 
