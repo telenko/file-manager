@@ -92,9 +92,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
         ) : (
           <VirtualizedList
             initialNumToRender={10}
-            maxToRenderPerBatch={20}
             removeClippedSubviews
-            updateCellsBatchingPeriod={700}
             data={dirItems}
             renderItem={renderItem}
             keyExtractor={keyExtractor}
