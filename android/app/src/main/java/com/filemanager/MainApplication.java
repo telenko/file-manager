@@ -12,14 +12,14 @@ import com.facebook.soloader.SoLoader;
 import com.filemanager.newarchitecture.MainApplicationReactNativeHost;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+
+import com.filemanager.viewer.LocalFileViewerPackage;
 import com.rnfs.RNFSPackage;
-import com.vinzscam.reactnativefileviewer.RNFileViewerPackage;
 import com.filemanager.PermissionFilePackage;
 import cl.json.RNSharePackage;
 import cl.json.ShareApplication;
 import com.th3rdwave.safeareacontext.SafeAreaContextPackage;
 import com.swmansion.rnscreens.RNScreensPackage;
-import com.reactlibrary.createthumbnail.CreateThumbnailPackage;
 
 
 public class MainApplication extends Application implements ReactApplication {
@@ -39,7 +39,7 @@ public class MainApplication extends Application implements ReactApplication {
           // packages.add(new MyReactNativePackage());
           packages.add(new PermissionFilePackage());
           packages.add(new SafeAreaContextPackage());
-          packages.add(new CreateThumbnailPackage());
+          packages.add(new LocalFileViewerPackage());
           return packages;
         }
 

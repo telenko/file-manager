@@ -1,4 +1,6 @@
 {
     "title": "Менеджер файлів",
-    "deviceRoot": "Сховище"
+    "deviceRoot": "Сховище",
+    "permissionRequired": "Нам треба доступ до сховища",
+    "openWithTitle": "Відкрити за допомогою"
 }

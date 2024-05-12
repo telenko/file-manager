@@ -1,6 +1,7 @@
 import * as RNFS from 'react-native-fs';
-import FileViewer from 'react-native-file-viewer';
-import { createThumbnail } from 'react-native-create-thumbnail';
+import { NativeModules } from 'react-native';
+import { FileOpener } from './FileOpener';
+import i18n from '../i18n/i18n';
 
 export type DirItem = RNFS.ReadDirItem;
 
@@ -11,9 +12,11 @@ export const FileApi = {
     if (!item.isFile()) {
       return;
     }
-    return FileViewer.open(item.path, {
+
+    return FileOpener.open(item.path, {
       showAppsSuggestions: true,
       showOpenWithDialog: true,
+      dialogTitle: i18n.t('openWithTitle'),
     });
   },
   // Note, UNIX specific
@@ -42,12 +45,25 @@ export const FileApi = {
     );
   },
   makeVideoPreview: (file: DirItem) => {
-    return null; // @TODO Andrii fix
+    // return null; // @TODO Andrii fix
     if (!FileApi.isFileVideo(file)) {
       return null;
     }
-    return createThumbnail({
-      url: `file://${file.path}`,
+    // return createThumbnail({
+    //   url: `file://${file.path}`,
+    // });
+  },
+  askForStoragePermission: () => {
+    const PermissionFile = NativeModules.PermissionFile;
+    return new Promise((resolve, reject) => {
+      PermissionFile.checkAndGrantPermission(
+        (err: any): any => {
+          reject(err);
+        },
+        (res: any): any => {
+          resolve(res);
+        },
+      );
     });
   },
 };

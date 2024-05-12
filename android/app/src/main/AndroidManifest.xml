@@ -27,29 +27,26 @@
         </intent-filter>
       </activity>
       <provider
-        android:name="com.vinzscam.reactnativefileviewer.FileProvider"
-        android:authorities="${applicationId}.provider"
+        android:name="androidx.core.content.FileProvider"
+        android:authorities="com.filemanager.fileprovider"
         android:exported="false"
         android:grantUriPermissions="true">
         <meta-data
           android:name="android.support.FILE_PROVIDER_PATHS"
-          android:resource="@xml/file_viewer_provider_paths"
-        />
+          android:resource="@xml/file_viewer_provider_paths" />
       </provider>
     </application>
     <queries>
+      <!-- Packages your app interacts with -->
       <package android:name="com.example.store" />
       <package android:name="com.example.services" />
-
-      <!--for example, to share via instagram -->
+  
+      <!-- For sharing via Instagram -->
       <package android:name="com.instagram.android" />
+      
       <intent>
-        <action android:name="android.intent.action.VIEW" />
-           <data android:mimeType="*/*" />
+          <action android:name="android.intent.action.VIEW" />
+          <data android:mimeType="*/*" />
       </intent>
-      <intent>
-        <action android:name="android.intent.action.VIEW" />
-           <data android:mimeType="application/pdf" />
-      </intent>
-    </queries>
+  </queries>
 </manifest>
