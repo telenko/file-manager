@@ -59,7 +59,12 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
       await new Promise(r => setTimeout(r, 100));
       try {
         const newDirItems = await FileApi.readDir(route ?? FileApi.ROOT_PATH);
-        setDirItems(newDirItems.filter(file => !FileApi.isItemHidden(file)));
+        setDirItems(
+          newDirItems
+            .filter(file => !FileApi.isItemHidden(file))
+            // @ts-ignore
+            .sort((a, b) => a.mtime?.getTime() - b.mtime?.getTime()),
+        );
       } catch (e) {
         setDirError(e as Error);
         setDirItems([]);
