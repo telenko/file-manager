@@ -8,6 +8,15 @@ export type DirItem = RNFS.ReadDirItem;
 export const FileApi = {
   ROOT_PATH: RNFS.ExternalStorageDirectoryPath,
   readDir: RNFS.readDir,
+  getMetadata: async (path: string): Promise<DirItem> => {
+    const res = await RNFS.stat(path);
+    return {
+      ...res,
+      name: res.name ?? '',
+      ctime: new Date(res.ctime),
+      mtime: new Date(res.mtime),
+    };
+  },
   openFile: (item: DirItem) => {
     if (!item.isFile()) {
       return;

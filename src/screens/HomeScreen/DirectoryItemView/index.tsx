@@ -52,13 +52,18 @@ const DirectoryItemView: React.FC<DirItemProps> = ({ item }) => {
           />
         )
       }
+      onLongPress={() => {
+        if (item.isFile() && FileApi.isFileImage(item)) {
+          FileApi.openFile(item);
+        }
+      }}
       onPress={() => {
         if (item.isFile()) {
           if (FileApi.isFileImage(item)) {
             homeCtx.openPreview(item);
-          } else{ 
+          } else {
             FileApi.openFile(item);
-          } 
+          }
         } else {
           homeCtx.openDirectory(item);
         }

@@ -2,5 +2,6 @@
     "title": "Менеджер файлів",
     "deviceRoot": "Сховище",
     "permissionRequired": "Нам треба доступ до сховища",
-    "openWithTitle": "Відкрити за допомогою"
+    "openWithTitle": "Відкрити за допомогою",
+    "imageViewer": "Перегляд зображення"
 }

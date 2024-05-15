@@ -2,5 +2,6 @@
     "title": "File Manager",
     "deviceRoot": "Storage",
     "permissionRequired": "We need permission to access storage",
-    "openWithTitle": "Open File With"
+    "openWithTitle": "Open File With",
+    "imageViewer": "Image preview"
 }

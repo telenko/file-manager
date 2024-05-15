@@ -1,8 +1,7 @@
-import React, { useEffect, useMemo } from 'react';
-import { Image, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Dimensions, Image, View } from 'react-native';
 import { Text } from 'react-native-paper';
-import { useNavigation } from '@react-navigation/native';
-import { DirItem } from '../../services/FileApi';
+import { DirItem, FileApi } from '../../services/FileApi';
 
 export type ImageViewerScreenProps = {
   route: { params: { route: string } };
@@ -16,14 +15,16 @@ const ImagePreviewScreen: React.FC<ImageViewerScreenProps> = ({
   if (!route) {
     return null;
   }
+  const { width, height } = Dimensions.get('window');
+  const [file, setFile] = useState<DirItem | null>(null);
+  useEffect(() => {
+    FileApi.getMetadata(route).then(setFile);
+  }, []);
   return (
     <View>
-      {/* <Text>{route.name}</Text>
-      <Text>{route.mtime?.toLocaleDateString()}</Text> */}
-      <Image
-        source={{ uri: `file://${route}` }}
-        style={{ width: '100%', height: '100%' }}
-      />
+      <Text>{file?.mtime?.toLocaleDateString()}</Text>
+      <Text>{file?.mtime?.toLocaleTimeString()}</Text>
+      <Image source={{ uri: `file://${route}` }} style={{ width, height }} />
     </View>
   );
 };
