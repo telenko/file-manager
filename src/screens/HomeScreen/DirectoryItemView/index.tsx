@@ -19,6 +19,7 @@ const ICON_SIZE = 40;
 
 const TH = ({ file }: { file: DirItem }) => {
   useEffect(() => {
+    // @ts-ignore
     FileApi.makeVideoPreview(file)?.then(console.log).catch(console.error);
   }, []);
   return <Text>Video</Text>;
@@ -53,7 +54,11 @@ const DirectoryItemView: React.FC<DirItemProps> = ({ item }) => {
       }
       onPress={() => {
         if (item.isFile()) {
-          FileApi.openFile(item);
+          if (FileApi.isFileImage(item)) {
+            homeCtx.openPreview(item);
+          } else{ 
+            FileApi.openFile(item);
+          } 
         } else {
           homeCtx.openDirectory(item);
         }

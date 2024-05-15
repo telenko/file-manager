@@ -5,6 +5,7 @@ import HomeScreen from '../screens/HomeScreen';
 import { FileApi } from '../services/FileApi';
 import { FileManagerNavigation } from '../common/types/navigation';
 import { useTranslation } from 'react-i18next';
+import ImagePreviewScreen from '../screens/ImagePreviewScreen';
 
 const Stack = createNativeStackNavigator<FileManagerNavigation>();
 export default function FileManager() {
@@ -22,6 +23,18 @@ export default function FileManager() {
           initialParams={{
             // @ts-ignore
             route: FileApi.ROOT_PATH,
+          }}
+        />
+        <Stack.Screen
+          name="ImageViewer"
+          options={{
+            title: t('imageViewer'),
+          }}
+          // @ts-ignore
+          component={ImagePreviewScreen}
+          initialParams={{
+            // @ts-ignore
+            route: null,
           }}
         />
       </Stack.Navigator>

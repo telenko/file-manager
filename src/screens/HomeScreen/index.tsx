@@ -39,6 +39,17 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
     },
     [navigator],
   );
+  const openPreview = useCallback(
+    (file: DirItem) => {
+      if (!file.isFile()) {
+        return;
+      }
+      // @TODO Andrii solve parametrization typings
+      // @ts-ignore
+      navigator.push('ImageViewer', { route: file.path });
+    },
+    [navigator],
+  );
   const value = useMemo<HomeScreenContext>(
     () => ({
       route: route ?? FileApi.ROOT_PATH,
@@ -46,8 +57,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
       dirLoading,
       dirError,
       openDirectory,
+      openPreview,
     }),
-    [route, dirItems, dirLoading, dirError, openDirectory],
+    [route, dirItems, dirLoading, dirError, openDirectory, openPreview],
   );
 
   useEffect(() => {

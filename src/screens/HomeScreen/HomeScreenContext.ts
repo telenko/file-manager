@@ -7,6 +7,7 @@ export type HomeScreenContext = {
   dirError: Error | null;
   dirItems: DirItem[];
   openDirectory: (dir: DirItem) => void;
+  openPreview: (item: DirItem) => void;
 };
 
 export const HomeScreenContext = React.createContext<HomeScreenContext>({
@@ -15,6 +16,7 @@ export const HomeScreenContext = React.createContext<HomeScreenContext>({
   dirError: null,
   dirItems: [],
   openDirectory: () => {},
+  openPreview: () => {},
 });
 
 export const useHomeContext = (): HomeScreenContext => {
