@@ -15,14 +15,15 @@ type DirItemProps = {
   item: DirectoryItemType;
 };
 
-const ICON_SIZE = 40;
+const ICON_SIZE = 45;
+const ICON_RADIUS = 4;
 
 const VideoThumbnail = ({ file }: { file: DirItem }) => {
   const fallbackThumbnail =
     'data:image/gif;base64,R0lGODlhAQABAIAAAMLCwgAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==';
   const [thumbnail, setThumbnail] = useState<string | null>(null);
   useEffect(() => {
-    FileApi.makeVideoPreview(file).then(setThumbnail).catch(console.error);
+    FileApi.makeVideoPreview(file).then(setThumbnail).catch(console.info);
   }, []);
   return (
     <ImageBackground
@@ -32,6 +33,7 @@ const VideoThumbnail = ({ file }: { file: DirItem }) => {
         height: ICON_SIZE,
         justifyContent: 'center',
         alignItems: 'center',
+        borderRadius: ICON_RADIUS,
       }}>
       <Icon size={25} color={'#fff'} source={'play-circle'} />
     </ImageBackground>
@@ -44,21 +46,29 @@ const DirectoryItemView: React.FC<DirItemProps> = ({ item }) => {
     <List.Item
       style={item.isDirectory() ? styles.folder : styles.file}
       title={item.name}
+      titleStyle={{ fontSize: 16, fontWeight: 'bold', color: '#3d3d3d' }}
+      descriptionStyle={{ fontSize: 12, color: '#969696' }}
       description={item.mtime?.toLocaleDateString() ?? ''}
       left={() =>
         FileApi.isFileImage(item) ? (
           <Image
             source={{ uri: `file://${item.path}` }}
-            style={{ width: ICON_SIZE, height: ICON_SIZE }}
+            style={{
+              width: ICON_SIZE,
+              height: ICON_SIZE,
+              borderRadius: ICON_RADIUS,
+            }}
           />
         ) : FileApi.isFileVideo(item) ? (
           <VideoThumbnail file={item} />
         ) : (
-          <Icon
-            size={ICON_SIZE}
-            color={item.isDirectory() ? theme.folderColor : theme.fileColor}
-            source={item.isDirectory() ? 'folder' : 'file'}
-          />
+          <View style={{ borderRadius: ICON_RADIUS }}>
+            <Icon
+              size={ICON_SIZE}
+              color={item.isDirectory() ? theme.folderColor : theme.fileColor}
+              source={item.isDirectory() ? 'folder' : 'file'}
+            />
+          </View>
         )
       }
       onLongPress={() => {

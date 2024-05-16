@@ -24,9 +24,13 @@ const BreadCrumbs: React.FC<BreadCrumbsProps> = ({ items }) => {
             selected={index === items.length - 1}
             mode="flat"
             onPress={() => item.onPress?.(item.id)}
-            style={
-              index === items.length - 1 ? styles.activeItem : styles.item
-            }>
+            textStyle={styles.text}
+            style={{
+              ...(index === items.length - 1
+                ? styles.activeItem
+                : styles.inactiveItem),
+              ...styles.item,
+            }}>
             {item.needTranslate ? t(item.name) : item.name}
           </Chip>
           {index >= 0 && index < items.length - 1 ? (
@@ -49,7 +53,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
+  text: {
+    fontSize: 13,
+  },
   item: {
+    paddingTop: 0,
+    paddingBottom: 0,
+  },
+  inactiveItem: {
     backgroundColor: MD3Colors.neutral80,
   },
   activeItem: {
