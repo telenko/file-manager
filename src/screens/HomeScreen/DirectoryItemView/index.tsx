@@ -34,6 +34,7 @@ const VideoThumbnail = ({ file }: { file: DirItem }) => {
         justifyContent: 'center',
         alignItems: 'center',
         borderRadius: ICON_RADIUS,
+        overflow: 'hidden',
       }}>
       <Icon size={25} color={'#fff'} source={'play-circle'} />
     </ImageBackground>
@@ -46,8 +47,12 @@ const DirectoryItemView: React.FC<DirItemProps> = ({ item }) => {
     <List.Item
       style={item.isDirectory() ? styles.folder : styles.file}
       title={item.name}
-      titleStyle={{ fontSize: 16, fontWeight: 'bold', color: '#3d3d3d' }}
-      descriptionStyle={{ fontSize: 12, color: '#969696' }}
+      titleStyle={{
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: theme.fileTitleColor,
+      }}
+      descriptionStyle={{ fontSize: 12, color: theme.fileDescriptionColor }}
       description={item.mtime?.toLocaleDateString() ?? ''}
       left={() =>
         FileApi.isFileImage(item) ? (
