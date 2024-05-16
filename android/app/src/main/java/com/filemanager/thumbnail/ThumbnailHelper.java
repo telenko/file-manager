@@ -12,7 +12,9 @@ public class ThumbnailHelper {
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
         retriever.setDataSource(videoPath);
         Bitmap bitmap = retriever.getFrameAtTime(1000000); // Get frame at 1 second (1000000 microseconds)
-        
+        if (bitmap == null) {
+            return null;
+        }
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.JPEG, 90, byteArrayOutputStream);
         byte[] byteArray = byteArrayOutputStream.toByteArray();

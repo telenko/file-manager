@@ -18,24 +18,22 @@ type DirItemProps = {
 const ICON_SIZE = 40;
 
 const VideoThumbnail = ({ file }: { file: DirItem }) => {
-  const [thumbnail, setThumbnail] = useState<string>('');
+  const fallbackThumbnail =
+    'data:image/gif;base64,R0lGODlhAQABAIAAAMLCwgAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==';
+  const [thumbnail, setThumbnail] = useState<string | null>(null);
   useEffect(() => {
-    // @ts-ignore
-    FileApi.makeVideoPreview(file)?.then(setThumbnail).catch(console.error);
+    FileApi.makeVideoPreview(file).then(setThumbnail).catch(console.error);
   }, []);
-  if (!thumbnail) {
-    return null;
-  }
   return (
     <ImageBackground
-      source={{ uri: thumbnail }}
+      source={{ uri: thumbnail ?? fallbackThumbnail }}
       style={{
         width: ICON_SIZE,
         height: ICON_SIZE,
         justifyContent: 'center',
         alignItems: 'center',
       }}>
-      <Icon size={20} color={'#fff'} source={'play-circle'} />
+      <Icon size={25} color={'#fff'} source={'play-circle'} />
     </ImageBackground>
   );
 };

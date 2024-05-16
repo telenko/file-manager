@@ -16,8 +16,16 @@ public class ThumbnailModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void createVideoThumbnail(String videoPath, Callback successCallback) {
-        String base64Thumbnail = ThumbnailHelper.createVideoThumbnail(videoPath);
-        successCallback.invoke(base64Thumbnail);
+    public void createVideoThumbnail(String videoPath, Callback successCallback, Callback errorCallback) {
+        try {
+            String base64Thumbnail = ThumbnailHelper.createVideoThumbnail(videoPath);
+            if (base64Thumbnail == null) {
+                errorCallback.invoke("failed to decode 1st second from video");
+            } else {
+                successCallback.invoke(base64Thumbnail);
+            }
+        } catch (Exception e) {
+            errorCallback.invoke(e.getMessage());
+        }
     }
 }

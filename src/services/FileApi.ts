@@ -37,9 +37,9 @@ export const FileApi = {
       return false;
     }
     return (
-      file.name.endsWith('.jpg') ||
-      file.name.endsWith('.jpeg') ||
-      file.name.endsWith('.png')
+      file.name.toLowerCase().endsWith('.jpg') ||
+      file.name.toLowerCase().endsWith('.jpeg') ||
+      file.name.toLowerCase().endsWith('.png')
     );
   },
   isFileVideo: (file: DirItem): boolean => {
@@ -57,12 +57,15 @@ export const FileApi = {
     if (!FileApi.isFileVideo(file)) {
       return null;
     }
-    return new Promise(resolve => {
+    return new Promise((resolve, reject) => {
       const { ThumbnailModule } = NativeModules;
       ThumbnailModule.createVideoThumbnail(
         file.path,
         (base64Thumbnail: string) => {
           resolve(`data:image/jpeg;base64,${base64Thumbnail}`);
+        },
+        (error: string) => {
+          reject(error);
         },
       );
     });
