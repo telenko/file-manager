@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { Chip, Icon, MD3Colors } from 'react-native-paper';
@@ -16,8 +16,18 @@ type BreadCrumbsProps = {
 
 const BreadCrumbs: React.FC<BreadCrumbsProps> = ({ items }) => {
   const { t } = useTranslation();
+  const scrollViewRef = useRef<any>(null);
+  useEffect(() => {
+    if (scrollViewRef.current) {
+      scrollViewRef.current.scrollToEnd({ animated: true });
+    }
+  }, [items]);
   return (
-    <ScrollView horizontal contentContainerStyle={styles.container}>
+    <ScrollView
+      ref={scrollViewRef}
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      contentContainerStyle={styles.container}>
       {items.map((item, index) => (
         <View key={item.id} style={styles.itemContainer}>
           <Chip
@@ -44,10 +54,10 @@ const BreadCrumbs: React.FC<BreadCrumbsProps> = ({ items }) => {
 
 const styles = StyleSheet.create({
   container: {
-    width: '100%',
+    // width: '100%',
     flexDirection: 'row',
     alignItems: 'center',
-    flex: 1,
+    // flex: 1,
   },
   itemContainer: {
     flexDirection: 'row',
