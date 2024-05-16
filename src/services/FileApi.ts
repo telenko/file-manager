@@ -53,14 +53,19 @@ export const FileApi = {
       file.name.endsWith('.mov')
     );
   },
-  makeVideoPreview: (file: DirItem) => {
-    // return null; // @TODO Andrii fix
+  makeVideoPreview: async (file: DirItem): Promise<string | null> => {
     if (!FileApi.isFileVideo(file)) {
       return null;
     }
-    // return createThumbnail({
-    //   url: `file://${file.path}`,
-    // });
+    return new Promise(resolve => {
+      const { ThumbnailModule } = NativeModules;
+      ThumbnailModule.createVideoThumbnail(
+        file.path,
+        (base64Thumbnail: string) => {
+          resolve(`data:image/jpeg;base64,${base64Thumbnail}`);
+        },
+      );
+    });
   },
   askForStoragePermission: () => {
     const PermissionFile = NativeModules.PermissionFile;

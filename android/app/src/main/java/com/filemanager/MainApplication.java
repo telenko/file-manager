@@ -15,7 +15,8 @@ import java.util.List;
 
 import com.filemanager.viewer.LocalFileViewerPackage;
 import com.rnfs.RNFSPackage;
-import com.filemanager.PermissionFilePackage;
+import com.filemanager.fspermissions.PermissionFilePackage;
+import com.filemanager.thumbnail.ThumbnailPackage;
 import cl.json.RNSharePackage;
 import cl.json.ShareApplication;
 import com.th3rdwave.safeareacontext.SafeAreaContextPackage;
@@ -40,6 +41,7 @@ public class MainApplication extends Application implements ReactApplication {
           packages.add(new PermissionFilePackage());
           packages.add(new SafeAreaContextPackage());
           packages.add(new LocalFileViewerPackage());
+          packages.add(new ThumbnailPackage());
           return packages;
         }
 

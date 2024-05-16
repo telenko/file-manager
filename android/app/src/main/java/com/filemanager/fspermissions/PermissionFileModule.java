@@ -1,4 +1,4 @@
-package com.filemanager;
+package com.filemanager.fspermissions;
 
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;

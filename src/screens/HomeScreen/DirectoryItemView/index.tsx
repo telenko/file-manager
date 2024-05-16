@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react';
-import { Image, StyleSheet } from 'react-native';
-import { List, Text } from 'react-native-paper';
+import React, { useEffect, useState } from 'react';
+import { Image, ImageBackground, StyleSheet, View } from 'react-native';
+import { List } from 'react-native-paper';
 
 import {
   DirItem,
@@ -17,12 +17,27 @@ type DirItemProps = {
 
 const ICON_SIZE = 40;
 
-const TH = ({ file }: { file: DirItem }) => {
+const VideoThumbnail = ({ file }: { file: DirItem }) => {
+  const [thumbnail, setThumbnail] = useState<string>('');
   useEffect(() => {
     // @ts-ignore
-    FileApi.makeVideoPreview(file)?.then(console.log).catch(console.error);
+    FileApi.makeVideoPreview(file)?.then(setThumbnail).catch(console.error);
   }, []);
-  return <Text>Video</Text>;
+  if (!thumbnail) {
+    return null;
+  }
+  return (
+    <ImageBackground
+      source={{ uri: thumbnail }}
+      style={{
+        width: ICON_SIZE,
+        height: ICON_SIZE,
+        justifyContent: 'center',
+        alignItems: 'center',
+      }}>
+      <Icon size={20} color={'#fff'} source={'play-circle'} />
+    </ImageBackground>
+  );
 };
 
 const DirectoryItemView: React.FC<DirItemProps> = ({ item }) => {
@@ -39,12 +54,8 @@ const DirectoryItemView: React.FC<DirItemProps> = ({ item }) => {
             style={{ width: ICON_SIZE, height: ICON_SIZE }}
           />
         ) : FileApi.isFileVideo(item) ? (
-          <TH file={item} />
+          <VideoThumbnail file={item} />
         ) : (
-          // <VideoPreview
-          //   source={{ uri: `file://${item.path}` }}
-          //   style={{ width: ICON_SIZE, height: ICON_SIZE }}
-          // />
           <Icon
             size={ICON_SIZE}
             color={item.isDirectory() ? theme.folderColor : theme.fileColor}

@@ -1,4 +1,4 @@
-package com.filemanager;
+package com.filemanager.fspermissions;
 
 import androidx.annotation.NonNull;
 
@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Collections;
 
-import com.filemanager.PermissionFileModule;
+import com.filemanager.fspermissions.PermissionFileModule;
 
 public class PermissionFilePackage implements ReactPackage {
     @NonNull
