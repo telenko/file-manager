@@ -83,6 +83,10 @@ const DirectoryItemView: React.FC<DirItemProps> = ({ item }) => {
           />
         ) : FileApi.isFileVideo(item) ? (
           <VideoThumbnail file={item} />
+        ) : FileApi.isFileMusical(item) ? (
+          <View style={{ borderRadius: ICON_RADIUS }}>
+            <Icon size={ICON_SIZE} source={'file-music'} />
+          </View>
         ) : (
           <View style={{ borderRadius: ICON_RADIUS }}>
             <Icon

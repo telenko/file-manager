@@ -89,6 +89,21 @@ export const FileApi = {
       file.name.endsWith('.mov')
     );
   },
+  isFileMusical: (file: DirItem): boolean => {
+    const audioExtensions = [
+      'mp3',
+      'wav',
+      'aac',
+      'flac',
+      'ogg',
+      'm4a',
+      'wma',
+      'aiff',
+      'alac',
+    ];
+    const fileExtension = file.path?.split('.')?.pop()?.toLowerCase();
+    return audioExtensions.includes(fileExtension ?? '');
+  },
   makeVideoPreview: makeVideoPreviewQueued,
   askForStoragePermission: () => {
     const PermissionFile = NativeModules.PermissionFile;

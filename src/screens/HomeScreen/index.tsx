@@ -95,7 +95,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
         () => 1, // All items have the same layout type
         (type, dim) => {
           dim.width = SCREEN_WIDTH;
-          dim.height = 65;
+          dim.height = 70;
         },
       ),
     [],
