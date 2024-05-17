@@ -28,6 +28,21 @@ export const FileApi = {
       dialogTitle: i18n.t('openWithTitle'),
     });
   },
+  copyItem: async (item: DirItem, destFolder: DirItem) => {
+    if (!destFolder.isDirectory()) {
+      return;
+    }
+    await RNFS.copyFile(item.path, destFolder.path);
+  },
+  deleteItem: async (item: DirItem) => {
+    await RNFS.unlink(item.path);
+  },
+  moveItem: async (item: DirItem, destFolder: DirItem) => {
+    if (!destFolder.isDirectory()) {
+      return;
+    }
+    await RNFS.moveFile(item.path, destFolder.path);
+  },
   // Note, UNIX specific
   isItemHidden: (dirItem: DirItem) => {
     return dirItem.name.startsWith('.');

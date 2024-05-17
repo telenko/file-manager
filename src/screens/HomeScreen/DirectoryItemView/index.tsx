@@ -49,10 +49,14 @@ const DirectoryItemView: React.FC<DirItemProps> = ({ item }) => {
       title={item.name}
       titleStyle={{
         fontSize: 16,
-        fontWeight: 'bold',
         color: theme.fileTitleColor,
+        fontFamily: theme.mediumText,
       }}
-      descriptionStyle={{ fontSize: 12, color: theme.fileDescriptionColor }}
+      descriptionStyle={{
+        fontSize: 12,
+        color: theme.fileDescriptionColor,
+        fontFamily: theme.regularText,
+      }}
       description={item.mtime?.toLocaleDateString() ?? ''}
       left={() =>
         FileApi.isFileImage(item) ? (

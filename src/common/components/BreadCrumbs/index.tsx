@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { Chip, Icon, MD3Colors } from 'react-native-paper';
+import { theme } from '../../../theme';
 
 export type BreadCrumbItem = {
   id: string;
@@ -28,26 +29,30 @@ const BreadCrumbs: React.FC<BreadCrumbsProps> = ({ items }) => {
       horizontal
       showsHorizontalScrollIndicator={false}
       contentContainerStyle={styles.container}>
-      {items.map((item, index) => (
-        <View key={item.id} style={styles.itemContainer}>
-          <Chip
-            selected={index === items.length - 1}
-            mode="flat"
-            onPress={() => item.onPress?.(item.id)}
-            textStyle={styles.text}
-            style={{
-              ...(index === items.length - 1
-                ? styles.activeItem
-                : styles.inactiveItem),
-              ...styles.item,
-            }}>
-            {item.needTranslate ? t(item.name) : item.name}
-          </Chip>
-          {index >= 0 && index < items.length - 1 ? (
-            <Icon size={20} source="chevron-right" />
-          ) : null}
-        </View>
-      ))}
+      {items.map((item, index) => {
+        const isActive = index === items.length - 1;
+        return (
+          <View key={item.id} style={styles.itemContainer}>
+            <Chip
+              selected={isActive}
+              mode="flat"
+              onPress={() => item.onPress?.(item.id)}
+              textStyle={{
+                ...styles.text,
+                fontFamily: isActive ? theme.mediumText : theme.regularText,
+              }}
+              style={{
+                ...styles.item,
+                ...(isActive ? styles.activeItem : styles.inactiveItem),
+              }}>
+              {item.needTranslate ? t(item.name) : item.name}
+            </Chip>
+            {index >= 0 && index < items.length - 1 ? (
+              <Icon size={20} source="chevron-right" />
+            ) : null}
+          </View>
+        );
+      })}
     </ScrollView>
   );
 };

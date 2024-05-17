@@ -3,4 +3,6 @@ export const theme = {
   fileColor: '#b0aeae',
   fileDescriptionColor: '#969696',
   fileTitleColor: '#3d3d3d',
+  mediumText: 'OpenSans-Medium',
+  regularText: 'OpenSans-Regular',
 };
