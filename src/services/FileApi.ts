@@ -2,8 +2,30 @@ import * as RNFS from 'react-native-fs';
 import { NativeModules } from 'react-native';
 import { FileOpener } from './FileOpener';
 import i18n from '../i18n/i18n';
+import { makeQueueable } from '../common/utils/queue';
 
 export type DirItem = RNFS.ReadDirItem;
+
+const makeVideoPreviewQueued = makeQueueable(
+  async (file: DirItem): Promise<string | null> => {
+    if (!FileApi.isFileVideo(file)) {
+      return null;
+    }
+    return new Promise((resolve, reject) => {
+      const { ThumbnailModule } = NativeModules;
+      ThumbnailModule.createVideoThumbnail(
+        file.path,
+        (base64Thumbnail: string) => {
+          resolve(`data:image/jpeg;base64,${base64Thumbnail}`);
+        },
+        (error: string) => {
+          reject(error);
+        },
+      );
+    });
+  },
+  15,
+);
 
 export const FileApi = {
   ROOT_PATH: RNFS.ExternalStorageDirectoryPath,
@@ -67,23 +89,7 @@ export const FileApi = {
       file.name.endsWith('.mov')
     );
   },
-  makeVideoPreview: async (file: DirItem): Promise<string | null> => {
-    if (!FileApi.isFileVideo(file)) {
-      return null;
-    }
-    return new Promise((resolve, reject) => {
-      const { ThumbnailModule } = NativeModules;
-      ThumbnailModule.createVideoThumbnail(
-        file.path,
-        (base64Thumbnail: string) => {
-          resolve(`data:image/jpeg;base64,${base64Thumbnail}`);
-        },
-        (error: string) => {
-          reject(error);
-        },
-      );
-    });
-  },
+  makeVideoPreview: makeVideoPreviewQueued,
   askForStoragePermission: () => {
     const PermissionFile = NativeModules.PermissionFile;
     return new Promise((resolve, reject) => {

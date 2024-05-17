@@ -5,9 +5,16 @@ import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.Callback;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 public class ThumbnailModule extends ReactContextBaseJavaModule {
+
+    private final ExecutorService executorService;
+
     public ThumbnailModule(ReactApplicationContext reactContext) {
         super(reactContext);
+        this.executorService = Executors.newFixedThreadPool(10);
     }
 
     @Override
@@ -17,15 +24,20 @@ public class ThumbnailModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void createVideoThumbnail(String videoPath, Callback successCallback, Callback errorCallback) {
-        try {
-            String base64Thumbnail = ThumbnailHelper.createVideoThumbnail(videoPath);
-            if (base64Thumbnail == null) {
-                errorCallback.invoke("failed to decode 1st second from video");
-            } else {
-                successCallback.invoke(base64Thumbnail);
+        executorService.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    String base64Thumbnail = ThumbnailHelper.createVideoThumbnail(videoPath);
+                    if (base64Thumbnail == null) {
+                        errorCallback.invoke("Failed to decode 1st second from video");
+                    } else {
+                        successCallback.invoke(base64Thumbnail);
+                    }
+                } catch (Exception e) {
+                    errorCallback.invoke(e.getMessage());
+                }
             }
-        } catch (Exception e) {
-            errorCallback.invoke(e.getMessage());
-        }
+        });
     }
 }

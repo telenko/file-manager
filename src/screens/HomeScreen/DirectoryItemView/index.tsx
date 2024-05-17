@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Image, ImageBackground, StyleSheet, View } from 'react-native';
 import { List } from 'react-native-paper';
 
@@ -22,11 +22,24 @@ const VideoThumbnail = ({ file }: { file: DirItem }) => {
   const fallbackThumbnail =
     'data:image/gif;base64,R0lGODlhAQABAIAAAMLCwgAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==';
   const [thumbnail, setThumbnail] = useState<string | null>(null);
+  const makeThumbnailAllowed = useRef<boolean>(false);
   useEffect(() => {
-    FileApi.makeVideoPreview(file).then(setThumbnail).catch(console.info);
+    (async () => {
+      // @ts-ignore
+      await new Promise(r => setTimeout(r, 600));
+      if (makeThumbnailAllowed.current) {
+        FileApi.makeVideoPreview(file)
+          .then(setThumbnail)
+          .catch(() => {});
+      }
+    })();
+    return () => {
+      makeThumbnailAllowed.current = false;
+    };
   }, []);
   return (
     <ImageBackground
+      onLayout={() => (makeThumbnailAllowed.current = true)}
       source={{ uri: thumbnail ?? fallbackThumbnail }}
       style={{
         width: ICON_SIZE,

@@ -2,22 +2,21 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { DirItem, FileApi } from '../../services/FileApi';
 import FilePathBreadCrumb from './FilePathBreadCrumb';
 import { useNavigation } from '../../common/hooks/useNavigation';
-import {
-  VirtualizedList,
-  View,
-  StyleSheet,
-  ListRenderItem,
-} from 'react-native';
+import { View, StyleSheet, Dimensions } from 'react-native';
 import { HomeScreenContext } from './HomeScreenContext';
 import DirectoryItemView from './DirectoryItemView';
-import { ScrollView } from 'react-native-gesture-handler';
-import { ReadDirItem } from 'react-native-fs';
-import { ActivityIndicator, MD2Colors, Text } from 'react-native-paper';
 import LoadingIndicator from '../../common/components/LoadingIndicator';
+import {
+  DataProvider,
+  LayoutProvider,
+  RecyclerListView,
+} from 'recyclerlistview';
 
 export type HomeScreenProps = {
   route: { params: { route: string } };
 };
+
+const SCREEN_WIDTH = Dimensions.get('window').width;
 
 const HomeScreen: React.FC<HomeScreenProps> = ({
   route: {
@@ -86,14 +85,25 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
   }, [route]);
 
   // virtualized memoized contents
-  const renderItem: ListRenderItem<ReadDirItem> = useCallback(
-    ({ item }) => <DirectoryItemView key={item.path} item={item} />,
+  const dataProvider = useMemo(
+    () => new DataProvider((r1, r2) => r1 !== r2).cloneWithRows(dirItems),
+    [dirItems],
+  );
+  const layoutProvider = useMemo(
+    () =>
+      new LayoutProvider(
+        () => 1, // All items have the same layout type
+        (type, dim) => {
+          dim.width = SCREEN_WIDTH;
+          dim.height = 65;
+        },
+      ),
     [],
   );
-  const keyExtractor = useCallback((item: DirItem) => item.path, []);
-  const getItemCount = useCallback((data: DirItem[]) => data.length, []);
-  const getItem = useCallback(
-    (data: DirItem[], index: number) => data[index],
+  const rowRenderer = useCallback(
+    (type: any, item: DirItem) => (
+      <DirectoryItemView key={item.path} item={item} />
+    ),
     [],
   );
 
@@ -106,14 +116,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
         {dirLoading ? (
           <LoadingIndicator />
         ) : (
-          <VirtualizedList
-            initialNumToRender={10}
-            removeClippedSubviews
-            data={dirItems}
-            renderItem={renderItem}
-            keyExtractor={keyExtractor}
-            getItemCount={getItemCount}
-            getItem={getItem}
+          <RecyclerListView
+            dataProvider={dataProvider}
+            layoutProvider={layoutProvider}
+            rowRenderer={rowRenderer}
+            optimizeForInsertDeleteAnimations
           />
         )}
       </View>
