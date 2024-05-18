@@ -85,26 +85,42 @@ const DirectoryItemView: React.FC<DirItemProps> = ({ item }) => {
           <VideoThumbnail file={item} />
         ) : FileApi.isFileMusical(item) ? (
           <View style={{ borderRadius: ICON_RADIUS }}>
-            <Icon size={ICON_SIZE} source={'file-music'} color="#eb4034" />
+            <Icon
+              size={ICON_SIZE}
+              source={'file-music'}
+              color={theme.musicalFileColor}
+            />
           </View>
         ) : item.path?.endsWith('.pdf') ? (
           <View style={{ borderRadius: ICON_RADIUS }}>
-            <Icon size={ICON_SIZE} source={'file-pdf-box'} color="#3169e0" />
+            <Icon
+              size={ICON_SIZE}
+              source={'file-pdf-box'}
+              color={theme.pdfFileColor}
+            />
           </View>
         ) : /\.docx?$/i.test(item.path ?? '') ? (
           <View style={{ borderRadius: ICON_RADIUS }}>
-            <Icon size={ICON_SIZE} source={'file-word'} color="#3169e0" />
+            <Icon
+              size={ICON_SIZE}
+              source={'file-word'}
+              color={theme.docFileColor}
+            />
           </View>
         ) : /\.xlsx?$/i.test(item.path ?? '') ? (
           <View style={{ borderRadius: ICON_RADIUS }}>
-            <Icon size={ICON_SIZE} source={'file-excel'} color="#30b516" />
+            <Icon
+              size={ICON_SIZE}
+              source={'file-excel'}
+              color={theme.xlxFileColor}
+            />
           </View>
         ) : FileApi.isFileArchive(item) ? (
           <View style={{ borderRadius: ICON_RADIUS }}>
             <Icon
               size={ICON_SIZE}
               source={'archive-arrow-down'}
-              color="#dba50f"
+              color={theme.archiveFileColor}
             />
           </View>
         ) : (

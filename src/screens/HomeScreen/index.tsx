@@ -62,6 +62,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
   );
 
   useEffect(() => {
+    FileApi.clearVideoPreviewCache();
     (async () => {
       setDirLoading(true);
       setDirError(null);

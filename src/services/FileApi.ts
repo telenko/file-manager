@@ -24,8 +24,10 @@ const makeVideoPreviewQueued = makeQueueable(
       );
     });
   },
-  15,
+  4,
 );
+
+let VIDEO_PREVIEW_CACHE: Record<string, string> = {};
 
 export const FileApi = {
   ROOT_PATH: RNFS.ExternalStorageDirectoryPath,
@@ -107,7 +109,19 @@ export const FileApi = {
   isFileArchive: (item: DirItem) => {
     return /\.(zip|rar|tar|gz|bz2|7z|xz|iso|tgz)$/i.test(item.path);
   },
-  makeVideoPreview: makeVideoPreviewQueued,
+  makeVideoPreview: async (item: DirItem): Promise<string | null> => {
+    if (VIDEO_PREVIEW_CACHE[item.path]) {
+      return VIDEO_PREVIEW_CACHE[item.path];
+    }
+    const result = await makeVideoPreviewQueued(item);
+    if (result) {
+      VIDEO_PREVIEW_CACHE[item.path] = result;
+    }
+    return VIDEO_PREVIEW_CACHE[item.path];
+  },
+  clearVideoPreviewCache: () => {
+    VIDEO_PREVIEW_CACHE = {};
+  },
   askForStoragePermission: () => {
     const PermissionFile = NativeModules.PermissionFile;
     return new Promise((resolve, reject) => {
