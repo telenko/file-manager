@@ -85,7 +85,27 @@ const DirectoryItemView: React.FC<DirItemProps> = ({ item }) => {
           <VideoThumbnail file={item} />
         ) : FileApi.isFileMusical(item) ? (
           <View style={{ borderRadius: ICON_RADIUS }}>
-            <Icon size={ICON_SIZE} source={'file-music'} />
+            <Icon size={ICON_SIZE} source={'file-music'} color="#eb4034" />
+          </View>
+        ) : item.path?.endsWith('.pdf') ? (
+          <View style={{ borderRadius: ICON_RADIUS }}>
+            <Icon size={ICON_SIZE} source={'file-pdf-box'} color="#3169e0" />
+          </View>
+        ) : /\.docx?$/i.test(item.path ?? '') ? (
+          <View style={{ borderRadius: ICON_RADIUS }}>
+            <Icon size={ICON_SIZE} source={'file-word'} color="#3169e0" />
+          </View>
+        ) : /\.xlsx?$/i.test(item.path ?? '') ? (
+          <View style={{ borderRadius: ICON_RADIUS }}>
+            <Icon size={ICON_SIZE} source={'file-excel'} color="#30b516" />
+          </View>
+        ) : FileApi.isFileArchive(item) ? (
+          <View style={{ borderRadius: ICON_RADIUS }}>
+            <Icon
+              size={ICON_SIZE}
+              source={'archive-arrow-down'}
+              color="#dba50f"
+            />
           </View>
         ) : (
           <View style={{ borderRadius: ICON_RADIUS }}>

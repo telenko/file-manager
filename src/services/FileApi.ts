@@ -104,6 +104,9 @@ export const FileApi = {
     const fileExtension = file.path?.split('.')?.pop()?.toLowerCase();
     return audioExtensions.includes(fileExtension ?? '');
   },
+  isFileArchive: (item: DirItem) => {
+    return /\.(zip|rar|tar|gz|bz2|7z|xz|iso|tgz)$/i.test(item.path);
+  },
   makeVideoPreview: makeVideoPreviewQueued,
   askForStoragePermission: () => {
     const PermissionFile = NativeModules.PermissionFile;
