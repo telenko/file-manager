@@ -11,6 +11,7 @@ import {
   LayoutProvider,
   RecyclerListView,
 } from 'recyclerlistview';
+import { Cache } from '../../services/Cache';
 
 export type HomeScreenProps = {
   route: { params: { route: string } };
@@ -71,11 +72,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
       await new Promise(r => setTimeout(r, 100));
       try {
         const newDirItems = await FileApi.readDir(route ?? FileApi.ROOT_PATH);
-        setDirItems(
-          FileApi.sortDirItems(
-            newDirItems.filter(file => !FileApi.isItemHidden(file)),
-          ),
+        const sortedDirItems = FileApi.sortDirItems(
+          newDirItems.filter(file => !FileApi.isItemHidden(file)),
         );
+        setDirItems(sortedDirItems);
+        Cache.putDirItems(route ?? FileApi.ROOT_PATH, sortedDirItems);
       } catch (e) {
         setDirError(e as Error);
         setDirItems([]);
@@ -83,6 +84,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
         setDirLoading(false);
       }
     })();
+
+    return () => {
+      Cache.clearDirItems();
+    };
   }, [route]);
 
   // virtualized memoized contents

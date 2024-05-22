@@ -11,6 +11,7 @@ import {
 } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import { FileApi } from './src/services/FileApi';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 // const App = AppLegacy;
 
@@ -44,13 +45,15 @@ const App = () => {
     FileApi.askForStoragePermission().then(() => setPermissionGranted(true));
   }, []);
   return (
-    <FontsProvider>
-      {permissionGranted ? (
-        <FileManager />
-      ) : (
-        <Text>{t('permissionRequired')}</Text>
-      )}
-    </FontsProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <FontsProvider>
+        {permissionGranted ? (
+          <FileManager />
+        ) : (
+          <Text>{t('permissionRequired')}</Text>
+        )}
+      </FontsProvider>
+    </GestureHandlerRootView>
   );
 };
 

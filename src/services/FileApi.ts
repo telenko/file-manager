@@ -110,6 +110,7 @@ export const FileApi = {
     return /\.(zip|rar|tar|gz|bz2|7z|xz|iso|tgz)$/i.test(item.path);
   },
   makeVideoPreview: async (item: DirItem): Promise<string | null> => {
+    // @TODO move to cache
     if (VIDEO_PREVIEW_CACHE[item.path]) {
       return VIDEO_PREVIEW_CACHE[item.path];
     }
@@ -121,6 +122,13 @@ export const FileApi = {
   },
   clearVideoPreviewCache: () => {
     VIDEO_PREVIEW_CACHE = {};
+  },
+  getParentDirectoryPath: (filePath: string) => {
+    const normalizedPath = filePath.endsWith('/')
+      ? filePath.slice(0, -1)
+      : filePath;
+    const lastSlashIndex = normalizedPath.lastIndexOf('/');
+    return normalizedPath.substring(0, lastSlashIndex);
   },
   askForStoragePermission: () => {
     const PermissionFile = NativeModules.PermissionFile;
