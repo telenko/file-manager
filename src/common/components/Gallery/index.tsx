@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Dimensions, VirtualizedList } from 'react-native';
+import { Dimensions, View, VirtualizedList } from 'react-native';
 import { useAnimatedRef, useSharedValue } from 'react-native-reanimated';
 
 const { width, height } = Dimensions.get('window');
@@ -9,12 +9,15 @@ function Gallery<T>({
   items,
   renderItem,
   selectedItemKey,
+  onItemOpen,
+  disableScrolling = false,
 }: {
   items: T[];
   renderItem: (v: T) => React.ReactNode;
   getItemKey: (v: T) => string;
   selectedItemKey: string;
   onItemOpen?: (item: T) => void;
+  disableScrolling?: boolean;
 }) {
   const [index, setIndex] = useState<number | null>(0);
   const scrollViewRef = useAnimatedRef();
@@ -35,10 +38,11 @@ function Gallery<T>({
   const endX = useRef<number>(0);
 
   return (
-    // @ts-ignore
     <VirtualizedList
       horizontal
+      // @ts-ignore
       ref={scrollViewRef}
+      // scrollEnabled={!disableScrolling}
       pagingEnabled
       windowSize={3}
       initialNumToRender={3}
@@ -58,13 +62,26 @@ function Gallery<T>({
         offset: width * index,
         index,
       })}
-      onScrollEndDrag={() => {
-        console.log('ANIM END');
+      onScrollBeginDrag={event => {
+        startX.current = event.nativeEvent.contentOffset.x;
+      }}
+      onScrollEndDrag={event => {
+        endX.current = event.nativeEvent.contentOffset.x;
+        const upDown = startX.current > endX.current;
+        const newIdx = upDown
+          ? Math.max(index! - 1, 0)
+          : Math.min(index! + 1, items.length - 1);
+        setIndex(newIdx);
+        onItemOpen?.(items[newIdx]);
       }}
       // @ts-ignore
       renderItem={info => {
         // @ts-ignore
-        return renderItem(info.item);
+        return (
+          <View style={{ width, overflow: 'hidden' }}>
+            {renderItem(info.item)}
+          </View>
+        );
       }}
     />
   );

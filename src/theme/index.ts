@@ -5,6 +5,7 @@ export const theme = {
   fileTitleColor: '#3d3d3d',
   mediumText: 'OpenSans-Medium',
   regularText: 'OpenSans-Regular',
+  strongText: 'OpenSans-Bold',
   musicalFileColor: '#eb4034',
   pdfFileColor: '#3169e0',
   docFileColor: '#3169e0',

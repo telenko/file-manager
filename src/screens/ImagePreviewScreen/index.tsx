@@ -11,52 +11,59 @@ import Animated, {
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { Cache } from '../../services/Cache';
 import Gallery from '../../common/components/Gallery';
+import { theme } from '../../theme';
+import ImageViewer from '../../common/components/ImageViewer';
+import { useNavigation } from '../../common/hooks/useNavigation';
 
 const { width, height } = Dimensions.get('window');
-
+// const HEADER_HEIGHT = 20;
+// const FOOTER_HEIGHT = 20;
 export type ImageViewerScreenProps = {
   route: { params: { route: string } };
 };
 
 const ImagePreviewContext = React.createContext<any>({});
 
-const ImageItem = ({ file }: { file: DirItem }) => {
-  const ctx = useContext(ImagePreviewContext);
-  const scale = useSharedValue(1);
-  const savedScale = useSharedValue(1);
+// const ImageItem = ({ file }: { file: DirItem }) => {
+//   const ctx = useContext(ImagePreviewContext);
+//   const scale = useSharedValue(1);
+//   const savedScale = useSharedValue(1);
 
-  const pinchGesture = Gesture.Pinch()
-    .onStart(() => {
-      runOnJS(ctx.onZooming)(true);
-    })
-    .onUpdate(e => {
-      scale.value = Math.max(savedScale.value * e.scale, 1);
-    })
-    .onEnd(() => {
-      savedScale.value = scale.value;
-      runOnJS(ctx.onZooming)(false);
-    });
+//   const pinchGesture = Gesture.Pinch()
+//     .onStart(() => {
+//       runOnJS(ctx.onZooming)(true);
+//     })
+//     .onUpdate(e => {
+//       scale.value = Math.max(savedScale.value * e.scale, 1);
+//     })
+//     .onEnd(() => {
+//       savedScale.value = scale.value;
+//       runOnJS(ctx.onZooming)(false);
+//     });
 
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: withSpring(scale.value, { stiffness: 100 }) }],
-  }));
+//   const animatedStyle = useAnimatedStyle(() => ({
+//     transform: [{ scale: withSpring(scale.value, { stiffness: 100 }) }],
+//   }));
 
-  return (
-    <GestureDetector gesture={pinchGesture}>
-      <View>
-        <Text>{file?.name}</Text>
-        <Text>{file?.mtime?.toLocaleTimeString()}</Text>
-        <Animated.View style={[styles.imageContainer, animatedStyle]}>
-          <Image
-            source={{ uri: `file://${file.path}` }}
-            style={styles.image}
-            resizeMode="contain"
-          />
-        </Animated.View>
-      </View>
-    </GestureDetector>
-  );
-};
+//   return (
+//     <GestureDetector gesture={pinchGesture}>
+//       <View
+//         style={{
+//           flexDirection: 'column',
+//           alignItems: 'center',
+//           justifyContent: 'center',
+//         }}>
+//         <Animated.View style={[styles.imageContainer, animatedStyle]}>
+//           <Image
+//             source={{ uri: `file://${file.path}` }}
+//             style={styles.image}
+//             resizeMode="contain"
+//           />
+//         </Animated.View>
+//       </View>
+//     </GestureDetector>
+//   );
+// };
 
 const ImagePreviewScreen: React.FC<ImageViewerScreenProps> = ({
   route: {
@@ -66,11 +73,19 @@ const ImagePreviewScreen: React.FC<ImageViewerScreenProps> = ({
   if (!route) {
     return null;
   }
+  const navigation = useNavigation();
   const [zooming, setZooming] = useState(false);
   const [file, setFile] = useState<DirItem | null>(null);
   const [imagesInFolderSorted, setImagesInFolderSorted] = useState<DirItem[]>(
     [],
   );
+  useEffect(() => {
+    navigation.setOptions({
+      headerTitle: `${file?.mtime?.toLocaleDateString()} ${file?.mtime
+        ?.toLocaleTimeString()
+        ?.slice(0, 5)}`,
+    });
+  }, [file, navigation]);
   useEffect(() => {
     FileApi.getMetadata(route).then(setFile);
     const dirItems =
@@ -94,16 +109,32 @@ const ImagePreviewScreen: React.FC<ImageViewerScreenProps> = ({
           setZooming(val);
         },
       }}>
-      <Gallery
-        items={imagesCarousel}
-        getItemKey={it => it.path}
-        renderItem={image => <ImageItem file={image} />}
-        selectedItemKey={route}
-      />
+      <View style={{ justifyContent: 'space-between' }}>
+        <View>
+          {imagesCarousel.length > 0 ? (
+            <Gallery
+              items={imagesCarousel}
+              getItemKey={it => it.path}
+              renderItem={image => (
+                <ImageViewer file={image} onZooming={setZooming} />
+              )}
+              selectedItemKey={route}
+              onItemOpen={setFile}
+              disableScrolling={zooming}
+            />
+          ) : (
+            <ImageViewer
+              onZooming={setZooming}
+              file={{
+                path: route,
+              }}
+            />
+          )}
+        </View>
+        <View></View>
+      </View>
     </ImagePreviewContext.Provider>
   );
-
-  return null;
 };
 
 const styles = StyleSheet.create({
@@ -113,13 +144,12 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     width: width,
-    height: height,
     justifyContent: 'center',
     alignItems: 'center',
+    flexDirection: 'column',
   },
   image: {
-    width: '100%',
-    height: '100%',
+    width: width,
   },
 });
 
