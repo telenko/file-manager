@@ -1,17 +1,8 @@
-import React, { useContext, useEffect, useMemo, useState } from 'react';
-import { Dimensions, Image, StyleSheet, View } from 'react-native';
-import { Text } from 'react-native-paper';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Dimensions, StyleSheet, View } from 'react-native';
 import { DirItem, FileApi } from '../../services/FileApi';
-import Animated, {
-  runOnJS,
-  useAnimatedStyle,
-  useSharedValue,
-  withSpring,
-} from 'react-native-reanimated';
-import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { Cache } from '../../services/Cache';
 import Gallery from '../../common/components/Gallery';
-import { theme } from '../../theme';
 import ImageViewer from '../../common/components/ImageViewer';
 import { useNavigation } from '../../common/hooks/useNavigation';
 
@@ -23,47 +14,6 @@ export type ImageViewerScreenProps = {
 };
 
 const ImagePreviewContext = React.createContext<any>({});
-
-// const ImageItem = ({ file }: { file: DirItem }) => {
-//   const ctx = useContext(ImagePreviewContext);
-//   const scale = useSharedValue(1);
-//   const savedScale = useSharedValue(1);
-
-//   const pinchGesture = Gesture.Pinch()
-//     .onStart(() => {
-//       runOnJS(ctx.onZooming)(true);
-//     })
-//     .onUpdate(e => {
-//       scale.value = Math.max(savedScale.value * e.scale, 1);
-//     })
-//     .onEnd(() => {
-//       savedScale.value = scale.value;
-//       runOnJS(ctx.onZooming)(false);
-//     });
-
-//   const animatedStyle = useAnimatedStyle(() => ({
-//     transform: [{ scale: withSpring(scale.value, { stiffness: 100 }) }],
-//   }));
-
-//   return (
-//     <GestureDetector gesture={pinchGesture}>
-//       <View
-//         style={{
-//           flexDirection: 'column',
-//           alignItems: 'center',
-//           justifyContent: 'center',
-//         }}>
-//         <Animated.View style={[styles.imageContainer, animatedStyle]}>
-//           <Image
-//             source={{ uri: `file://${file.path}` }}
-//             style={styles.image}
-//             resizeMode="contain"
-//           />
-//         </Animated.View>
-//       </View>
-//     </GestureDetector>
-//   );
-// };
 
 const ImagePreviewScreen: React.FC<ImageViewerScreenProps> = ({
   route: {

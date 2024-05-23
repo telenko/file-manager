@@ -29,7 +29,7 @@ function Gallery<T>({
       // @ts-ignore
       scrollViewRef.current.scrollToIndex({
         index: Math.max(nextIndex, 0),
-        animated: true,
+        animated: false,
       });
     }, 0);
   }, [items, selectedItemKey]);
@@ -42,7 +42,7 @@ function Gallery<T>({
       horizontal
       // @ts-ignore
       ref={scrollViewRef}
-      // scrollEnabled={!disableScrolling}
+      scrollEnabled={!disableScrolling}
       pagingEnabled
       windowSize={3}
       initialNumToRender={3}
