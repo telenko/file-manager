@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Image, ImageBackground, StyleSheet, View } from 'react-native';
-import { List } from 'react-native-paper';
+import { IconButton, List, Menu } from 'react-native-paper';
 
 import {
   DirItem,
@@ -10,6 +10,7 @@ import {
 import { useHomeContext } from '../HomeScreenContext';
 import { Icon } from 'react-native-paper';
 import { theme } from '../../../theme';
+import { useTranslation } from 'react-i18next';
 
 type DirItemProps = {
   item: DirectoryItemType;
@@ -17,6 +18,7 @@ type DirItemProps = {
 
 const ICON_SIZE = 45;
 const ICON_RADIUS = 4;
+const MENU_ICON_SIZE = 30;
 
 const VideoThumbnail = ({ file }: { file: DirItem }) => {
   const fallbackThumbnail =
@@ -56,6 +58,8 @@ const VideoThumbnail = ({ file }: { file: DirItem }) => {
 
 const DirectoryItemView: React.FC<DirItemProps> = ({ item }) => {
   const homeCtx = useHomeContext();
+  const { t } = useTranslation();
+  const [menuOpen, setMenuOpen] = useState(false);
   return (
     <List.Item
       style={item.isDirectory() ? styles.folder : styles.file}
@@ -133,10 +137,38 @@ const DirectoryItemView: React.FC<DirItemProps> = ({ item }) => {
           </View>
         )
       }
+      right={() => (
+        <Menu
+          visible={menuOpen}
+          onDismiss={() => setMenuOpen(false)}
+          anchor={
+            <IconButton
+              onPress={() => setMenuOpen(true)}
+              size={MENU_ICON_SIZE}
+              // @TODO Andrii - is there a way to make it cleaner?
+              style={{ marginRight: -20, height: MENU_ICON_SIZE }}
+              icon={'dots-vertical'}
+              iconColor={theme.fileMenuColor}
+            />
+          }>
+          <Menu.Item
+            onPress={() => {
+              FileApi.openFile(item);
+              setMenuOpen(false);
+            }}
+            title={t('openWith')}
+          />
+          <Menu.Item
+            onPress={() => {
+              homeCtx.copyDirItem(item);
+              setMenuOpen(false);
+            }}
+            title={t('copy')}
+          />
+        </Menu>
+      )}
       onLongPress={() => {
-        if (item.isFile() && FileApi.isFileImage(item)) {
-          FileApi.openFile(item);
-        }
+        setMenuOpen(true);
       }}
       onPress={() => {
         if (item.isFile()) {

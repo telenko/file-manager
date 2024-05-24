@@ -11,4 +11,5 @@ export const theme = {
   docFileColor: '#3169e0',
   xlxFileColor: '#30b516',
   archiveFileColor: '#dba50f',
+  fileMenuColor: '#ababab',
 };

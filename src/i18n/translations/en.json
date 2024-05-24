@@ -3,5 +3,11 @@
     "deviceRoot": "Storage",
     "permissionRequired": "We need permission to access storage",
     "openWithTitle": "Open File With",
-    "imageViewer": "Image preview"
+    "imageViewer": "Image preview",
+    "copyInto": "Copy into",
+    "copyHere": "Copy here",
+    "moveHere": "Move here",
+    "copy": "Copy",
+    "share": "Share",
+    "openWith": "Open with"
 }

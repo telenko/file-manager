@@ -52,11 +52,29 @@ export const FileApi = {
       dialogTitle: i18n.t('openWithTitle'),
     });
   },
-  copyItem: async (item: DirItem, destFolder: DirItem) => {
-    if (!destFolder.isDirectory()) {
-      return;
-    }
-    await RNFS.copyFile(item.path, destFolder.path);
+  copyFileOrDirectory: async (source: string, destination: string) => {
+    const copyRecursive = async (source: string, destination: string) => {
+      const stats = await RNFS.stat(source);
+
+      if (stats.isDirectory()) {
+        await RNFS.mkdir(destination);
+        const items = await RNFS.readDir(source);
+
+        for (const item of items) {
+          const itemSourcePath = `${source}/${item.name}`;
+          const itemDestinationPath = `${destination}/${item.name}`;
+
+          await copyRecursive(itemSourcePath, itemDestinationPath);
+        }
+      } else {
+        const destStats = await RNFS.stat(destination);
+        let fileDest = destStats.isDirectory()
+          ? `${destination}/${stats.name}`
+          : destination;
+        await RNFS.copyFile(source, fileDest);
+      }
+    };
+    return copyRecursive(source, destination);
   },
   deleteItem: async (item: DirItem) => {
     await RNFS.unlink(item.path);

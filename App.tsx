@@ -37,6 +37,15 @@ const FontsProvider: React.FC<PropsWithChildren> = ({ children }) => {
   return <PaperProvider theme={theme}>{children}</PaperProvider>;
 };
 
+/**
+ * TODOs list
+ * 1. orientation change impact on gallery
+ * 2. move behavior
+ * 3. copy behavior
+ * 4. remove/rename
+ * 5. details
+ */
+
 const App = () => {
   const [permissionGranted, setPermissionGranted] = useState<boolean>(false);
   useDeviceLocale();

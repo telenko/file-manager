@@ -7,13 +7,9 @@ import ImageViewer from '../../common/components/ImageViewer';
 import { useNavigation } from '../../common/hooks/useNavigation';
 
 const { width, height } = Dimensions.get('window');
-// const HEADER_HEIGHT = 20;
-// const FOOTER_HEIGHT = 20;
 export type ImageViewerScreenProps = {
   route: { params: { route: string } };
 };
-
-const ImagePreviewContext = React.createContext<any>({});
 
 const ImagePreviewScreen: React.FC<ImageViewerScreenProps> = ({
   route: {
@@ -53,37 +49,30 @@ const ImagePreviewScreen: React.FC<ImageViewerScreenProps> = ({
     return imagesInFolderSorted;
   }, [file, imagesInFolderSorted, route]);
   return (
-    <ImagePreviewContext.Provider
-      value={{
-        onZooming: (val: boolean) => {
-          setZooming(val);
-        },
-      }}>
-      <View style={{ justifyContent: 'space-between' }}>
-        <View>
-          {imagesCarousel.length > 0 ? (
-            <Gallery
-              items={imagesCarousel}
-              getItemKey={it => it.path}
-              renderItem={image => (
-                <ImageViewer file={image} onZooming={setZooming} />
-              )}
-              selectedItemKey={route}
-              onItemOpen={setFile}
-              disableScrolling={zooming}
-            />
-          ) : (
-            <ImageViewer
-              onZooming={setZooming}
-              file={{
-                path: route,
-              }}
-            />
-          )}
-        </View>
-        <View></View>
+    <View style={{ justifyContent: 'space-between' }}>
+      <View>
+        {imagesCarousel.length > 0 ? (
+          <Gallery
+            items={imagesCarousel}
+            getItemKey={it => it.path}
+            renderItem={image => (
+              <ImageViewer file={image} onZooming={setZooming} />
+            )}
+            selectedItemKey={route}
+            onItemOpen={setFile}
+            disableScrolling={zooming}
+          />
+        ) : (
+          <ImageViewer
+            onZooming={setZooming}
+            file={{
+              path: route,
+            }}
+          />
+        )}
       </View>
-    </ImagePreviewContext.Provider>
+      <View></View>
+    </View>
   );
 };
 

@@ -12,22 +12,51 @@ import {
   RecyclerListView,
 } from 'recyclerlistview';
 import { Cache } from '../../services/Cache';
+import { useTranslation } from 'react-i18next';
+import { Button } from 'react-native-paper';
+import { navigateFromSelectable } from '../../common/utils/navigator';
 
 export type HomeScreenProps = {
-  route: { params: { route: string } };
+  route: {
+    params: {
+      route: string;
+      mode?: 'tree' | 'copy' | 'move';
+      fromRoute?: string;
+    };
+  };
 };
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
 const HomeScreen: React.FC<HomeScreenProps> = ({
   route: {
-    params: { route },
+    params: { route, ...routeMetadatas },
   },
 }) => {
   const navigator = useNavigation();
+  const { t } = useTranslation();
   const [dirItems, setDirItems] = useState<DirItem[]>([]);
   const [dirLoading, setDirLoading] = useState<boolean>(false);
   const [dirError, setDirError] = useState<Error | null>(null);
+  const [copyInProgress, setCopyInProgress] = useState<boolean>(false);
+
+  useEffect(() => {
+    let title = '';
+    switch (routeMetadatas.mode) {
+      case 'copy': {
+        title = t('copyInto');
+        break;
+      }
+      default: {
+        title = t('title');
+        break;
+      }
+    }
+    navigator.setOptions({
+      headerTitle: title,
+    });
+  }, [routeMetadatas.mode, navigator]);
+
   const openDirectory = useCallback(
     (dir: DirItem) => {
       if (!dir.isDirectory()) {
@@ -35,9 +64,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
       }
       // @TODO Andrii solve parametrization typings
       // @ts-ignore
-      navigator.push('Home', { route: dir.path });
+      navigator.push('Home', { route: dir.path, ...routeMetadatas });
     },
-    [navigator],
+    [navigator, ...Object.values(routeMetadatas)],
   );
   const openPreview = useCallback(
     (file: DirItem) => {
@@ -46,20 +75,49 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
       }
       // @TODO Andrii solve parametrization typings
       // @ts-ignore
-      navigator.push('ImageViewer', { route: file.path });
+      navigator.push('ImageViewer', { route: file.path, ...routeMetadatas });
     },
-    [navigator],
+    [navigator, ...Object.values(routeMetadatas)],
   );
+  const copyDirItem = useCallback((dirItem: DirItem) => {
+    // @ts-ignore
+    navigator.push('Home', {
+      route: FileApi.ROOT_PATH,
+      mode: 'copy',
+      fromRoute: dirItem.path,
+    });
+  }, []);
+  const moveDirItem = useCallback((dirItem: DirItem) => {
+    // @ts-ignore
+    navigator.push('Home', {
+      route: FileApi.ROOT_PATH,
+      mode: 'move',
+      fromRoute: dirItem.path,
+    });
+  }, []);
   const value = useMemo<HomeScreenContext>(
     () => ({
       route: route ?? FileApi.ROOT_PATH,
       dirItems,
+      mode: routeMetadatas.mode ?? 'tree',
       dirLoading,
       dirError,
       openDirectory,
       openPreview,
+      copyDirItem,
+      moveDirItem,
     }),
-    [route, dirItems, dirLoading, dirError, openDirectory, openPreview],
+    [
+      route,
+      dirItems,
+      routeMetadatas.mode,
+      dirLoading,
+      dirError,
+      openDirectory,
+      openPreview,
+      copyDirItem,
+      moveDirItem,
+    ],
   );
 
   useEffect(() => {
@@ -129,6 +187,27 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
             optimizeForInsertDeleteAnimations
           />
         )}
+        {routeMetadatas.mode === 'copy' ? (
+          <Button
+            loading={copyInProgress}
+            mode="outlined"
+            disabled={!routeMetadatas.fromRoute || !route || copyInProgress}
+            onPress={() => {
+              setCopyInProgress(true);
+              FileApi.copyFileOrDirectory(routeMetadatas.fromRoute!, route)
+                .then(() => {
+                  navigateFromSelectable(navigator);
+                })
+                // @TODO Andrii errors handling
+                .catch(console.error)
+                .finally(() => setCopyInProgress(false));
+            }}>
+            {t('copyHere')}
+          </Button>
+        ) : null}
+        {routeMetadatas.mode === 'move' ? (
+          <Button>{t('moveHere')}</Button>
+        ) : null}
       </View>
     </HomeScreenContext.Provider>
   );
