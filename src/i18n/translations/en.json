@@ -9,5 +9,8 @@
     "moveHere": "Move here",
     "copy": "Copy",
     "share": "Share",
-    "openWith": "Open with"
+    "delete": "Delete",
+    "deleteConfirm": "Delete this item?",
+    "openWith": "Open with",
+    "cancel": "Cancel"
 }

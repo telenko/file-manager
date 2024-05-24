@@ -57,6 +57,27 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
     });
   }, [routeMetadatas.mode, navigator]);
 
+  const reloadDir = useCallback(async () => {
+    setDirLoading(true);
+    setDirError(null);
+    setDirItems([]);
+    // @ts-ignore
+    await new Promise(r => setTimeout(r, 100));
+    try {
+      const newDirItems = await FileApi.readDir(route ?? FileApi.ROOT_PATH);
+      const sortedDirItems = FileApi.sortDirItems(
+        newDirItems.filter(file => !FileApi.isItemHidden(file)),
+      );
+      setDirItems(sortedDirItems);
+      Cache.putDirItems(route ?? FileApi.ROOT_PATH, sortedDirItems);
+    } catch (e) {
+      setDirError(e as Error);
+      setDirItems([]);
+    } finally {
+      setDirLoading(false);
+    }
+  }, [route]);
+
   const openDirectory = useCallback(
     (dir: DirItem) => {
       if (!dir.isDirectory()) {
@@ -106,6 +127,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
       openPreview,
       copyDirItem,
       moveDirItem,
+      reloadDir,
     }),
     [
       route,
@@ -117,36 +139,17 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
       openPreview,
       copyDirItem,
       moveDirItem,
+      reloadDir,
     ],
   );
 
   useEffect(() => {
     FileApi.clearVideoPreviewCache();
-    (async () => {
-      setDirLoading(true);
-      setDirError(null);
-      setDirItems([]);
-      // @ts-ignore
-      await new Promise(r => setTimeout(r, 100));
-      try {
-        const newDirItems = await FileApi.readDir(route ?? FileApi.ROOT_PATH);
-        const sortedDirItems = FileApi.sortDirItems(
-          newDirItems.filter(file => !FileApi.isItemHidden(file)),
-        );
-        setDirItems(sortedDirItems);
-        Cache.putDirItems(route ?? FileApi.ROOT_PATH, sortedDirItems);
-      } catch (e) {
-        setDirError(e as Error);
-        setDirItems([]);
-      } finally {
-        setDirLoading(false);
-      }
-    })();
-
+    reloadDir();
     return () => {
       Cache.clearDirItems();
     };
-  }, [route]);
+  }, [route, reloadDir]);
 
   // virtualized memoized contents
   const dataProvider = useMemo(

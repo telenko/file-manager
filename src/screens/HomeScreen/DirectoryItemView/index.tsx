@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Image, ImageBackground, StyleSheet, View } from 'react-native';
+import { Alert, Image, ImageBackground, StyleSheet, View } from 'react-native';
 import { IconButton, List, Menu } from 'react-native-paper';
 
 import {
@@ -152,6 +152,7 @@ const DirectoryItemView: React.FC<DirItemProps> = ({ item }) => {
             />
           }>
           <Menu.Item
+            disabled={item.isDirectory()}
             onPress={() => {
               FileApi.openFile(item);
               setMenuOpen(false);
@@ -164,6 +165,31 @@ const DirectoryItemView: React.FC<DirItemProps> = ({ item }) => {
               setMenuOpen(false);
             }}
             title={t('copy')}
+          />
+          <Menu.Item
+            onPress={() => {
+              Alert.alert(
+                t('delete'),
+                t('deleteConfirm'),
+                [
+                  {
+                    text: t('cancel'),
+                    style: 'cancel',
+                  },
+                  {
+                    text: t('delete'),
+                    onPress: async () => {
+                      await FileApi.deleteItem(item);
+                      homeCtx.reloadDir();
+                    },
+                    style: 'destructive',
+                  },
+                ],
+                { cancelable: true },
+              );
+              setMenuOpen(false);
+            }}
+            title={t('delete')}
           />
         </Menu>
       )}

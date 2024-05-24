@@ -55,8 +55,14 @@ export const FileApi = {
   copyFileOrDirectory: async (source: string, destination: string) => {
     const copyRecursive = async (source: string, destination: string) => {
       const stats = await RNFS.stat(source);
+      const destStats = await RNFS.stat(destination); 
 
       if (stats.isDirectory()) {
+        if (await RNFS.exists(destination)) {
+          throw new Error(
+            'Failed to copy contents, as destination already exists',
+          );
+        }
         await RNFS.mkdir(destination);
         const items = await RNFS.readDir(source);
 
@@ -67,10 +73,16 @@ export const FileApi = {
           await copyRecursive(itemSourcePath, itemDestinationPath);
         }
       } else {
-        const destStats = await RNFS.stat(destination);
+        const fileName = stats.name || source.split('/').pop();
         let fileDest = destStats.isDirectory()
-          ? `${destination}/${stats.name}`
+          ? `${destination}/${fileName}`
           : destination;
+
+        if (await RNFS.exists(fileDest)) {
+          throw new Error(
+            'Failed to copy file, as destination file already exists',
+          );
+        }
         await RNFS.copyFile(source, fileDest);
       }
     };

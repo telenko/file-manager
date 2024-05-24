@@ -11,6 +11,7 @@ export type HomeScreenContext = {
   openPreview: (item: DirItem) => void;
   copyDirItem: (dirItem: DirItem) => void;
   moveDirItem: (dirItem: DirItem) => void;
+  reloadDir: () => void;
 };
 
 export const HomeScreenContext = React.createContext<HomeScreenContext>({
@@ -23,6 +24,7 @@ export const HomeScreenContext = React.createContext<HomeScreenContext>({
   openPreview: () => {},
   copyDirItem: () => {},
   moveDirItem: () => {},
+  reloadDir: () => {},
 });
 
 export const useHomeContext = (): HomeScreenContext => {
