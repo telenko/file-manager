@@ -39,12 +39,17 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
   const [dirLoading, setDirLoading] = useState<boolean>(false);
   const [dirError, setDirError] = useState<Error | null>(null);
   const [copyInProgress, setCopyInProgress] = useState<boolean>(false);
+  const [moveInProgress, setMoveInProgress] = useState<boolean>(false);
 
   useEffect(() => {
     let title = '';
     switch (routeMetadatas.mode) {
       case 'copy': {
         title = t('copyInto');
+        break;
+      }
+      case 'move': {
+        title = t('moveInto');
         break;
       }
       default: {
@@ -190,27 +195,62 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
             optimizeForInsertDeleteAnimations
           />
         )}
-        {routeMetadatas.mode === 'copy' ? (
-          <Button
-            loading={copyInProgress}
-            mode="outlined"
-            disabled={!routeMetadatas.fromRoute || !route || copyInProgress}
-            onPress={() => {
-              setCopyInProgress(true);
-              FileApi.copyFileOrDirectory(routeMetadatas.fromRoute!, route)
-                .then(() => {
-                  navigateFromSelectable(navigator);
-                })
-                // @TODO Andrii errors handling
-                .catch(console.error)
-                .finally(() => setCopyInProgress(false));
-            }}>
-            {t('copyHere')}
-          </Button>
-        ) : null}
-        {routeMetadatas.mode === 'move' ? (
-          <Button>{t('moveHere')}</Button>
-        ) : null}
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            paddingLeft: 20,
+            paddingRight: 20,
+          }}>
+          {routeMetadatas.mode === 'copy' ? (
+            <Button
+              icon='content-copy'
+              loading={copyInProgress}
+              mode="outlined"
+              disabled={!routeMetadatas.fromRoute || !route || copyInProgress}
+              onPress={() => {
+                setCopyInProgress(true);
+                FileApi.copyFileOrDirectory(routeMetadatas.fromRoute!, route)
+                  .then(() => {
+                    navigateFromSelectable(navigator);
+                  })
+                  // @TODO Andrii errors handling
+                  .catch(console.error)
+                  .finally(() => setCopyInProgress(false));
+              }}>
+              {t('copyHere')}
+            </Button>
+          ) : null}
+          {routeMetadatas.mode === 'move' ? (
+            <Button
+              icon="file-move"
+              loading={moveInProgress}
+              // mode="outlined"
+              disabled={!routeMetadatas.fromRoute || !route || copyInProgress}
+              onPress={() => {
+                setMoveInProgress(true);
+                FileApi.moveFileOrDirectory(routeMetadatas.fromRoute!, route)
+                  .then(() => {
+                    navigateFromSelectable(navigator);
+                  })
+                  // @TODO Andrii errors handling
+                  .catch(console.error)
+                  .finally(() => setMoveInProgress(false));
+              }}>
+              {t('moveHere')}
+            </Button>
+          ) : null}
+          {routeMetadatas.mode === 'copy' || routeMetadatas.mode === 'move' ? (
+            <Button
+              icon="close"
+              onPress={() => {
+                navigateFromSelectable(navigator);
+              }}>
+              {t('cancel')}
+            </Button>
+          ) : null}
+        </View>
       </View>
     </HomeScreenContext.Provider>
   );

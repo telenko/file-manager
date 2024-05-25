@@ -55,7 +55,7 @@ export const FileApi = {
   copyFileOrDirectory: async (source: string, destination: string) => {
     const copyRecursive = async (source: string, destination: string) => {
       const stats = await RNFS.stat(source);
-      const destStats = await RNFS.stat(destination); 
+      const destStats = await RNFS.stat(destination);
 
       if (stats.isDirectory()) {
         if (await RNFS.exists(destination)) {
@@ -88,14 +88,45 @@ export const FileApi = {
     };
     return copyRecursive(source, destination);
   },
+  moveFileOrDirectory: async (source: string, destination: string) => {
+    const moveRecursive = async (source: string, destination: string) => {
+      const stats = await RNFS.stat(source);
+      const destStats = await RNFS.stat(destination);
+      if (stats.isDirectory()) {
+        if (await RNFS.exists(destination)) {
+          throw new Error(
+            'Failed to move contents, as destination already exists',
+          );
+        }
+        await RNFS.mkdir(destination);
+        const items = await RNFS.readDir(source);
+
+        for (const item of items) {
+          const itemSourcePath = `${source}/${item.name}`;
+          const itemDestinationPath = `${destination}/${item.name}`;
+
+          await moveRecursive(itemSourcePath, itemDestinationPath);
+        }
+        // Remove the original directory after moving all its contents
+        await RNFS.unlink(source);
+      } else {
+        const fileName = stats.name || source.split('/').pop();
+        let fileDest = destStats.isDirectory()
+          ? `${destination}/${fileName}`
+          : destination;
+
+        if (await RNFS.exists(fileDest)) {
+          throw new Error(
+            'Failed to move file, as destination file already exists',
+          );
+        }
+        await RNFS.moveFile(source, fileDest);
+      }
+    };
+    return moveRecursive(source, destination);
+  },
   deleteItem: async (item: DirItem) => {
     await RNFS.unlink(item.path);
-  },
-  moveItem: async (item: DirItem, destFolder: DirItem) => {
-    if (!destFolder.isDirectory()) {
-      return;
-    }
-    await RNFS.moveFile(item.path, destFolder.path);
   },
   // Note, UNIX specific
   isItemHidden: (dirItem: DirItem) => {

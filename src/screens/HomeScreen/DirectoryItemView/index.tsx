@@ -168,6 +168,13 @@ const DirectoryItemView: React.FC<DirItemProps> = ({ item }) => {
           />
           <Menu.Item
             onPress={() => {
+              homeCtx.moveDirItem(item);
+              setMenuOpen(false);
+            }}
+            title={t('move')}
+          />
+          <Menu.Item
+            onPress={() => {
               Alert.alert(
                 t('delete'),
                 t('deleteConfirm'),
