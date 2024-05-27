@@ -207,7 +207,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
             <Button
               icon='content-copy'
               loading={copyInProgress}
-              mode="outlined"
               disabled={!routeMetadatas.fromRoute || !route || copyInProgress}
               onPress={() => {
                 setCopyInProgress(true);
@@ -226,13 +225,14 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
             <Button
               icon="file-move"
               loading={moveInProgress}
-              // mode="outlined"
               disabled={!routeMetadatas.fromRoute || !route || copyInProgress}
               onPress={() => {
                 setMoveInProgress(true);
                 FileApi.moveFileOrDirectory(routeMetadatas.fromRoute!, route)
                   .then(() => {
                     navigateFromSelectable(navigator);
+                    // @TODO Andrii solve reload after move
+                    // reloadDir();
                   })
                   // @TODO Andrii errors handling
                   .catch(console.error)
