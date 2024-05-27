@@ -1,9 +1,6 @@
 import { NavigationProp } from '@react-navigation/native';
 
-export const navigateFromSelectable = (
-  navigator: NavigationProp<any>,
-  reload: boolean = false,
-) => {
+export const navigateFromSelectable = (navigator: NavigationProp<any>) => {
   const state = navigator.getState();
   const routes = state.routes;
 
@@ -21,5 +18,5 @@ export const navigateFromSelectable = (
     screensCounter++;
   }
   // @ts-ignore
-  navigator.pop(screensCounter, { reload });
+  navigator.pop(screensCounter);
 };

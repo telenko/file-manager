@@ -15,6 +15,7 @@ import { Cache } from '../../services/Cache';
 import { useTranslation } from 'react-i18next';
 import { Button } from 'react-native-paper';
 import { navigateFromSelectable } from '../../common/utils/navigator';
+import { useFileManager } from '../../widgets/FileManagerContext';
 
 export type HomeScreenProps = {
   route: {
@@ -40,6 +41,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
   const [dirError, setDirError] = useState<Error | null>(null);
   const [copyInProgress, setCopyInProgress] = useState<boolean>(false);
   const [moveInProgress, setMoveInProgress] = useState<boolean>(false);
+  const fileManager = useFileManager();
 
   useEffect(() => {
     let title = '';
@@ -148,9 +150,16 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
     ],
   );
 
+  // useEffect(() => {
+  //   if (fileManager.reloadRequired) {
+  //     reloadDir();
+  //     fileManager.setReloadRequired(false);
+  //   }
+  // }, [fileManager.reloadRequired]);
+
   useEffect(() => {
-    FileApi.clearVideoPreviewCache();
     reloadDir();
+    FileApi.clearVideoPreviewCache();
     return () => {
       Cache.clearDirItems();
     };
@@ -205,7 +214,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
           }}>
           {routeMetadatas.mode === 'copy' ? (
             <Button
-              icon='content-copy'
+              icon="content-copy"
               loading={copyInProgress}
               disabled={!routeMetadatas.fromRoute || !route || copyInProgress}
               onPress={() => {
@@ -231,8 +240,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
                 FileApi.moveFileOrDirectory(routeMetadatas.fromRoute!, route)
                   .then(() => {
                     navigateFromSelectable(navigator);
-                    // @TODO Andrii solve reload after move
-                    // reloadDir();
+                    fileManager.setReloadRequired(true);
                   })
                   // @TODO Andrii errors handling
                   .catch(console.error)
