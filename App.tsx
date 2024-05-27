@@ -12,6 +12,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { FileApi } from './src/services/FileApi';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 // const App = AppLegacy;
 
@@ -55,13 +56,15 @@ const App = () => {
   }, []);
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <FontsProvider>
-        {permissionGranted ? (
-          <FileManager />
-        ) : (
-          <Text>{t('permissionRequired')}</Text>
-        )}
-      </FontsProvider>
+      <SafeAreaProvider>
+        <FontsProvider>
+          {permissionGranted ? (
+            <FileManager />
+          ) : (
+            <Text>{t('permissionRequired')}</Text>
+          )}
+        </FontsProvider>
+      </SafeAreaProvider>
     </GestureHandlerRootView>
   );
 };

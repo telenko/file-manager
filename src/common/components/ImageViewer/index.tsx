@@ -19,7 +19,7 @@ const ImageViewer: React.FC<{
   };
 
   return (
-    <View style={{ width, height }}>
+    <View style={{ width, height: '100%', flexDirection: 'column' }}>
       <ImageZoom
         uri={`file://${file.path}`}
         minScale={0.5}
@@ -58,7 +58,7 @@ const styles = StyleSheet.create({
   },
   image: {
     width: width,
-    height: '100%',
+    flex: 1,
   },
 });
 

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Alert, Image, ImageBackground, StyleSheet, View } from 'react-native';
+import { Image, ImageBackground, StyleSheet, View } from 'react-native';
 import { IconButton, List, Menu } from 'react-native-paper';
 
 import {
@@ -11,6 +11,7 @@ import { useHomeContext } from '../HomeScreenContext';
 import { Icon } from 'react-native-paper';
 import { theme } from '../../../theme';
 import { useTranslation } from 'react-i18next';
+import { FileGuiHelper } from '../../../services/FileGuiHelper';
 
 type DirItemProps = {
   item: DirectoryItemType;
@@ -175,25 +176,11 @@ const DirectoryItemView: React.FC<DirItemProps> = ({ item }) => {
           />
           <Menu.Item
             onPress={() => {
-              Alert.alert(
-                t('delete'),
-                t('deleteConfirm'),
-                [
-                  {
-                    text: t('cancel'),
-                    style: 'cancel',
-                  },
-                  {
-                    text: t('delete'),
-                    onPress: async () => {
-                      await FileApi.deleteItem(item);
-                      homeCtx.reloadDir();
-                    },
-                    style: 'destructive',
-                  },
-                ],
-                { cancelable: true },
-              );
+              FileGuiHelper.deleteContent(item).then(isDone => {
+                if (isDone) {
+                  homeCtx.reloadDir();
+                }
+              });
               setMenuOpen(false);
             }}
             title={t('delete')}

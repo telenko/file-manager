@@ -52,6 +52,7 @@ export const FileApi = {
       dialogTitle: i18n.t('openWithTitle'),
     });
   },
+  // @TODO Andrii if exists make (copy N) behavior
   copyFileOrDirectory: async (source: string, destination: string) => {
     const copyRecursive = async (source: string, destination: string) => {
       const stats = await RNFS.stat(source);

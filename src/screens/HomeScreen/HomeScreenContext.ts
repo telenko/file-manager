@@ -7,6 +7,7 @@ export type HomeScreenContext = {
   dirLoading: boolean;
   dirError: Error | null;
   dirItems: DirItem[];
+  // @TODO Andrii all ops to common service
   openDirectory: (dir: DirItem) => void;
   openPreview: (item: DirItem) => void;
   copyDirItem: (dirItem: DirItem) => void;
