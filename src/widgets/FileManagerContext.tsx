@@ -11,6 +11,6 @@ export const useFileManager = (): FileManagerContextType => {
 };
 
 export const FileManagerContext = React.createContext<FileManagerContextType>({
-  reloadRequired: true,
+  reloadRequired: false,
   setReloadRequired: () => {},
 });

@@ -150,12 +150,12 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
     ],
   );
 
-  // useEffect(() => {
-  //   if (fileManager.reloadRequired) {
-  //     reloadDir();
-  //     fileManager.setReloadRequired(false);
-  //   }
-  // }, [fileManager.reloadRequired]);
+  useEffect(() => {
+    if (fileManager.reloadRequired) {
+      reloadDir();
+      fileManager.setReloadRequired(false);
+    }
+  }, [fileManager.reloadRequired]);
 
   useEffect(() => {
     reloadDir();
