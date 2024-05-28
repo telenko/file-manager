@@ -100,6 +100,16 @@ const ImagePreviewScreen: React.FC<ImageViewerScreenProps> = ({
           }}>
           {t('delete')}
         </Button>
+        <Button
+          icon="content-copy"
+          onPress={() => {
+            if (!file) {
+              return;
+            }
+            FileGuiHelper.copyContent(file, navigation);
+          }}>
+          {t('copy')}
+        </Button>
       </View>
     </SafeAreaView>
   );

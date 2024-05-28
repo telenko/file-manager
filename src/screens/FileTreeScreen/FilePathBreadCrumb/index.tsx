@@ -4,8 +4,8 @@ import { usePathBreadCrumbs } from '../../../common/hooks/usePathBreadCrumbs';
 import { useFileTreeContext } from '../FileTreeContext';
 
 const FilePathBreadCrumb: React.FC = () => {
-  const homeCtx = useFileTreeContext();
-  const breadCrumbs = usePathBreadCrumbs(homeCtx.route);
+  const fileTreeCtx = useFileTreeContext();
+  const breadCrumbs = usePathBreadCrumbs(fileTreeCtx.route);
 
   return <BreadCrumbs items={breadCrumbs} />;
 };

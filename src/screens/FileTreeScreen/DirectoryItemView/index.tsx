@@ -7,7 +7,6 @@ import {
   FileApi,
   type DirItem as DirectoryItemType,
 } from '../../../services/FileApi';
-import { useFileTreeContext } from '../FileTreeContext';
 import { Icon } from 'react-native-paper';
 import { theme } from '../../../theme';
 import { useTranslation } from 'react-i18next';
@@ -66,7 +65,6 @@ const VideoThumbnail = ({ file }: { file: DirItem }) => {
 };
 
 const DirectoryItemView: React.FC<DirItemProps> = ({ item }) => {
-  const homeCtx = useFileTreeContext();
   const fileManager = useFileManager();
   const navigation = useNavigation();
   const { t } = useTranslation();
