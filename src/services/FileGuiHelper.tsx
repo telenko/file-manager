@@ -4,6 +4,15 @@ import { DirItem, FileApi } from './FileApi';
 import { NavigationProp } from '@react-navigation/native';
 import { FileManagerNavigation } from '../common/types/navigation';
 
+const getRouteMetadatas = (
+  navigator: NavigationProp<FileManagerNavigation>,
+): any => {
+  const { routes } = navigator.getState();
+  const lastRoute = routes[routes.length - 1];
+  const { route, ...routeMetadatas } = lastRoute?.params ?? {};
+  return routeMetadatas;
+};
+
 export const FileGuiHelper = {
   deleteContent: (file: DirItem): Promise<boolean> => {
     let resolved = false;
@@ -66,12 +75,9 @@ export const FileGuiHelper = {
     if (!content.isDirectory()) {
       return;
     }
-    // @ts-ignore
-    const { params = {} } = navigator.getState();
-    const { route, ...routeMetadatas } = params;
     // @TODO Andrii solve parametrization typings
     // @ts-ignore
-    navigator.push('FileTree', { route: content.path, ...routeMetadatas });
+    navigator.push('FileTree', { route: content.path, ...getRouteMetadatas(navigator) });
   },
   openPreview: (
     content: DirItem,
@@ -80,12 +86,8 @@ export const FileGuiHelper = {
     if (!content.isFile() || !FileApi.isFileImage(content)) {
       return;
     }
-    // @ts-ignore
-    const { params = {} } = navigator.getState();
-    const { route, ...routeMetadatas } = params;
-
     // @TODO Andrii solve parametrization typings
     // @ts-ignore
-    navigator.push('ImageViewer', { route: content.path, ...routeMetadatas });
+    navigator.push('ImageViewer', { route: content.path, ...getRouteMetadatas(navigator) });
   },
 };
