@@ -86,6 +86,16 @@ const ImagePreviewScreen: React.FC<ImageViewerScreenProps> = ({
           alignItems: 'center',
         }}>
         <Button
+          icon="share"
+          onPress={() => {
+            if (!file) {
+              return;
+            }
+            FileApi.shareFile(file);
+          }}>
+          {t('share')}
+        </Button>
+        <Button
           icon="delete"
           onPress={() => {
             if (!file) {

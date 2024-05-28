@@ -1,10 +1,42 @@
 import * as RNFS from 'react-native-fs';
 import { NativeModules } from 'react-native';
+import Share from 'react-native-share';
 import { FileOpener } from './FileOpener';
 import i18n from '../i18n/i18n';
 import { makeQueueable } from '../common/utils/queue';
 
 export type DirItem = RNFS.ReadDirItem;
+
+const getMimeType = async (filePath: string) => {
+  try {
+    // const res = await RNFetchBlob.fs.readFile(filePath, 'base64');
+    // const type = RNFetchBlob.config(res);
+    const extension = filePath.split('.').pop()?.toLowerCase();
+    const mimeTypes: Record<string, string> = {
+      // Add more file extensions and corresponding MIME types as needed
+      jpg: 'image/jpeg',
+      jpeg: 'image/jpeg',
+      png: 'image/png',
+      gif: 'image/gif',
+      pdf: 'application/pdf',
+      // Add more here...
+    };
+
+    return mimeTypes[extension ?? ''] || 'application/octet-stream'; // Default to binary if MIME type not found
+  } catch (error) {
+    console.error('Error getting MIME type:', error);
+    return null;
+  }
+};
+
+const generateContentUri = async (filePath: string) => {
+  try {
+    return `content://${filePath}`;
+  } catch (error) {
+    console.error('Error generating content URI:', error);
+    return null;
+  }
+};
 
 const makeVideoPreviewQueued = makeQueueable(
   async (file: DirItem): Promise<string | null> => {
@@ -148,9 +180,9 @@ export const FileApi = {
       return false;
     }
     return (
-      file.name.endsWith('.mp4') ||
-      file.name.endsWith('.avi') ||
-      file.name.endsWith('.mov')
+      file.name.toLowerCase().endsWith('.mp4') ||
+      file.name.toLowerCase().endsWith('.avi') ||
+      file.name.toLowerCase().endsWith('.mov')
     );
   },
   isFileMusical: (file: DirItem): boolean => {
@@ -191,6 +223,17 @@ export const FileApi = {
         },
       );
     });
+  },
+  shareFile: async (file: DirItem) => {
+    if (!file.isFile()) {
+      return;
+    }
+    const contentUri = await generateContentUri(file.path);
+    const mimeType = await getMimeType(file.path);
+    if (!contentUri || !mimeType) {
+      throw new Error('Failed to share file - file path seem to be invalid');
+    }
+    await Share.open({ url: contentUri, type: mimeType });
   },
   sortDirItems: (
     dirItems: DirItem[],
