@@ -1,6 +1,8 @@
 import { Alert } from 'react-native';
 import i18n from '../i18n/i18n';
 import { DirItem, FileApi } from './FileApi';
+import { NavigationProp } from '@react-navigation/native';
+import { FileManagerNavigation } from '../common/types/navigation';
 
 export const FileGuiHelper = {
   deleteContent: (file: DirItem): Promise<boolean> => {
@@ -34,5 +36,56 @@ export const FileGuiHelper = {
         },
       );
     });
+  },
+  copyContent: (
+    content: DirItem,
+    navigator: NavigationProp<FileManagerNavigation>,
+  ) => {
+    // @ts-ignore
+    navigator.push('FileTree', {
+      route: FileApi.ROOT_PATH,
+      mode: 'copy',
+      fromRoute: content.path,
+    });
+  },
+  moveContent: (
+    content: DirItem,
+    navigator: NavigationProp<FileManagerNavigation>,
+  ) => {
+    // @ts-ignore
+    navigator.push('FileTree', {
+      route: FileApi.ROOT_PATH,
+      mode: 'move',
+      fromRoute: content.path,
+    });
+  },
+  openDirectory: (
+    content: DirItem,
+    navigator: NavigationProp<FileManagerNavigation>,
+  ) => {
+    if (!content.isDirectory()) {
+      return;
+    }
+    // @ts-ignore
+    const { params = {} } = navigator.getState();
+    const { route, ...routeMetadatas } = params;
+    // @TODO Andrii solve parametrization typings
+    // @ts-ignore
+    navigator.push('FileTree', { route: content.path, ...routeMetadatas });
+  },
+  openPreview: (
+    content: DirItem,
+    navigator: NavigationProp<FileManagerNavigation>,
+  ) => {
+    if (!content.isFile() || !FileApi.isFileImage(content)) {
+      return;
+    }
+    // @ts-ignore
+    const { params = {} } = navigator.getState();
+    const { route, ...routeMetadatas } = params;
+
+    // @TODO Andrii solve parametrization typings
+    // @ts-ignore
+    navigator.push('ImageViewer', { route: content.path, ...routeMetadatas });
   },
 };

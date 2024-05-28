@@ -1,7 +1,7 @@
-import { HomeScreenProps } from '../../screens/HomeScreen';
+import { FileScreenProps } from '../../screens/FileTreeScreen';
 import { ImageViewerScreenProps } from '../../screens/ImagePreviewScreen';
 
 export type FileManagerNavigation = {
-  Home: HomeScreenProps;
+  FileTree: FileScreenProps;
   ImageViewer: ImageViewerScreenProps;
 };

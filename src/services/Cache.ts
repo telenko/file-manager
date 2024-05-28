@@ -2,8 +2,10 @@ import { DirItem } from './FileApi';
 
 const CACHE: Record<string, any> = {
   dirItems: {},
+  videoPreviews: {},
 };
 
+// Non-React store to keep some heavily computed content
 export const Cache = {
   putDirItems(dirPath: string, items: DirItem[]) {
     CACHE.dirItems[dirPath] = items;
@@ -15,5 +17,17 @@ export const Cache = {
 
   clearDirItems() {
     CACHE.dirItems = {};
+  },
+
+  putVideoPreview(filePath: string, previewB64: string) {
+    CACHE.videoPreviews[filePath] = previewB64;
+  },
+
+  clearVideoPreviews() {
+    CACHE.videoPreviews = {};
+  },
+
+  getVideoPreview(filePath: string): string | null {
+    return CACHE.videoPreviews[filePath] ?? null;
   },
 };

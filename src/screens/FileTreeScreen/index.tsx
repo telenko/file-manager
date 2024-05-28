@@ -3,7 +3,7 @@ import { DirItem, FileApi } from '../../services/FileApi';
 import FilePathBreadCrumb from './FilePathBreadCrumb';
 import { useNavigation } from '../../common/hooks/useNavigation';
 import { View, StyleSheet, Dimensions } from 'react-native';
-import { HomeScreenContext } from './HomeScreenContext';
+import { FileTreeContext, FileTreeContextType } from './FileTreeContext';
 import DirectoryItemView from './DirectoryItemView';
 import LoadingIndicator from '../../common/components/LoadingIndicator';
 import {
@@ -17,7 +17,7 @@ import { Button } from 'react-native-paper';
 import { navigateFromSelectable } from '../../common/utils/navigator';
 import { useFileManager } from '../../widgets/FileManagerContext';
 
-export type HomeScreenProps = {
+export type FileScreenProps = {
   route: {
     params: {
       route: string;
@@ -29,7 +29,7 @@ export type HomeScreenProps = {
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
-const HomeScreen: React.FC<HomeScreenProps> = ({
+const FileScreen: React.FC<FileScreenProps> = ({
   route: {
     params: { route, ...routeMetadatas },
   },
@@ -85,69 +85,12 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
     }
   }, [route]);
 
-  const openDirectory = useCallback(
-    (dir: DirItem) => {
-      if (!dir.isDirectory()) {
-        return;
-      }
-      // @TODO Andrii solve parametrization typings
-      // @ts-ignore
-      navigator.push('Home', { route: dir.path, ...routeMetadatas });
-    },
-    [navigator, ...Object.values(routeMetadatas)],
-  );
-  const openPreview = useCallback(
-    (file: DirItem) => {
-      if (!file.isFile()) {
-        return;
-      }
-      // @TODO Andrii solve parametrization typings
-      // @ts-ignore
-      navigator.push('ImageViewer', { route: file.path, ...routeMetadatas });
-    },
-    [navigator, ...Object.values(routeMetadatas)],
-  );
-  const copyDirItem = useCallback((dirItem: DirItem) => {
-    // @ts-ignore
-    navigator.push('Home', {
-      route: FileApi.ROOT_PATH,
-      mode: 'copy',
-      fromRoute: dirItem.path,
-    });
-  }, []);
-  const moveDirItem = useCallback((dirItem: DirItem) => {
-    // @ts-ignore
-    navigator.push('Home', {
-      route: FileApi.ROOT_PATH,
-      mode: 'move',
-      fromRoute: dirItem.path,
-    });
-  }, []);
-  const value = useMemo<HomeScreenContext>(
+  const value = useMemo<FileTreeContextType>(
     () => ({
       route: route ?? FileApi.ROOT_PATH,
-      dirItems,
       mode: routeMetadatas.mode ?? 'tree',
-      dirLoading,
-      dirError,
-      openDirectory,
-      openPreview,
-      copyDirItem,
-      moveDirItem,
-      reloadDir,
     }),
-    [
-      route,
-      dirItems,
-      routeMetadatas.mode,
-      dirLoading,
-      dirError,
-      openDirectory,
-      openPreview,
-      copyDirItem,
-      moveDirItem,
-      reloadDir,
-    ],
+    [route, routeMetadatas.mode],
   );
 
   useEffect(() => {
@@ -159,7 +102,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
 
   useEffect(() => {
     reloadDir();
-    FileApi.clearVideoPreviewCache();
+    Cache.clearVideoPreviews();
     return () => {
       Cache.clearDirItems();
     };
@@ -189,7 +132,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
   );
 
   return (
-    <HomeScreenContext.Provider value={value}>
+    <FileTreeContext.Provider value={value}>
       <View style={styles.container}>
         <View style={styles.breadCrumbsContainer}>
           <FilePathBreadCrumb />
@@ -260,7 +203,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
           ) : null}
         </View>
       </View>
-    </HomeScreenContext.Provider>
+    </FileTreeContext.Provider>
   );
 };
 
@@ -282,4 +225,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default HomeScreen;
+export default FileScreen;

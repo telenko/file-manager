@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import HomeScreen from '../screens/HomeScreen';
+import FileTreeScreen from '../screens/FileTreeScreen';
 import { FileApi } from '../services/FileApi';
 import { FileManagerNavigation } from '../common/types/navigation';
 import { useTranslation } from 'react-i18next';
@@ -21,12 +21,12 @@ export default function FileManager() {
       <NavigationContainer>
         <Stack.Navigator>
           <Stack.Screen
-            name="Home"
+            name="FileTree"
             options={{
               title: t('title'),
             }}
             // @ts-ignore
-            component={HomeScreen}
+            component={FileTreeScreen}
             initialParams={{
               // @ts-ignore
               route: FileApi.ROOT_PATH,

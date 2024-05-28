@@ -7,11 +7,14 @@ import {
   FileApi,
   type DirItem as DirectoryItemType,
 } from '../../../services/FileApi';
-import { useHomeContext } from '../HomeScreenContext';
+import { useFileTreeContext } from '../FileTreeContext';
 import { Icon } from 'react-native-paper';
 import { theme } from '../../../theme';
 import { useTranslation } from 'react-i18next';
 import { FileGuiHelper } from '../../../services/FileGuiHelper';
+import { useNavigation } from '../../../common/hooks/useNavigation';
+import { Cache } from '../../../services/Cache';
+import { useFileManager } from '../../../widgets/FileManagerContext';
 
 type DirItemProps = {
   item: DirectoryItemType;
@@ -31,9 +34,14 @@ const VideoThumbnail = ({ file }: { file: DirItem }) => {
       // @ts-ignore
       await new Promise(r => setTimeout(r, 600));
       if (makeThumbnailAllowed.current) {
-        FileApi.makeVideoPreview(file)
-          .then(setThumbnail)
-          .catch(() => {});
+        const cachedPreview = Cache.getVideoPreview(file.path);
+        if (cachedPreview) {
+          setThumbnail(cachedPreview);
+        } else {
+          FileApi.makeVideoPreview(file)
+            .then(setThumbnail)
+            .catch(() => {});
+        }
       }
     })();
     return () => {
@@ -58,7 +66,9 @@ const VideoThumbnail = ({ file }: { file: DirItem }) => {
 };
 
 const DirectoryItemView: React.FC<DirItemProps> = ({ item }) => {
-  const homeCtx = useHomeContext();
+  const homeCtx = useFileTreeContext();
+  const fileManager = useFileManager();
+  const navigation = useNavigation();
   const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
   return (
@@ -162,14 +172,14 @@ const DirectoryItemView: React.FC<DirItemProps> = ({ item }) => {
           />
           <Menu.Item
             onPress={() => {
-              homeCtx.copyDirItem(item);
+              FileGuiHelper.copyContent(item, navigation);
               setMenuOpen(false);
             }}
             title={t('copy')}
           />
           <Menu.Item
             onPress={() => {
-              homeCtx.moveDirItem(item);
+              FileGuiHelper.moveContent(item, navigation);
               setMenuOpen(false);
             }}
             title={t('move')}
@@ -178,7 +188,7 @@ const DirectoryItemView: React.FC<DirItemProps> = ({ item }) => {
             onPress={() => {
               FileGuiHelper.deleteContent(item).then(isDone => {
                 if (isDone) {
-                  homeCtx.reloadDir();
+                  fileManager.setReloadRequired(true);
                 }
               });
               setMenuOpen(false);
@@ -193,12 +203,12 @@ const DirectoryItemView: React.FC<DirItemProps> = ({ item }) => {
       onPress={() => {
         if (item.isFile()) {
           if (FileApi.isFileImage(item)) {
-            homeCtx.openPreview(item);
+            FileGuiHelper.openPreview(item, navigation);
           } else {
             FileApi.openFile(item);
           }
         } else {
-          homeCtx.openDirectory(item);
+          FileGuiHelper.openDirectory(item, navigation);
         }
       }}
     />

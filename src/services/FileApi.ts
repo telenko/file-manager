@@ -171,20 +171,7 @@ export const FileApi = {
   isFileArchive: (item: DirItem) => {
     return /\.(zip|rar|tar|gz|bz2|7z|xz|iso|tgz)$/i.test(item.path);
   },
-  makeVideoPreview: async (item: DirItem): Promise<string | null> => {
-    // @TODO move to cache
-    if (VIDEO_PREVIEW_CACHE[item.path]) {
-      return VIDEO_PREVIEW_CACHE[item.path];
-    }
-    const result = await makeVideoPreviewQueued(item);
-    if (result) {
-      VIDEO_PREVIEW_CACHE[item.path] = result;
-    }
-    return VIDEO_PREVIEW_CACHE[item.path];
-  },
-  clearVideoPreviewCache: () => {
-    VIDEO_PREVIEW_CACHE = {};
-  },
+  makeVideoPreview: makeVideoPreviewQueued,
   getParentDirectoryPath: (filePath: string) => {
     const normalizedPath = filePath.endsWith('/')
       ? filePath.slice(0, -1)
