@@ -39,12 +39,12 @@ const FontsProvider: React.FC<PropsWithChildren> = ({ children }) => {
 };
 
 /**
- * TODOs list
+ * @TODO Andrii list
  * 1. orientation change impact on gallery
- * 2. move behavior
- * 3. copy behavior
- * 4. remove/rename
+ * 4. rename
  * 5. details
+ * - empty dir components
+ * - refresh dir
  */
 
 const App = () => {

@@ -19,12 +19,11 @@ function Gallery<T>({
   onItemOpen?: (item: T) => void;
   disableScrolling?: boolean;
 }) {
-  const [index, setIndex] = useState<number | null>(0);
   const scrollViewRef = useAnimatedRef();
 
   useEffect(() => {
     const nextIndex = items.findIndex(it => getItemKey(it) === selectedItemKey);
-    setIndex(nextIndex);
+    // setIndex(nextIndex);
     setTimeout(() => {
       // @ts-ignore
       scrollViewRef.current.scrollToIndex({
@@ -34,14 +33,14 @@ function Gallery<T>({
     }, 0);
   }, [items, selectedItemKey]);
 
-  const startX = useRef<number>(0);
-  const endX = useRef<number>(0);
-
   return (
     <VirtualizedList
       horizontal
       // @ts-ignore
       ref={scrollViewRef}
+      viewabilityConfig={{
+        itemVisiblePercentThreshold: 50,
+      }}
       scrollEnabled={!disableScrolling}
       pagingEnabled
       windowSize={3}
@@ -62,17 +61,11 @@ function Gallery<T>({
         offset: width * index,
         index,
       })}
-      onScrollBeginDrag={event => {
-        startX.current = event.nativeEvent.contentOffset.x;
-      }}
-      onScrollEndDrag={event => {
-        endX.current = event.nativeEvent.contentOffset.x;
-        const upDown = startX.current > endX.current;
-        const newIdx = upDown
-          ? Math.max(index! - 1, 0)
-          : Math.min(index! + 1, items.length - 1);
-        setIndex(newIdx);
-        onItemOpen?.(items[newIdx]);
+      onViewableItemsChanged={info => {
+        const newIdx = info.viewableItems.filter(i => i.isViewable)?.[0]?.index ?? 0;
+        onItemOpen?.(
+          items[newIdx],
+        );
       }}
       // @ts-ignore
       renderItem={info => {
