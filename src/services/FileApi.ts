@@ -7,6 +7,26 @@ import { makeQueueable } from '../common/utils/queue';
 
 export type DirItem = RNFS.ReadDirItem;
 
+const resolveCounterConflictRecursive = async (
+  destination: string,
+  count: number,
+): Promise<string> => {
+  const dotTokens = destination.split('.');
+  const ext = dotTokens.length > 1 ? dotTokens.pop() : '';
+  const preExt = dotTokens.join('.');
+  const pathTokens = preExt.split('/');
+  const itemName = pathTokens.pop();
+  const resultPath = `${pathTokens.join('/')}/${itemName} ${i18n.t(
+    'copyCount',
+    { n: count },
+  )}${ext ? '.' + ext : ''}`;
+
+  if (await RNFS.exists(resultPath)) {
+    return resolveCounterConflictRecursive(destination, count + 1);
+  }
+  return resultPath;
+};
+
 const getMimeType = async (filePath: string) => {
   try {
     // const res = await RNFetchBlob.fs.readFile(filePath, 'base64');
@@ -90,29 +110,11 @@ export const FileApi = {
     injectCopyNIfConflict: boolean = false,
   ) => {
     const copyRecursive = async (source: string, destination: string) => {
-      const resolveCounterRecursive = async (
-        count: number,
-      ): Promise<string> => {
-        const dotTokens = destination.split('.');
-        const ext = dotTokens.length > 1 ? dotTokens.pop() : '';
-        const preExt = dotTokens.join('.');
-        const pathTokens = preExt.split('/');
-        const itemName = pathTokens.pop();
-        const resultPath = `${pathTokens.join('/')}/${itemName} ${i18n.t(
-          'copyCount',
-          { n: count },
-        )}${ext ? '.' + ext : ''}`;
-
-        if (await RNFS.exists(resultPath)) {
-          return resolveCounterRecursive(count + 1);
-        }
-        return resultPath;
-      };
       const stats = await RNFS.stat(source);
       if (stats.isDirectory()) {
         if (await RNFS.exists(destination)) {
           if (injectCopyNIfConflict) {
-            destination = await resolveCounterRecursive(1);
+            destination = await resolveCounterConflictRecursive(destination, 1);
           } else {
             throw new Error(
               'Failed to copy contents, as destination already exists',
@@ -131,7 +133,7 @@ export const FileApi = {
       } else {
         if (await RNFS.exists(destination)) {
           if (injectCopyNIfConflict) {
-            destination = await resolveCounterRecursive(1);
+            destination = await resolveCounterConflictRecursive(destination, 1);
           } else {
             throw new Error(
               'Failed to copy file, as destination file already exists',
@@ -150,6 +152,8 @@ export const FileApi = {
 
     return copyRecursive(source, fileDest);
   },
+
+  // @TODO Andrii conflicts for move?
   moveFileOrDirectory: async (source: string, destination: string) => {
     const moveRecursive = async (source: string, destination: string) => {
       const stats = await RNFS.stat(source);
