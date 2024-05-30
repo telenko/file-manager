@@ -90,12 +90,34 @@ export const FileApi = {
     injectCopyNIfConflict: boolean = false,
   ) => {
     const copyRecursive = async (source: string, destination: string) => {
+      const resolveCounterRecursive = async (
+        count: number,
+      ): Promise<string> => {
+        const dotTokens = destination.split('.');
+        const ext = dotTokens.length > 1 ? dotTokens.pop() : '';
+        const preExt = dotTokens.join('.');
+        const pathTokens = preExt.split('/');
+        const itemName = pathTokens.pop();
+        const resultPath = `${pathTokens.join('/')}/${itemName} ${i18n.t(
+          'copyCount',
+          { n: count },
+        )}${ext ? '.' + ext : ''}`;
+
+        if (await RNFS.exists(resultPath)) {
+          return resolveCounterRecursive(count + 1);
+        }
+        return resultPath;
+      };
       const stats = await RNFS.stat(source);
       if (stats.isDirectory()) {
         if (await RNFS.exists(destination)) {
-          throw new Error(
-            'Failed to copy contents, as destination already exists',
-          );
+          if (injectCopyNIfConflict) {
+            destination = await resolveCounterRecursive(1);
+          } else {
+            throw new Error(
+              'Failed to copy contents, as destination already exists',
+            );
+          }
         }
         await RNFS.mkdir(destination);
         const items = await RNFS.readDir(source);
@@ -109,24 +131,6 @@ export const FileApi = {
       } else {
         if (await RNFS.exists(destination)) {
           if (injectCopyNIfConflict) {
-            const resolveCounterRecursive = async (
-              count: number,
-            ): Promise<string> => {
-              const dotTokens = destination.split('.');
-              const ext = dotTokens.length > 1 ? dotTokens.pop() : '';
-              const preExt = dotTokens.join('.');
-              const pathTokens = preExt.split('/');
-              const itemName = pathTokens.pop();
-              const resultPath = `${pathTokens.join('/')}/${itemName} ${i18n.t(
-                'copyCount',
-                { n: count },
-              )}${ext ? '.' + ext : ''}`;
-
-              if (await RNFS.exists(resultPath)) {
-                return resolveCounterRecursive(count + 1);
-              }
-              return resultPath;
-            };
             destination = await resolveCounterRecursive(1);
           } else {
             throw new Error(
