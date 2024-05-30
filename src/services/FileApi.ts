@@ -84,12 +84,11 @@ export const FileApi = {
       dialogTitle: i18n.t('openWithTitle'),
     });
   },
+  // @TODO Andrii copy folder not working
   // @TODO Andrii if exists make (copy N) behavior
   copyFileOrDirectory: async (source: string, destination: string) => {
     const copyRecursive = async (source: string, destination: string) => {
       const stats = await RNFS.stat(source);
-      const destStats = await RNFS.stat(destination);
-
       if (stats.isDirectory()) {
         if (await RNFS.exists(destination)) {
           throw new Error(
@@ -106,25 +105,26 @@ export const FileApi = {
           await copyRecursive(itemSourcePath, itemDestinationPath);
         }
       } else {
-        const fileName = stats.name || source.split('/').pop();
-        let fileDest = destStats.isDirectory()
-          ? `${destination}/${fileName}`
-          : destination;
-
-        if (await RNFS.exists(fileDest)) {
+        if (await RNFS.exists(destination)) {
           throw new Error(
             'Failed to copy file, as destination file already exists',
           );
         }
-        await RNFS.copyFile(source, fileDest);
+        await RNFS.copyFile(source, destination);
       }
     };
-    return copyRecursive(source, destination);
+
+    const destStats = await RNFS.stat(destination);
+    const fileName = source.split('/').pop();
+    let fileDest = destStats.isDirectory()
+      ? `${destination}/${fileName}`
+      : destination;
+
+    return copyRecursive(source, fileDest);
   },
   moveFileOrDirectory: async (source: string, destination: string) => {
     const moveRecursive = async (source: string, destination: string) => {
       const stats = await RNFS.stat(source);
-      const destStats = await RNFS.stat(destination);
       if (stats.isDirectory()) {
         if (await RNFS.exists(destination)) {
           throw new Error(
@@ -143,20 +143,22 @@ export const FileApi = {
         // Remove the original directory after moving all its contents
         await RNFS.unlink(source);
       } else {
-        const fileName = stats.name || source.split('/').pop();
-        let fileDest = destStats.isDirectory()
-          ? `${destination}/${fileName}`
-          : destination;
-
-        if (await RNFS.exists(fileDest)) {
+        if (await RNFS.exists(destination)) {
           throw new Error(
             'Failed to move file, as destination file already exists',
           );
         }
-        await RNFS.moveFile(source, fileDest);
+        await RNFS.moveFile(source, destination);
       }
     };
-    return moveRecursive(source, destination);
+
+    const destStats = await RNFS.stat(destination);
+    const fileName = source.split('/').pop();
+    let fileDest = destStats.isDirectory()
+      ? `${destination}/${fileName}`
+      : destination;
+
+    return moveRecursive(source, fileDest);
   },
   deleteItem: async (item: DirItem) => {
     await RNFS.unlink(item.path);

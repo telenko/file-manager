@@ -45,6 +45,9 @@ const FontsProvider: React.FC<PropsWithChildren> = ({ children }) => {
  * 5. details
  * - empty dir components
  * - refresh dir
+ * - sort is bad
+ * - gifs not working
+ * - animations are too much
  */
 
 const App = () => {
