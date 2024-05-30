@@ -14,5 +14,6 @@
     "delete": "Delete",
     "deleteConfirm": "Delete this item?",
     "openWith": "Open with",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "copyCount": "(Copy {{n}})"
 }

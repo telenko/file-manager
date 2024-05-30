@@ -162,7 +162,11 @@ const FileScreen: React.FC<FileScreenProps> = ({
               disabled={!routeMetadatas.fromRoute || !route || copyInProgress}
               onPress={() => {
                 setCopyInProgress(true);
-                FileApi.copyFileOrDirectory(routeMetadatas.fromRoute!, route)
+                FileApi.copyFileOrDirectory(
+                  routeMetadatas.fromRoute!,
+                  route,
+                  true,
+                )
                   .then(() => {
                     navigateFromSelectable(navigator);
                   })
