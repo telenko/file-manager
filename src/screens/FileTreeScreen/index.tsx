@@ -169,6 +169,7 @@ const FileScreen: React.FC<FileScreenProps> = ({
                 )
                   .then(() => {
                     navigateFromSelectable(navigator);
+                    fileManager.setReloadRequired(true);
                   })
                   // @TODO Andrii errors handling
                   .catch(console.error)

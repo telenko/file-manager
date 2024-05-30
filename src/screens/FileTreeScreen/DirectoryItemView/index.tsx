@@ -163,30 +163,30 @@ const DirectoryItemView: React.FC<DirItemProps> = ({ item }) => {
           <Menu.Item
             disabled={item.isDirectory()}
             onPress={() => {
-              FileApi.shareFile(item);
               setMenuOpen(false);
+              FileApi.shareFile(item);
             }}
             title={t('share')}
           />
           <Menu.Item
             disabled={item.isDirectory()}
             onPress={() => {
-              FileApi.openFile(item);
               setMenuOpen(false);
+              FileApi.openFile(item);
             }}
             title={t('openWith')}
           />
           <Menu.Item
             onPress={() => {
-              FileGuiHelper.copyContent(item, navigation);
               setMenuOpen(false);
+              FileGuiHelper.copyContent(item, navigation);
             }}
             title={t('copy')}
           />
           <Menu.Item
             onPress={() => {
-              FileGuiHelper.moveContent(item, navigation);
               setMenuOpen(false);
+              FileGuiHelper.moveContent(item, navigation);
             }}
             title={t('move')}
           />
