@@ -17,5 +17,6 @@
     "cancel": "Cancel",
     "copyCount": "(Copy {{n}})",
     "rename": "Rename",
-    "renameConfirm": "Enter new name"
+    "renameConfirm": "Enter new name",
+    "done": "Done"
 }

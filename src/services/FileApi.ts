@@ -182,11 +182,17 @@ export const FileApi = {
       }
     };
 
-    const destStats = await RNFS.stat(destination);
+    const isDestDirectory = await (async () => {
+      try {
+        const destStats = await RNFS.stat(destination);
+        return destStats.isDirectory();
+      } catch {
+        return false;
+      }
+    })();
+
     const fileName = source.split('/').pop();
-    let fileDest = destStats.isDirectory()
-      ? `${destination}/${fileName}`
-      : destination;
+    let fileDest = isDestDirectory ? `${destination}/${fileName}` : destination;
 
     return moveRecursive(source, fileDest);
   },

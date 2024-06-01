@@ -2,11 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { Button, Dialog, Portal, Text, TextInput } from 'react-native-paper';
 import { useFileManager } from './FileManagerContext';
 import { FileApi } from '../../services/FileApi';
+import { useTranslation } from 'react-i18next';
 
 const RenameContentDialog: React.FC = () => {
   const fileManager = useFileManager();
 
   const [text, setText] = useState('');
+
+  const { t } = useTranslation();
 
   useEffect(() => {
     setText(fileManager.renameDialogItem?.name ?? '');
@@ -19,17 +22,18 @@ const RenameContentDialog: React.FC = () => {
   return (
     <Portal>
       <Dialog visible={!!fileManager.renameDialogItem} onDismiss={hideDialog}>
-        <Dialog.Title>Alert</Dialog.Title>
+        <Dialog.Title>{t('renameConfirm')}</Dialog.Title>
         <Dialog.Content>
-          <TextInput label="Rename item" value={text} onChangeText={setText} />
+          <TextInput label={t('rename')} value={text} onChangeText={setText} />
         </Dialog.Content>
         <Dialog.Actions>
           <Button
-            onPress={() => {
+            onPress={async () => {
               hideDialog();
-              FileApi.renameItem(fileManager.renameDialogItem!, text);
+              await FileApi.renameItem(fileManager.renameDialogItem!, text);
+              fileManager.setReloadRequired(true);
             }}>
-            Done
+            {t('done')}
           </Button>
         </Dialog.Actions>
       </Dialog>

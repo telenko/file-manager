@@ -17,5 +17,6 @@
     "cancel": "Відхилити",
     "copyCount": "(Копія {{n}})",
     "rename": "Перейменувати",
-    "renameConfirm": "Ввести нове ім'я"
+    "renameConfirm": "Ввести нове ім'я",
+    "done": "Готово"
 }
