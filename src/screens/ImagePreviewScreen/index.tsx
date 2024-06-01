@@ -8,8 +8,7 @@ import { useNavigation } from '../../common/hooks/useNavigation';
 import { Button, Text } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useFileManager } from '../../widgets/FileManagerContext';
-import { FileGuiHelper } from '../../services/FileGuiHelper';
+import { useFileManager } from '../../widgets/FileManager';
 
 const { width, height } = Dimensions.get('window');
 export type ImageViewerScreenProps = {
@@ -101,7 +100,7 @@ const ImagePreviewScreen: React.FC<ImageViewerScreenProps> = ({
             if (!file) {
               return;
             }
-            FileGuiHelper.deleteContent(file).then(isDone => {
+            fileManager.deleteContent(file).then(isDone => {
               if (isDone) {
                 fileManager.setReloadRequired(true);
                 navigation.goBack();
@@ -116,7 +115,7 @@ const ImagePreviewScreen: React.FC<ImageViewerScreenProps> = ({
             if (!file) {
               return;
             }
-            FileGuiHelper.copyContent(file, navigation);
+            fileManager.copyContent(file, navigation);
           }}>
           {t('copy')}
         </Button>

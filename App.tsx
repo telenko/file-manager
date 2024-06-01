@@ -1,6 +1,6 @@
 import React, { PropsWithChildren, useEffect, useState } from 'react';
 import { Platform, StyleSheet } from 'react-native';
-import FileManager from './src/widgets/FileManager';
+import FileManager from './src/widgets/FileManager/FileManager';
 import AppLegacy from './App_legacy';
 import { useDeviceLocale } from './src/i18n/hooks/useDeviceLocale';
 import {

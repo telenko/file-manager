@@ -1,8 +1,8 @@
 import { Alert } from 'react-native';
-import i18n from '../i18n/i18n';
-import { DirItem, FileApi } from './FileApi';
+import i18n from '../../i18n/i18n';
+import { DirItem, FileApi } from '../../services/FileApi';
 import { NavigationProp } from '@react-navigation/native';
-import { FileManagerNavigation } from '../common/types/navigation';
+import { FileManagerNavigation } from '../../common/types/navigation';
 
 const getRouteMetadatas = (
   navigator: NavigationProp<FileManagerNavigation>,
@@ -77,7 +77,10 @@ export const FileGuiHelper = {
     }
     // @TODO Andrii solve parametrization typings
     // @ts-ignore
-    navigator.push('FileTree', { route: content.path, ...getRouteMetadatas(navigator) });
+    navigator.push('FileTree', {
+      route: content.path,
+      ...getRouteMetadatas(navigator),
+    });
   },
   openPreview: (
     content: DirItem,
@@ -88,6 +91,9 @@ export const FileGuiHelper = {
     }
     // @TODO Andrii solve parametrization typings
     // @ts-ignore
-    navigator.push('ImageViewer', { route: content.path, ...getRouteMetadatas(navigator) });
+    navigator.push('ImageViewer', {
+      route: content.path,
+      ...getRouteMetadatas(navigator),
+    });
   },
 };

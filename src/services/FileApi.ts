@@ -79,8 +79,6 @@ const makeVideoPreviewQueued = makeQueueable(
   4,
 );
 
-let VIDEO_PREVIEW_CACHE: Record<string, string> = {};
-
 export const FileApi = {
   ROOT_PATH: RNFS.ExternalStorageDirectoryPath,
   readDir: RNFS.readDir,

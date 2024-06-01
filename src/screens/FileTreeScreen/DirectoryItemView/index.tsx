@@ -10,10 +10,9 @@ import {
 import { Icon } from 'react-native-paper';
 import { theme } from '../../../theme';
 import { useTranslation } from 'react-i18next';
-import { FileGuiHelper } from '../../../services/FileGuiHelper';
 import { useNavigation } from '../../../common/hooks/useNavigation';
 import { Cache } from '../../../services/Cache';
-import { useFileManager } from '../../../widgets/FileManagerContext';
+import { useFileManager } from '../../../widgets/FileManager';
 
 type DirItemProps = {
   item: DirectoryItemType;
@@ -177,22 +176,30 @@ const DirectoryItemView: React.FC<DirItemProps> = ({ item }) => {
             title={t('openWith')}
           />
           <Menu.Item
+            disabled={item.isDirectory()}
             onPress={() => {
               setMenuOpen(false);
-              FileGuiHelper.copyContent(item, navigation);
+              fileManager.renameContent(item);
+            }}
+            title={t('rename')}
+          />
+          <Menu.Item
+            onPress={() => {
+              setMenuOpen(false);
+              fileManager.copyContent(item, navigation);
             }}
             title={t('copy')}
           />
           <Menu.Item
             onPress={() => {
               setMenuOpen(false);
-              FileGuiHelper.moveContent(item, navigation);
+              fileManager.moveContent(item, navigation);
             }}
             title={t('move')}
           />
           <Menu.Item
             onPress={() => {
-              FileGuiHelper.deleteContent(item).then(isDone => {
+              fileManager.deleteContent(item).then(isDone => {
                 if (isDone) {
                   fileManager.setReloadRequired(true);
                 }
@@ -209,12 +216,12 @@ const DirectoryItemView: React.FC<DirItemProps> = ({ item }) => {
       onPress={() => {
         if (item.isFile()) {
           if (FileApi.isFileImage(item)) {
-            FileGuiHelper.openPreview(item, navigation);
+            fileManager.openPreview(item, navigation);
           } else {
             FileApi.openFile(item);
           }
         } else {
-          FileGuiHelper.openDirectory(item, navigation);
+          fileManager.openDirectory(item, navigation);
         }
       }}
     />

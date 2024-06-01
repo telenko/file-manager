@@ -15,7 +15,7 @@ import { Cache } from '../../services/Cache';
 import { useTranslation } from 'react-i18next';
 import { Button } from 'react-native-paper';
 import { navigateFromSelectable } from '../../common/utils/navigator';
-import { useFileManager } from '../../widgets/FileManagerContext';
+import { useFileManager } from '../../widgets/FileManager';
 
 export type FileScreenProps = {
   route: {

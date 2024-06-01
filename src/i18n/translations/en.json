@@ -15,5 +15,7 @@
     "deleteConfirm": "Delete this item?",
     "openWith": "Open with",
     "cancel": "Cancel",
-    "copyCount": "(Copy {{n}})"
+    "copyCount": "(Copy {{n}})",
+    "rename": "Rename",
+    "renameConfirm": "Enter new name"
 }
