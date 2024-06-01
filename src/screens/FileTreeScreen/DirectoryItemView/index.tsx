@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Image, ImageBackground, StyleSheet, View } from 'react-native';
 import { IconButton, List, Menu } from 'react-native-paper';
 
@@ -13,6 +13,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigation } from '../../../common/hooks/useNavigation';
 import { Cache } from '../../../services/Cache';
 import { useFileManager } from '../../../widgets/FileManager';
+import i18n from '../../../i18n/i18n';
 
 type DirItemProps = {
   item: DirectoryItemType;
@@ -68,6 +69,75 @@ const DirectoryItemView: React.FC<DirItemProps> = ({ item }) => {
   const navigation = useNavigation();
   const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
+
+  const menuItems = useMemo(
+    () =>
+      [
+        {
+          title: t('share'),
+          key: 'share',
+          enabled: item.isFile(),
+          onPress: () => {
+            FileApi.shareFile(item);
+          },
+        },
+        {
+          title: t('openWith'),
+          key: 'openWith',
+          enabled: item.isFile(),
+          onPress: () => {
+            FileApi.openFile(item);
+          },
+        },
+        {
+          title: t('rename'),
+          key: 'rename',
+          enabled: true,
+          onPress: () => {
+            fileManager.renameContent(item);
+          },
+        },
+        {
+          title: t('copy'),
+          key: 'copy',
+          enabled: true,
+          onPress: () => {
+            fileManager.copyContent(item, navigation);
+          },
+        },
+        {
+          title: t('move'),
+          key: 'move',
+          enabled: true,
+          onPress: () => {
+            fileManager.moveContent(item, navigation);
+          },
+        },
+        {
+          title: t('delete'),
+          key: 'delete',
+          enabled: true,
+          onPress: () => {
+            fileManager.deleteContent(item).then(isDone => {
+              if (isDone) {
+                fileManager.setReloadRequired(true);
+              }
+            });
+          },
+        },
+      ]
+        .filter(menuItem => menuItem.enabled)
+        .map(menuItem => ({
+          ...menuItem,
+          onPress: async () => {
+            setMenuOpen(false);
+            await new Promise<void>(r => setTimeout(r, 200));
+            menuItem.onPress();
+          },
+        })),
+    [item],
+  );
+
   return (
     <List.Item
       style={item.isDirectory() ? styles.folder : styles.file}
@@ -159,55 +229,9 @@ const DirectoryItemView: React.FC<DirItemProps> = ({ item }) => {
               iconColor={theme.fileMenuColor}
             />
           }>
-          <Menu.Item
-            disabled={item.isDirectory()}
-            onPress={() => {
-              setMenuOpen(false);
-              FileApi.shareFile(item);
-            }}
-            title={t('share')}
-          />
-          <Menu.Item
-            disabled={item.isDirectory()}
-            onPress={() => {
-              setMenuOpen(false);
-              FileApi.openFile(item);
-            }}
-            title={t('openWith')}
-          />
-          <Menu.Item
-            disabled={item.isDirectory()}
-            onPress={() => {
-              setMenuOpen(false);
-              fileManager.renameContent(item);
-            }}
-            title={t('rename')}
-          />
-          <Menu.Item
-            onPress={() => {
-              setMenuOpen(false);
-              fileManager.copyContent(item, navigation);
-            }}
-            title={t('copy')}
-          />
-          <Menu.Item
-            onPress={() => {
-              setMenuOpen(false);
-              fileManager.moveContent(item, navigation);
-            }}
-            title={t('move')}
-          />
-          <Menu.Item
-            onPress={() => {
-              fileManager.deleteContent(item).then(isDone => {
-                if (isDone) {
-                  fileManager.setReloadRequired(true);
-                }
-              });
-              setMenuOpen(false);
-            }}
-            title={t('delete')}
-          />
+          {menuItems.map(menuItem => (
+            <Menu.Item {...menuItem} key={menuItem.key} />
+          ))}
         </Menu>
       )}
       onLongPress={() => {
