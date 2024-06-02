@@ -12,8 +12,11 @@ import { theme } from '../../../theme';
 import { useTranslation } from 'react-i18next';
 import { useNavigation } from '../../../common/hooks/useNavigation';
 import { Cache } from '../../../services/Cache';
-import { useFileManager } from '../../../widgets/FileManager';
-import i18n from '../../../i18n/i18n';
+import {
+  getRouteMetadatas,
+  useFileManager,
+} from '../../../widgets/FileManager';
+import { type FileScreenProps } from '..';
 
 type DirItemProps = {
   item: DirectoryItemType;
@@ -69,6 +72,13 @@ const DirectoryItemView: React.FC<DirItemProps> = ({ item }) => {
   const navigation = useNavigation();
   const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
+
+  const mode = useMemo<FileScreenProps['route']['params']['mode']>(
+    () => getRouteMetadatas(navigation)?.mode,
+    [navigation],
+  );
+
+  const operationsAllowed = mode !== 'copy' && mode !== 'move';
 
   const menuItems = useMemo(
     () =>
@@ -215,34 +225,43 @@ const DirectoryItemView: React.FC<DirItemProps> = ({ item }) => {
           </View>
         )
       }
-      right={() => (
-        <Menu
-          visible={menuOpen}
-          onDismiss={() => setMenuOpen(false)}
-          anchor={
-            <IconButton
-              onPress={() => setMenuOpen(true)}
-              size={MENU_ICON_SIZE}
-              // @TODO Andrii - is there a way to make it cleaner?
-              style={{ marginRight: -20, height: MENU_ICON_SIZE }}
-              icon={'dots-vertical'}
-              iconColor={theme.fileMenuColor}
-            />
-          }>
-          {menuItems.map(menuItem => (
-            <Menu.Item {...menuItem} key={menuItem.key} />
-          ))}
-        </Menu>
-      )}
+      right={
+        operationsAllowed
+          ? () => (
+              <Menu
+                visible={menuOpen}
+                onDismiss={() => setMenuOpen(false)}
+                anchor={
+                  <IconButton
+                    onPress={() => setMenuOpen(true)}
+                    size={MENU_ICON_SIZE}
+                    // @TODO Andrii - is there a way to make it cleaner?
+                    style={{ marginRight: -20, height: MENU_ICON_SIZE }}
+                    icon={'dots-vertical'}
+                    iconColor={theme.fileMenuColor}
+                  />
+                }>
+                {menuItems.map(menuItem => (
+                  <Menu.Item {...menuItem} key={menuItem.key} />
+                ))}
+              </Menu>
+            )
+          : () => null
+      }
       onLongPress={() => {
+        if (!operationsAllowed) {
+          return;
+        }
         setMenuOpen(true);
       }}
       onPress={() => {
         if (item.isFile()) {
-          if (FileApi.isFileImage(item)) {
-            fileManager.openPreview(item, navigation);
-          } else {
-            FileApi.openFile(item);
+          if (operationsAllowed) {
+            if (FileApi.isFileImage(item)) {
+              fileManager.openPreview(item, navigation);
+            } else {
+              FileApi.openFile(item);
+            }
           }
         } else {
           fileManager.openDirectory(item, navigation);

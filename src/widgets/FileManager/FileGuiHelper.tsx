@@ -4,7 +4,7 @@ import { DirItem, FileApi } from '../../services/FileApi';
 import { NavigationProp } from '@react-navigation/native';
 import { FileManagerNavigation } from '../../common/types/navigation';
 
-const getRouteMetadatas = (
+export const getRouteMetadatas = (
   navigator: NavigationProp<FileManagerNavigation>,
 ): any => {
   const { routes } = navigator.getState();

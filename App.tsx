@@ -45,7 +45,6 @@ const FontsProvider: React.FC<PropsWithChildren> = ({ children }) => {
  * - refresh dir
  * - sort is bad
  * - gifs not working
- * - copy/move modes shouldnt offer operations
  * - video player + included to Gallery
  * - create folder/file
  */
