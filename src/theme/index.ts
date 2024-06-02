@@ -12,4 +12,7 @@ export const theme = {
   xlxFileColor: '#30b516',
   archiveFileColor: '#dba50f',
   fileMenuColor: '#ababab',
+  sizes: {
+    NO_DATA_ICON: 40,
+  }
 };

@@ -41,13 +41,13 @@ const FontsProvider: React.FC<PropsWithChildren> = ({ children }) => {
 /**
  * @TODO Andrii list
  * 1. orientation change impact on gallery
- * 4. rename
  * 5. details
- * - empty dir components
  * - refresh dir
  * - sort is bad
  * - gifs not working
- * - animations are too much
+ * - copy/move modes shouldnt offer operations
+ * - video player + included to Gallery
+ * - create folder/file
  */
 
 const App = () => {

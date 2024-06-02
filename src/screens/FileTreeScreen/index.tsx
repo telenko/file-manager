@@ -16,6 +16,7 @@ import { useTranslation } from 'react-i18next';
 import { Button } from 'react-native-paper';
 import { navigateFromSelectable } from '../../common/utils/navigator';
 import { useFileManager } from '../../widgets/FileManager';
+import EmptyData from '../../common/components/EmptyData';
 
 export type FileScreenProps = {
   route: {
@@ -139,6 +140,8 @@ const FileScreen: React.FC<FileScreenProps> = ({
         </View>
         {dirLoading ? (
           <LoadingIndicator />
+        ) : dirItems.length === 0 ? (
+          <EmptyData message={t('noDataHere')} />
         ) : (
           <RecyclerListView
             dataProvider={dataProvider}

@@ -18,5 +18,6 @@
     "copyCount": "(Copy {{n}})",
     "rename": "Rename",
     "renameConfirm": "Enter new name",
-    "done": "Done"
+    "done": "Done",
+    "noDataHere": "Nothing here"
 }
