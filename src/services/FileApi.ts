@@ -102,6 +102,9 @@ export const FileApi = {
       dialogTitle: i18n.t('openWithTitle'),
     });
   },
+  createFolder: async (path: string) => {
+    return RNFS.mkdir(path);
+  },
   copyFileOrDirectory: async (
     source: string,
     destination: string,

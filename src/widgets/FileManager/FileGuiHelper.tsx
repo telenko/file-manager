@@ -13,6 +13,15 @@ export const getRouteMetadatas = (
   return routeMetadatas;
 };
 
+export const getRouteDirectory = (
+  navigator: NavigationProp<FileManagerNavigation>,
+): any => {
+  const { routes } = navigator.getState();
+  const lastRoute = routes[routes.length - 1];
+  const { route } = lastRoute?.params ?? {};
+  return route;
+};
+
 export const FileGuiHelper = {
   deleteContent: (file: DirItem): Promise<boolean> => {
     let resolved = false;

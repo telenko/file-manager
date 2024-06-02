@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from 'react';
-import { NavigationContainer } from '@react-navigation/native';
+import React, { useCallback, useMemo, useState } from 'react';
+import { NavigationContainer, NavigationProp } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import FileTreeScreen from '../../screens/FileTreeScreen';
 import { DirItem, FileApi } from '../../services/FileApi';
@@ -10,8 +10,9 @@ import {
   FileManagerContext,
   FileManagerContextType,
 } from './FileManagerContext';
-import { FileGuiHelper } from './FileGuiHelper';
+import { FileGuiHelper, getRouteDirectory } from './FileGuiHelper';
 import RenameContentDialog from './RenameContentDialog';
+import CreateDirectoryDialog from './CreateDirectoryDialog';
 
 const Stack = createNativeStackNavigator<FileManagerNavigation>();
 export default function FileManager() {
@@ -19,6 +20,17 @@ export default function FileManager() {
   const [reloadRequired, setReloadRequired] = useState(false);
   const [renameDialogActive, setRenameDialogActive] = useState<DirItem | null>(
     null,
+  );
+  const [newDirName, setNewDirName] = useState<string>('');
+  const [newDirPath, setNewDirPath] = useState<string | null>(null);
+
+  const createDirectory = useCallback(
+    (navigation: NavigationProp<FileManagerNavigation>) => {
+      setNewDirName('');
+      const directory = getRouteDirectory(navigation);
+      setNewDirPath(directory);
+    },
+    [],
   );
   const ctxValue = useMemo<FileManagerContextType>(
     () => ({
@@ -28,12 +40,18 @@ export default function FileManager() {
       renameContent: setRenameDialogActive,
       renameDialogItem: renameDialogActive,
       setRenameDialogActive,
+      createDirectory,
+      newDirName,
+      setNewDirName,
+      newDirPath,
+      setNewDirPath,
     }),
     [reloadRequired, renameDialogActive],
   );
   return (
     <FileManagerContext.Provider value={ctxValue}>
       <RenameContentDialog />
+      <CreateDirectoryDialog />
       <NavigationContainer>
         <Stack.Navigator>
           <Stack.Screen

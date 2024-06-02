@@ -152,6 +152,7 @@ const DirectoryItemView: React.FC<DirItemProps> = ({ item }) => {
     <List.Item
       style={item.isDirectory() ? styles.folder : styles.file}
       title={item.name}
+      disabled={!operationsAllowed && item.isFile()}
       titleStyle={{
         fontSize: 16,
         color: theme.fileTitleColor,
