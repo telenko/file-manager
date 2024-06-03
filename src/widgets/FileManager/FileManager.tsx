@@ -13,6 +13,7 @@ import {
 import { FileGuiHelper, getRouteDirectory } from './FileGuiHelper';
 import RenameContentDialog from './RenameContentDialog';
 import CreateDirectoryDialog from './CreateDirectoryDialog';
+import NewFolderIcon from './NewFolderIcon';
 
 const Stack = createNativeStackNavigator<FileManagerNavigation>();
 export default function FileManager() {
@@ -27,7 +28,7 @@ export default function FileManager() {
   const createDirectory = useCallback(
     (navigation: NavigationProp<FileManagerNavigation>) => {
       setNewDirName('');
-      const directory = getRouteDirectory(navigation);
+      const directory = getRouteDirectory(navigation) ?? FileApi.ROOT_PATH;
       setNewDirPath(directory);
     },
     [],
@@ -46,7 +47,7 @@ export default function FileManager() {
       newDirPath,
       setNewDirPath,
     }),
-    [reloadRequired, renameDialogActive],
+    [reloadRequired, renameDialogActive, newDirName, newDirPath],
   );
   return (
     <FileManagerContext.Provider value={ctxValue}>
@@ -58,6 +59,7 @@ export default function FileManager() {
             name="FileTree"
             options={{
               title: t('title'),
+              headerRight: () => <NewFolderIcon />,
             }}
             // @ts-ignore
             component={FileTreeScreen}

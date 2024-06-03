@@ -18,10 +18,12 @@ const CreateDirectoryDialog: React.FC = () => {
   if (!fileManager.newDirPath) {
     return null;
   }
-  const hideDialog = () => fileManager.setNewDirPath(null);
+  const hideDialog = () => {
+    fileManager.setNewDirPath(null);
+  };
   return (
     <Portal>
-      <Dialog visible={!!fileManager.renameDialogItem} onDismiss={hideDialog}>
+      <Dialog visible={!!fileManager.newDirPath} onDismiss={hideDialog}>
         <Dialog.Title>{t('createDirConfirm')}</Dialog.Title>
         <Dialog.Content>
           <TextInput
