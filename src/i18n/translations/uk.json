@@ -19,5 +19,7 @@
     "rename": "Перейменувати",
     "renameConfirm": "Введіть нове ім'я",
     "done": "Готово",
-    "noDataHere": "Тут нічого нема"
+    "noDataHere": "Тут нічого нема",
+    "createName": "Назва",
+    "createDirConfirm": "Введіть назву нової папки"
 }

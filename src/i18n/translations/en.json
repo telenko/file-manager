@@ -19,5 +19,7 @@
     "rename": "Rename",
     "renameConfirm": "Enter new name",
     "done": "Done",
-    "noDataHere": "Nothing here"
+    "noDataHere": "Nothing here",
+    "createName": "Name",
+    "createDirConfirm": "Enter name of new folder"
 }
