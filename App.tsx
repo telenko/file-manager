@@ -46,7 +46,6 @@ const FontsProvider: React.FC<PropsWithChildren> = ({ children }) => {
  * - sort is bad
  * - gifs not working
  * - video player + included to Gallery
- * - reload animation jumps
  */
 
 const App = () => {

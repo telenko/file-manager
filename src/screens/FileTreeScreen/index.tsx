@@ -37,6 +37,7 @@ const FileScreen: React.FC<FileScreenProps> = ({
 }) => {
   const navigator = useNavigation();
   const { t } = useTranslation();
+  const [dirLoadingDone, setDirLoadingDone] = useState(false);
   const [dirItems, setDirItems] = useState<DirItem[]>([]);
   const [dirLoading, setDirLoading] = useState<boolean>(false);
   const [dirError, setDirError] = useState<Error | null>(null);
@@ -68,7 +69,6 @@ const FileScreen: React.FC<FileScreenProps> = ({
   const reloadDir = useCallback(async () => {
     setDirLoading(true);
     setDirError(null);
-    setDirItems([]);
     // @ts-ignore
     await new Promise(r => setTimeout(r, 100));
     try {
@@ -77,6 +77,7 @@ const FileScreen: React.FC<FileScreenProps> = ({
         newDirItems.filter(file => !FileApi.isItemHidden(file)),
       );
       setDirItems(sortedDirItems);
+      setDirLoadingDone(true);
       Cache.putDirItems(route ?? FileApi.ROOT_PATH, sortedDirItems);
     } catch (e) {
       setDirError(e as Error);
@@ -106,6 +107,8 @@ const FileScreen: React.FC<FileScreenProps> = ({
     Cache.clearVideoPreviews();
     return () => {
       Cache.clearDirItems();
+      setDirLoadingDone(false);
+      setDirItems([]);
     };
   }, [route, reloadDir]);
 
@@ -138,18 +141,19 @@ const FileScreen: React.FC<FileScreenProps> = ({
         <View style={styles.breadCrumbsContainer}>
           <FilePathBreadCrumb />
         </View>
-        {dirLoading ? (
-          <LoadingIndicator />
-        ) : dirItems.length === 0 ? (
-          <EmptyData message={t('noDataHere')} />
-        ) : (
-          <RecyclerListView
-            dataProvider={dataProvider}
-            layoutProvider={layoutProvider}
-            rowRenderer={rowRenderer}
-            optimizeForInsertDeleteAnimations
-          />
-        )}
+        {dirLoading ? <LoadingIndicator /> : null}
+        {dirLoadingDone ? (
+          dirItems.length === 0 ? (
+            <EmptyData message={t('noDataHere')} />
+          ) : (
+            <RecyclerListView
+              dataProvider={dataProvider}
+              layoutProvider={layoutProvider}
+              rowRenderer={rowRenderer}
+              optimizeForInsertDeleteAnimations
+            />
+          )
+        ) : null}
         <View
           style={{
             flexDirection: 'row',
@@ -224,12 +228,6 @@ const styles = StyleSheet.create({
   },
   breadCrumbsContainer: {
     marginBottom: 10,
-  },
-  loadingContainer: {
-    flexDirection: 'column',
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
 });
 
