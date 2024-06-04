@@ -28,8 +28,10 @@ const CreateDirectoryDialog: React.FC = () => {
         <Dialog.Content>
           <TextInput
             label={t('createName')}
-            value={text}
+            // uncontrolled due to https://github.com/callstack/react-native-paper/issues/2565
+            // value={text}
             onChangeText={setText}
+            defaultValue={text}
           />
         </Dialog.Content>
         <Dialog.Actions>

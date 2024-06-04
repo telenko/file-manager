@@ -8,23 +8,41 @@ const RenameContentDialog: React.FC = () => {
   const fileManager = useFileManager();
 
   const [text, setText] = useState('');
+  const [textReady, setTextReady] = useState(false);
 
   const { t } = useTranslation();
 
   useEffect(() => {
     setText(fileManager.renameDialogItem?.name ?? '');
+    setTimeout(() => {
+      setTextReady(true);
+    }, 100);
+    return () => {
+      setTextReady(false);
+    };
   }, [fileManager.renameDialogItem]);
 
   if (!fileManager.renameDialogItem) {
     return null;
   }
-  const hideDialog = () => fileManager.setRenameDialogActive(null);
+  const hideDialog = () => {
+    fileManager.setRenameDialogActive(null);
+    setTextReady(false);
+  };
   return (
     <Portal>
       <Dialog visible={!!fileManager.renameDialogItem} onDismiss={hideDialog}>
         <Dialog.Title>{t('renameConfirm')}</Dialog.Title>
         <Dialog.Content>
-          <TextInput label={t('rename')} value={text} onChangeText={setText} />
+          {textReady && (
+            <TextInput
+              label={t('rename')}
+              // uncontrolled due to https://github.com/callstack/react-native-paper/issues/2565
+              // value={text}
+              onChangeText={setText}
+              defaultValue={text}
+            />
+          )}
         </Dialog.Content>
         <Dialog.Actions>
           <Button
