@@ -40,9 +40,7 @@ const FontsProvider: React.FC<PropsWithChildren> = ({ children }) => {
 
 /**
  * @TODO Andrii list
- * 1. orientation change impact on gallery
  * 5. details
- * - refresh dir
  * - sort is bad
  * - gifs not working
  * - video player + included to Gallery

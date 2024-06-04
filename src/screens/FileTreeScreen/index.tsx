@@ -5,7 +5,6 @@ import { useNavigation } from '../../common/hooks/useNavigation';
 import { View, StyleSheet, Dimensions } from 'react-native';
 import { FileTreeContext, FileTreeContextType } from './FileTreeContext';
 import DirectoryItemView from './DirectoryItemView';
-import LoadingIndicator from '../../common/components/LoadingIndicator';
 import {
   DataProvider,
   LayoutProvider,
@@ -17,6 +16,7 @@ import { Button } from 'react-native-paper';
 import { navigateFromSelectable } from '../../common/utils/navigator';
 import { useFileManager } from '../../widgets/FileManager';
 import EmptyData from '../../common/components/EmptyData';
+import { RefreshControl, ScrollView } from 'react-native-gesture-handler';
 
 export type FileScreenProps = {
   route: {
@@ -141,19 +141,37 @@ const FileScreen: React.FC<FileScreenProps> = ({
         <View style={styles.breadCrumbsContainer}>
           <FilePathBreadCrumb />
         </View>
-        {dirLoading ? <LoadingIndicator /> : null}
-        {dirLoadingDone ? (
-          dirItems.length === 0 ? (
+        {dirLoadingDone && dirItems.length === 0 ? (
+          <ScrollView
+            contentContainerStyle={{
+              flex: 1,
+              flexDirection: 'column',
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+            refreshControl={
+              <RefreshControl refreshing={dirLoading} onRefresh={reloadDir} />
+            }>
             <EmptyData message={t('noDataHere')} />
-          ) : (
-            <RecyclerListView
-              dataProvider={dataProvider}
-              layoutProvider={layoutProvider}
-              rowRenderer={rowRenderer}
-              optimizeForInsertDeleteAnimations
-            />
-          )
-        ) : null}
+          </ScrollView>
+        ) : (
+          <RecyclerListView
+            dataProvider={dataProvider}
+            layoutProvider={layoutProvider}
+            rowRenderer={rowRenderer}
+            optimizeForInsertDeleteAnimations
+            refreshControl={
+              <RefreshControl refreshing={dirLoading} onRefresh={reloadDir} />
+            }
+          />
+        )}
+        {/* {true ? (
+          dirItems.length === 0 && false ? (
+            
+          ) : ( */}
+
+        {/* )
+        ) : null} */}
         <View
           style={{
             flexDirection: 'row',
