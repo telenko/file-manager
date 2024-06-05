@@ -42,7 +42,6 @@ const FontsProvider: React.FC<PropsWithChildren> = ({ children }) => {
  * @TODO Andrii list
  * 5. details
  * - sort is bad
- * - gifs not working
  * - video player + included to Gallery
  */
 

@@ -221,6 +221,7 @@ export const FileApi = {
       return false;
     }
     return (
+      file.name.toLowerCase().endsWith('.gif') ||
       file.name.toLowerCase().endsWith('.jpg') ||
       file.name.toLowerCase().endsWith('.jpeg') ||
       file.name.toLowerCase().endsWith('.png')
