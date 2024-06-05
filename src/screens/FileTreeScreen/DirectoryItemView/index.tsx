@@ -135,6 +135,14 @@ const DirectoryItemView: React.FC<DirItemProps> = ({ item }) => {
             });
           },
         },
+        {
+          title: t('details'),
+          key: 'details',
+          enabled: item.isFile(),
+          onPress: () => {
+            fileManager.showFileDetails(item);
+          },
+        },
       ]
         .filter(menuItem => menuItem.enabled)
         .map(menuItem => ({

@@ -14,6 +14,7 @@ import { FileGuiHelper, getRouteDirectory } from './FileGuiHelper';
 import RenameContentDialog from './RenameContentDialog';
 import CreateDirectoryDialog from './CreateDirectoryDialog';
 import NewFolderIcon from './NewFolderIcon';
+import FileDetailsDialog from './FileDetailsDialog';
 
 const Stack = createNativeStackNavigator<FileManagerNavigation>();
 export default function FileManager() {
@@ -24,6 +25,7 @@ export default function FileManager() {
   );
   const [newDirName, setNewDirName] = useState<string>('');
   const [newDirPath, setNewDirPath] = useState<string | null>(null);
+  const [fileDetails, setFileDetails] = useState<DirItem | null>(null);
 
   const createDirectory = useCallback(
     (navigation: NavigationProp<FileManagerNavigation>) => {
@@ -33,6 +35,14 @@ export default function FileManager() {
     },
     [],
   );
+
+  const showFileDetails = useCallback((dirItem: DirItem) => {
+    if (!dirItem.isFile()) {
+      return;
+    }
+    setFileDetails(dirItem);
+  }, []);
+
   const ctxValue = useMemo<FileManagerContextType>(
     () => ({
       reloadRequired,
@@ -46,13 +56,18 @@ export default function FileManager() {
       setNewDirName,
       newDirPath,
       setNewDirPath,
+
+      fileDetails,
+      setFileDetails,
+      showFileDetails,
     }),
-    [reloadRequired, renameDialogActive, newDirName, newDirPath],
+    [reloadRequired, renameDialogActive, newDirName, newDirPath, fileDetails],
   );
   return (
     <FileManagerContext.Provider value={ctxValue}>
       <RenameContentDialog />
       <CreateDirectoryDialog />
+      <FileDetailsDialog />
       <NavigationContainer>
         <Stack.Navigator>
           <Stack.Screen

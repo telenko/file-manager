@@ -17,6 +17,10 @@ export type FileManagerContextType = {
   newDirPath?: string | null;
   setNewDirName: (v: string) => void;
   setNewDirPath: (v: string | null) => void;
+
+  showFileDetails: (dirItem: DirItem) => void;
+  setFileDetails: (v: DirItem | null) => void;
+  fileDetails?: DirItem | null;
 } & typeof FileGuiHelper;
 
 export const useFileManager = (): FileManagerContextType => {
@@ -33,5 +37,9 @@ export const FileManagerContext = React.createContext<FileManagerContextType>({
   createDirectory: () => {},
   setNewDirName: () => {},
   setNewDirPath: () => {},
+
+  showFileDetails: () => {},
+  setFileDetails: () => {},
+
   ...FileGuiHelper,
 });

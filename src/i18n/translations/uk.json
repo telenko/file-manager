@@ -21,5 +21,6 @@
     "done": "Готово",
     "noDataHere": "Тут нічого нема",
     "createName": "Назва",
-    "createDirConfirm": "Введіть назву нової папки"
+    "createDirConfirm": "Введіть назву нової папки",
+    "details": "Деталі"
 }

@@ -21,5 +21,6 @@
     "done": "Done",
     "noDataHere": "Nothing here",
     "createName": "Name",
-    "createDirConfirm": "Enter name of new folder"
+    "createDirConfirm": "Enter name of new folder",
+    "details": "Details"
 }
