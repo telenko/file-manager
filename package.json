@@ -7,6 +7,7 @@
     "android:release": "react-native run-android --variant=release",
     "ios": "react-native run-ios",
     "start": "react-native start",
+    "start:no-cache": "react-native start --reset-cache",
     "test": "jest",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
   },
@@ -29,6 +30,7 @@
     "react-native-screens": "3.14.0",
     "react-native-share": "^8.0.0",
     "react-native-vector-icons": "^10.1.0",
+    "react-native-video": "^5.2.1",
     "recyclerlistview": "^4.2.0"
   },
   "devDependencies": {
@@ -40,6 +42,7 @@
     "@types/react": "^18.0.21",
     "@types/react-native": "^0.70.6",
     "@types/react-native-fetch-blob": "^0.10.11",
+    "@types/react-native-video": "^5.0.20",
     "@types/react-test-renderer": "^18.0.0",
     "@typescript-eslint/eslint-plugin": "^5.37.0",
     "@typescript-eslint/parser": "^5.37.0",

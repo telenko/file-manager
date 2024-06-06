@@ -217,25 +217,24 @@ export const FileApi = {
     return dirItem.name.startsWith('.');
   },
   isFileImage: (file: DirItem): boolean => {
-    if (!file.isFile()) {
-      return false;
-    }
+    const fileOrig = file.name || file.path;
     return (
-      file.name.toLowerCase().endsWith('.gif') ||
-      file.name.toLowerCase().endsWith('.jpg') ||
-      file.name.toLowerCase().endsWith('.jpeg') ||
-      file.name.toLowerCase().endsWith('.png')
+      fileOrig.toLowerCase().endsWith('.gif') ||
+      fileOrig.toLowerCase().endsWith('.jpg') ||
+      fileOrig.toLowerCase().endsWith('.jpeg') ||
+      fileOrig.toLowerCase().endsWith('.png')
     );
   },
   isFileVideo: (file: DirItem): boolean => {
-    if (!file.isFile()) {
-      return false;
-    }
+    const fileOrig = file.name || file.path;
     return (
-      file.name.toLowerCase().endsWith('.mp4') ||
-      file.name.toLowerCase().endsWith('.avi') ||
-      file.name.toLowerCase().endsWith('.mov')
+      fileOrig.toLowerCase().endsWith('.mp4') ||
+      fileOrig.toLowerCase().endsWith('.avi') ||
+      fileOrig.toLowerCase().endsWith('.mov')
     );
+  },
+  isFileViewable: (file: DirItem): boolean => {
+    return FileApi.isFileImage(file) || FileApi.isFileVideo(file);
   },
   isFileMusical: (file: DirItem): boolean => {
     const audioExtensions = [

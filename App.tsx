@@ -43,6 +43,7 @@ const FontsProvider: React.FC<PropsWithChildren> = ({ children }) => {
  * 5. details
  * - sort is bad
  * - video player + included to Gallery
+ * - styling
  */
 
 const App = () => {

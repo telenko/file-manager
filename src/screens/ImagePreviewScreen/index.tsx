@@ -9,10 +9,23 @@ import { Button, Text } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFileManager } from '../../widgets/FileManager';
+import VideoViewer from '../../common/components/VideoViewer';
 
 const { width, height } = Dimensions.get('window');
 export type ImageViewerScreenProps = {
   route: { params: { route: string } };
+};
+
+const ItemPreview: React.FC<{
+  file: Partial<DirItem>;
+  onZooming?: (zooming: boolean) => void;
+  activeFile?: DirItem;
+}> = props => {
+  // @ts-ignore
+  if (FileApi.isFileVideo(props.file)) {
+    return <VideoViewer {...props} />;
+  }
+  return <ImageViewer {...props} />
 };
 
 const ImagePreviewScreen: React.FC<ImageViewerScreenProps> = ({
@@ -43,7 +56,7 @@ const ImagePreviewScreen: React.FC<ImageViewerScreenProps> = ({
     FileApi.getMetadata(route).then(setFile);
     const dirItems =
       Cache.getDirItems(FileApi.getParentDirectoryPath(route)) ?? [];
-    setImagesInFolderSorted(dirItems.filter(FileApi.isFileImage));
+    setImagesInFolderSorted(dirItems.filter(FileApi.isFileViewable));
   }, []);
 
   const imagesCarousel = useMemo<DirItem[]>(() => {
@@ -63,14 +76,14 @@ const ImagePreviewScreen: React.FC<ImageViewerScreenProps> = ({
             items={imagesCarousel}
             getItemKey={it => it.path}
             renderItem={image => (
-              <ImageViewer file={image} onZooming={setZooming} />
+              <ItemPreview file={image} onZooming={setZooming} activeFile={file ?? undefined} />
             )}
             selectedItemKey={route}
             onItemOpen={setFile}
             disableScrolling={zooming}
           />
         ) : (
-          <ImageViewer
+          <ItemPreview
             onZooming={setZooming}
             file={{
               path: route,

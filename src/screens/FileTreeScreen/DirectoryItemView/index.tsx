@@ -266,7 +266,7 @@ const DirectoryItemView: React.FC<DirItemProps> = ({ item }) => {
       onPress={() => {
         if (item.isFile()) {
           if (operationsAllowed) {
-            if (FileApi.isFileImage(item)) {
+            if (FileApi.isFileViewable(item)) {
               fileManager.openPreview(item, navigation);
             } else {
               FileApi.openFile(item);

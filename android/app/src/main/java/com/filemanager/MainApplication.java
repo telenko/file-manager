@@ -21,7 +21,7 @@ import cl.json.RNSharePackage;
 import cl.json.ShareApplication;
 import com.th3rdwave.safeareacontext.SafeAreaContextPackage;
 import com.swmansion.rnscreens.RNScreensPackage;
-
+import com.brentvatne.react.ReactVideoPackage;
 
 public class MainApplication extends Application implements ReactApplication {
 
@@ -42,6 +42,7 @@ public class MainApplication extends Application implements ReactApplication {
           packages.add(new SafeAreaContextPackage());
           packages.add(new LocalFileViewerPackage());
           packages.add(new ThumbnailPackage());
+          packages.add(new ReactVideoPackage());
           return packages;
         }
 

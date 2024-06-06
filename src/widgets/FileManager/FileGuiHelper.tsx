@@ -95,7 +95,7 @@ export const FileGuiHelper = {
     content: DirItem,
     navigator: NavigationProp<FileManagerNavigation>,
   ) => {
-    if (!content.isFile() || !FileApi.isFileImage(content)) {
+    if (!FileApi.isFileViewable(content)) {
       return;
     }
     // @TODO Andrii solve parametrization typings
