@@ -18,7 +18,7 @@ export type ImageViewerScreenProps = {
 
 const ItemPreview: React.FC<{
   file: Partial<DirItem>;
-  onZooming?: (zooming: boolean) => void;
+  onActive?: (zooming: boolean) => void;
   activeFile?: DirItem;
 }> = props => {
   // @ts-ignore
@@ -76,7 +76,7 @@ const ImagePreviewScreen: React.FC<ImageViewerScreenProps> = ({
             items={imagesCarousel}
             getItemKey={it => it.path}
             renderItem={image => (
-              <ItemPreview file={image} onZooming={setZooming} activeFile={file ?? undefined} />
+              <ItemPreview file={image} onActive={setZooming} activeFile={file ?? undefined} />
             )}
             selectedItemKey={route}
             onItemOpen={setFile}
@@ -84,7 +84,7 @@ const ImagePreviewScreen: React.FC<ImageViewerScreenProps> = ({
           />
         ) : (
           <ItemPreview
-            onZooming={setZooming}
+            onActive={setZooming}
             file={{
               path: route,
             }}

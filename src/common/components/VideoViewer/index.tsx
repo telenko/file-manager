@@ -1,22 +1,35 @@
-import React, { useEffect, useRef, useState } from 'react';
-import Video from 'react-native-video';
+import React, { useEffect, useState } from 'react';
+// @ts-ignore
+import Video from 'react-native-video-controls';
 import { DirItem, FileApi } from '../../../services/FileApi';
-import { Image, ImageBackground, useWindowDimensions } from 'react-native';
-import { Button, Icon } from 'react-native-paper';
+import {
+  ImageBackground,
+  useWindowDimensions,
+  View,
+} from 'react-native';
+import { Icon, Portal } from 'react-native-paper';
 import { Cache } from '../../../services/Cache';
-import { TouchableOpacity } from 'react-native-gesture-handler';
+class CustomizedVideo extends Video {
+  renderBottomControls() {
+    return (
+      <Portal>
+        <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0 }}>
+          {super.renderBottomControls()}
+        </View>
+      </Portal>
+    );
+  }
+}
 
 const VideoViewer: React.FC<{
   file: Partial<DirItem>;
   activeFile?: DirItem;
-}> = ({ file, activeFile }) => {
+  onActive?: (v: boolean) => void;
+}> = ({ file, activeFile, onActive }) => {
   const isCurrentViewable = activeFile?.path === file.path;
   const { width } = useWindowDimensions();
   const [paused, setPaused] = useState(true);
-  const videoRef = useRef<any>();
   const [preview, setPreview] = useState<string | null>('');
-  const [playStarted, setPlayStarted] = useState<boolean>(false);
-  const [controls, setControls] = useState(false);
   const fallbackThumbnail =
     'data:image/gif;base64,R0lGODlhAQABAIAAAMLCwgAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==';
 
@@ -55,34 +68,26 @@ const VideoViewer: React.FC<{
     </ImageBackground>
   );
 
-  console.log("PL", playStarted, isCurrentViewable)
-
+  if (!preview) {
+    return null;
+  }
   return (
     <>
       {isCurrentViewable ? (
-        <TouchableOpacity
-          onPress={() => {
-            if (paused) {
-              setPaused(!paused);
-            } else {
-              setControls(true);
-            }
-          }}>
-          <Video
-            ref={videoRef}
-            onProgress={({ currentTime }) => {
-              if (currentTime > 0 && !playStarted) {
-                setPlayStarted(true);
-              }
-            }}
-            source={{ uri: `file://${file.path}` }}
-            style={{ width, height: '100%' }}
-            paused={paused}
-            poster={preview ?? fallbackThumbnail}
-            resizeMode="cover"
-            controls={playStarted && isCurrentViewable}
-          />
-        </TouchableOpacity>
+        // @ts-ignore
+        <CustomizedVideo
+          disableFullscreen
+          disableBack
+          onPause={() => setPaused(true)}
+          onPlay={() => {
+            setPaused(false);
+          }}
+          showHours
+          paused={paused}
+          source={{ uri: `file://${file.path}` }}
+          style={{ width, height: '100%' }}
+          poster={preview ?? fallbackThumbnail}
+        />
       ) : (
         previewLayout
       )}

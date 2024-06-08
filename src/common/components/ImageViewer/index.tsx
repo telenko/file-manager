@@ -7,15 +7,15 @@ const { width, height } = Dimensions.get('window');
 
 const ImageViewer: React.FC<{
   file: Partial<DirItem>;
-  onZooming?: (zooming: boolean) => void;
-}> = ({ file, onZooming }) => {
+  onActive?: (zooming: boolean) => void;
+}> = ({ file, onActive }) => {
   const [zooming, setZooming] = useState<boolean>(false);
   const sendZooming = (newZooming: boolean) => {
     if (newZooming === zooming) {
       return;
     }
     setZooming(newZooming);
-    onZooming?.(newZooming);
+    onActive?.(newZooming);
   };
 
   return (
