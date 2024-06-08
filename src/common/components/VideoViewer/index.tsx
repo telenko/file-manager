@@ -2,15 +2,15 @@ import React, { useEffect, useState } from 'react';
 // @ts-ignore
 import Video from 'react-native-video-controls';
 import { DirItem, FileApi } from '../../../services/FileApi';
-import {
-  ImageBackground,
-  useWindowDimensions,
-  View,
-} from 'react-native';
-import { Icon, Portal } from 'react-native-paper';
+import { ImageBackground, useWindowDimensions, View } from 'react-native';
+import { IconButton, Portal } from 'react-native-paper';
 import { Cache } from '../../../services/Cache';
 class CustomizedVideo extends Video {
   renderBottomControls() {
+    // @ts-ignore
+    if (this.props.paused) {
+      return null;
+    }
     return (
       <Portal>
         <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0 }}>
@@ -54,6 +54,16 @@ const VideoViewer: React.FC<{
     }
   }, [isCurrentViewable]);
 
+  const playIcon = (
+    <IconButton
+      onPress={() => setPaused(!paused)}
+      size={90}
+      iconColor="#fff"
+      style={{ height: 90 }}
+      icon={'play-circle'}
+    />
+  ); //<Icon size={90} color={'#fff'} source={'play-circle'} />;
+
   const previewLayout = (
     <ImageBackground
       source={{ uri: preview ?? fallbackThumbnail }}
@@ -64,7 +74,7 @@ const VideoViewer: React.FC<{
         alignItems: 'center',
         overflow: 'hidden',
       }}>
-      <Icon size={60} color={'#fff'} source={'play-circle'} />
+      {playIcon}
     </ImageBackground>
   );
 
@@ -74,20 +84,37 @@ const VideoViewer: React.FC<{
   return (
     <>
       {isCurrentViewable ? (
-        // @ts-ignore
-        <CustomizedVideo
-          disableFullscreen
-          disableBack
-          onPause={() => setPaused(true)}
-          onPlay={() => {
-            setPaused(false);
-          }}
-          showHours
-          paused={paused}
-          source={{ uri: `file://${file.path}` }}
-          style={{ width, height: '100%' }}
-          poster={preview ?? fallbackThumbnail}
-        />
+        <>
+          {/* @ts-ignore */}
+          <CustomizedVideo
+            // tapAnywhereToPause
+            disableFullscreen
+            disableBack
+            onPause={() => setPaused(true)}
+            onPlay={() => {
+              setPaused(false);
+            }}
+            showHours
+            paused={paused}
+            source={{ uri: `file://${file.path}` }}
+            style={{ width, height: '100%' }}
+            poster={preview ?? fallbackThumbnail}
+          />
+          {paused ? (
+            <View
+              style={{
+                position: 'absolute',
+                left: 0,
+                top: 0,
+                right: 0,
+                bottom: 0,
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}>
+              {playIcon}
+            </View>
+          ) : null}
+        </>
       ) : (
         previewLayout
       )}
