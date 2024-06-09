@@ -19,15 +19,15 @@ export const Cache = {
     CACHE.dirItems = {};
   },
 
-  putVideoPreview(filePath: string, previewB64: string) {
-    CACHE.videoPreviews[filePath] = previewB64;
+  putVideoPreview(filePath: string, previewB64: string, width: number = 0) {
+    CACHE.videoPreviews[`${filePath}_${width}`] = previewB64;
   },
 
   clearVideoPreviews() {
     CACHE.videoPreviews = {};
   },
 
-  getVideoPreview(filePath: string): string | null {
-    return CACHE.videoPreviews[filePath] ?? null;
+  getVideoPreview(filePath: string, width: number = 0): string | null {
+    return CACHE.videoPreviews[`${filePath}_${width}`] ?? null;
   },
 };

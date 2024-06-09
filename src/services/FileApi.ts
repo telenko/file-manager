@@ -59,7 +59,7 @@ const generateContentUri = async (filePath: string) => {
 };
 
 const makeVideoPreviewQueued = makeQueueable(
-  async (file: DirItem): Promise<string | null> => {
+  async (file: DirItem, width: number = 0): Promise<string | null> => {
     if (!FileApi.isFileVideo(file)) {
       return null;
     }
@@ -67,6 +67,7 @@ const makeVideoPreviewQueued = makeQueueable(
       const { ThumbnailModule } = NativeModules;
       ThumbnailModule.createVideoThumbnail(
         file.path,
+        width,
         (base64Thumbnail: string) => {
           resolve(`data:image/jpeg;base64,${base64Thumbnail}`);
         },

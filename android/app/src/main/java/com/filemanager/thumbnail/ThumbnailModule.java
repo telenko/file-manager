@@ -23,12 +23,12 @@ public class ThumbnailModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void createVideoThumbnail(String videoPath, Callback successCallback, Callback errorCallback) {
+    public void createVideoThumbnail(String videoPath, Integer width, Callback successCallback, Callback errorCallback) {
         executorService.execute(new Runnable() {
             @Override
             public void run() {
                 try {
-                    String base64Thumbnail = ThumbnailHelper.createVideoThumbnail(videoPath);
+                    String base64Thumbnail = ThumbnailHelper.createVideoThumbnail(videoPath, width);
                     if (base64Thumbnail == null) {
                         errorCallback.invoke("Failed to decode 1st second from video");
                     } else {

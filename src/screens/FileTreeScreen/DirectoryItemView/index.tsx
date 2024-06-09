@@ -25,6 +25,7 @@ type DirItemProps = {
 const ICON_SIZE = 45;
 const ICON_RADIUS = 4;
 const MENU_ICON_SIZE = 30;
+const PREVIEW_SIZE = ICON_SIZE * 2;
 
 const VideoThumbnail = ({ file }: { file: DirItem }) => {
   const fallbackThumbnail =
@@ -36,12 +37,17 @@ const VideoThumbnail = ({ file }: { file: DirItem }) => {
       // @ts-ignore
       await new Promise(r => setTimeout(r, 600));
       if (makeThumbnailAllowed.current) {
-        const cachedPreview = Cache.getVideoPreview(file.path);
+        const cachedPreview = Cache.getVideoPreview(file.path, PREVIEW_SIZE);
         if (cachedPreview) {
           setThumbnail(cachedPreview);
         } else {
-          FileApi.makeVideoPreview(file)
-            .then(setThumbnail)
+          FileApi.makeVideoPreview(file, PREVIEW_SIZE)
+            .then(preview => {
+              setThumbnail(preview);
+              if (preview) {
+                Cache.putVideoPreview(file.path, preview, PREVIEW_SIZE);
+              }
+            })
             .catch(() => {});
         }
       }
