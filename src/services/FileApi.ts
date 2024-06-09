@@ -314,4 +314,24 @@ export const FileApi = {
       return koef * (pointsA - pointsB);
     });
   },
+  formatSize: (bytes: number) => {
+    const kiloBytes = 1024;
+    const megaBytes = kiloBytes * 1024;
+    const gigaBytes = megaBytes * 1024;
+/**
+ *  "gigabytes": "Гб",
+    "megabytes": "Мб",
+    "kilobytes": "Кб",
+    "bytes": "байт"
+ */
+    if (bytes >= gigaBytes) {
+      return (bytes / gigaBytes).toFixed(2) + ` ${i18n.t('gigabytes')}`;
+    } else if (bytes >= megaBytes) {
+      return (bytes / megaBytes).toFixed(2) + ` ${i18n.t('megabytes')}`;
+    } else if (bytes >= kiloBytes) {
+      return (bytes / kiloBytes).toFixed(2) + ` ${i18n.t('kilobytes')}`;
+    } else {
+      return bytes + ` ${i18n.t('bytes')}`;
+    }
+  },
 };

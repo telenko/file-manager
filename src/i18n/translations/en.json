@@ -22,5 +22,9 @@
     "noDataHere": "Nothing here",
     "createName": "Name",
     "createDirConfirm": "Enter name of new folder",
-    "details": "Details"
+    "details": "Details",
+    "gigabytes": "Gb",
+    "megabytes": "Mb",
+    "kilobytes": "Kb",
+    "bytes": "bytes"
 }

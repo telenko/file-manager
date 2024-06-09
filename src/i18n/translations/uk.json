@@ -22,5 +22,9 @@
     "noDataHere": "Тут нічого нема",
     "createName": "Назва",
     "createDirConfirm": "Введіть назву нової папки",
-    "details": "Деталі"
+    "details": "Деталі",
+    "gigabytes": "Гб",
+    "megabytes": "Мб",
+    "kilobytes": "Кб",
+    "bytes": "байт"
 }

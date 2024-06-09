@@ -4,6 +4,7 @@ import { useFileManager } from './FileManagerContext';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 import { theme } from '../../theme';
+import { FileApi } from '../../services/FileApi';
 
 const FileDetailsDialog: React.FC = () => {
   const fileManager = useFileManager();
@@ -15,20 +16,37 @@ const FileDetailsDialog: React.FC = () => {
 
   const hideDialog = () => fileManager.setFileDetails(null);
 
+  const details = [
+    { label: t('fileName'), value: fileManager.fileDetails.name },
+    { label: t('filePath'), value: fileManager.fileDetails.path },
+    {
+      label: t('fileSize'),
+      value: FileApi.formatSize(fileManager.fileDetails.size),
+    },
+  ];
+
   return (
     <Portal>
       <Dialog visible={!!fileManager.fileDetails} onDismiss={hideDialog}>
         <Dialog.Title>{t('details')}</Dialog.Title>
         <Dialog.Content>
-          <View
-            style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-            <Text style={{ fontFamily: theme.regularText }}>
-              {t('filePath')}
-            </Text>
-            <Text style={{ fontFamily: theme.mediumText }}>
-              {fileManager.fileDetails.path}
-            </Text>
-          </View>
+          {details.map(detail => {
+            return (
+              <View
+                key={detail.label}
+                style={{
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                }}>
+                <Text style={{ fontFamily: theme.regularText }}>
+                  {detail.label}
+                </Text>
+                <Text style={{ fontFamily: theme.mediumText }}>
+                  {detail.value}
+                </Text>
+              </View>
+            );
+          })}
         </Dialog.Content>
         <Dialog.Actions>
           <Button onPress={hideDialog}>{t('ok')}</Button>
