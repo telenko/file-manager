@@ -13,7 +13,14 @@ class CustomizedVideo extends Video {
     }
     return (
       <Portal>
-        <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0 }}>
+        <View
+          style={{
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            backgroundColor: 'rgba(120,120,120,0.5)',
+          }}>
           {super.renderBottomControls()}
         </View>
       </Portal>

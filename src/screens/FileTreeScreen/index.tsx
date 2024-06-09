@@ -200,7 +200,7 @@ const FileScreen: React.FC<FileScreenProps> = ({
           ) : null}
           {routeMetadatas.mode === 'move' ? (
             <ActionButton
-              icon="file-move"
+              icon="file-move-outline"
               text={t('moveHere')}
               loading={moveInProgress}
               style={styles.actionButton}
