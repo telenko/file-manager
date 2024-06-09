@@ -1,7 +1,6 @@
 import React, { PropsWithChildren, useEffect, useState } from 'react';
 import { Platform, StyleSheet } from 'react-native';
 import FileManager from './src/widgets/FileManager/FileManager';
-import AppLegacy from './App_legacy';
 import { useDeviceLocale } from './src/i18n/hooks/useDeviceLocale';
 import {
   configureFonts,
@@ -40,9 +39,8 @@ const FontsProvider: React.FC<PropsWithChildren> = ({ children }) => {
 
 /**
  * @TODO Andrii list
- * 5. details
  * - sort is bad
- * - styling
+ * - multiselect
  */
 
 const App = () => {

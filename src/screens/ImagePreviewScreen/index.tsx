@@ -5,11 +5,13 @@ import { Cache } from '../../services/Cache';
 import Gallery from '../../common/components/Gallery';
 import ImageViewer from '../../common/components/ImageViewer';
 import { useNavigation } from '../../common/hooks/useNavigation';
-import { Button, Text } from 'react-native-paper';
+import { Button, IconButton, Text } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFileManager } from '../../widgets/FileManager';
 import VideoViewer from '../../common/components/VideoViewer';
+import { theme } from '../../theme';
+import ActionButton from '../../common/components/ActionButton';
 
 const { width, height } = Dimensions.get('window');
 export type ImageViewerScreenProps = {
@@ -25,7 +27,7 @@ const ItemPreview: React.FC<{
   if (FileApi.isFileVideo(props.file)) {
     return <VideoViewer {...props} />;
   }
-  return <ImageViewer {...props} />
+  return <ImageViewer {...props} />;
 };
 
 const ImagePreviewScreen: React.FC<ImageViewerScreenProps> = ({
@@ -68,15 +70,78 @@ const ImagePreviewScreen: React.FC<ImageViewerScreenProps> = ({
     }
     return imagesInFolderSorted;
   }, [file, imagesInFolderSorted, route]);
+
+  const actions = [
+    {
+      text: t('share'),
+      icon: 'share-outline',
+      onPress: () => {
+        if (!file) {
+          return;
+        }
+        FileApi.shareFile(file);
+      },
+    },
+    {
+      text: t('delete'),
+      icon: 'delete-outline',
+      onPress: () => {
+        if (!file) {
+          return;
+        }
+        fileManager.deleteContent(file).then(isDone => {
+          if (isDone) {
+            fileManager.setReloadRequired(true);
+            navigation.goBack();
+          }
+        });
+      },
+    },
+    {
+      text: t('copy'),
+      icon: 'content-copy',
+      onPress: () => {
+        if (!file) {
+          return;
+        }
+        fileManager.copyContent(file, navigation);
+      },
+    },
+    {
+      text: t('move'),
+      icon: 'file-move-outline',
+      onPress: () => {
+        if (!file) {
+          return;
+        }
+        fileManager.moveContent(file, navigation);
+      },
+    },
+    {
+      text: t('details'),
+      icon: 'information-outline',
+      onPress: () => {
+        if (!file) {
+          return;
+        }
+        fileManager.showFileDetails(file);
+      },
+    },
+  ];
+
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView style={[styles.container, { flex: 1 }]}>
       <View style={{ flex: 1 }}>
         {imagesCarousel.length > 0 ? (
           <Gallery
             items={imagesCarousel}
             getItemKey={it => it.path}
             renderItem={image => (
-              <ItemPreview file={image} onActive={setZooming} activeFile={file ?? undefined} />
+              <ItemPreview
+                file={image}
+                onActive={setZooming}
+                activeFile={file ?? undefined}
+              />
             )}
             selectedItemKey={route}
             onItemOpen={setFile}
@@ -94,44 +159,19 @@ const ImagePreviewScreen: React.FC<ImageViewerScreenProps> = ({
       <View
         style={{
           flexDirection: 'row',
-          justifyContent: 'center',
+          justifyContent: 'space-between',
           alignItems: 'center',
         }}>
-        <Button
-          icon="share"
-          onPress={() => {
-            if (!file) {
-              return;
-            }
-            FileApi.shareFile(file);
-          }}>
-          {t('share')}
-        </Button>
-        <Button
-          icon="delete"
-          onPress={() => {
-            if (!file) {
-              return;
-            }
-            fileManager.deleteContent(file).then(isDone => {
-              if (isDone) {
-                fileManager.setReloadRequired(true);
-                navigation.goBack();
-              }
-            });
-          }}>
-          {t('delete')}
-        </Button>
-        <Button
-          icon="content-copy"
-          onPress={() => {
-            if (!file) {
-              return;
-            }
-            fileManager.copyContent(file, navigation);
-          }}>
-          {t('copy')}
-        </Button>
+        {actions.map(action => {
+          return (
+            <ActionButton
+              key={action.text}
+              icon={action.icon}
+              onPress={action.onPress}
+              text={action.text}
+            />
+          );
+        })}
       </View>
     </SafeAreaView>
   );
@@ -140,7 +180,6 @@ const ImagePreviewScreen: React.FC<ImageViewerScreenProps> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
   },
   imageContainer: {
     width: width,

@@ -12,11 +12,13 @@ import {
 } from 'recyclerlistview';
 import { Cache } from '../../services/Cache';
 import { useTranslation } from 'react-i18next';
-import { Button } from 'react-native-paper';
+import { Button, IconButton, Text } from 'react-native-paper';
 import { navigateFromSelectable } from '../../common/utils/navigator';
 import { useFileManager } from '../../widgets/FileManager';
 import EmptyData from '../../common/components/EmptyData';
 import { RefreshControl, ScrollView } from 'react-native-gesture-handler';
+import { theme } from '../../theme';
+import ActionButton from '../../common/components/ActionButton';
 
 export type FileScreenProps = {
   route: {
@@ -165,13 +167,6 @@ const FileScreen: React.FC<FileScreenProps> = ({
             }
           />
         )}
-        {/* {true ? (
-          dirItems.length === 0 && false ? (
-            
-          ) : ( */}
-
-        {/* )
-        ) : null} */}
         <View
           style={{
             flexDirection: 'row',
@@ -181,8 +176,9 @@ const FileScreen: React.FC<FileScreenProps> = ({
             paddingRight: 20,
           }}>
           {routeMetadatas.mode === 'copy' ? (
-            <Button
+            <ActionButton
               icon="content-copy"
+              text={t('copyHere')}
               loading={copyInProgress}
               disabled={!routeMetadatas.fromRoute || !route || copyInProgress}
               onPress={() => {
@@ -199,14 +195,15 @@ const FileScreen: React.FC<FileScreenProps> = ({
                   // @TODO Andrii errors handling
                   .catch(console.error)
                   .finally(() => setCopyInProgress(false));
-              }}>
-              {t('copyHere')}
-            </Button>
+              }}
+            />
           ) : null}
           {routeMetadatas.mode === 'move' ? (
-            <Button
+            <ActionButton
               icon="file-move"
+              text={t('moveHere')}
               loading={moveInProgress}
+              style={styles.actionButton}
               disabled={!routeMetadatas.fromRoute || !route || copyInProgress}
               onPress={() => {
                 setMoveInProgress(true);
@@ -218,18 +215,17 @@ const FileScreen: React.FC<FileScreenProps> = ({
                   // @TODO Andrii errors handling
                   .catch(console.error)
                   .finally(() => setMoveInProgress(false));
-              }}>
-              {t('moveHere')}
-            </Button>
+              }}
+            />
           ) : null}
           {routeMetadatas.mode === 'copy' || routeMetadatas.mode === 'move' ? (
-            <Button
+            <ActionButton
               icon="close"
+              text={t('cancel')}
               onPress={() => {
                 navigateFromSelectable(navigator);
-              }}>
-              {t('cancel')}
-            </Button>
+              }}
+            />
           ) : null}
         </View>
       </View>
@@ -246,6 +242,13 @@ const styles = StyleSheet.create({
   },
   breadCrumbsContainer: {
     marginBottom: 10,
+  },
+  actionButtonContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  actionButton: {
+    marginBottom: -5,
   },
 });
 

@@ -14,6 +14,6 @@ export const theme = {
   fileMenuColor: '#ababab',
   sizes: {
     NO_DATA_ICON: 40,
-    HEADER_ICON: 30,
+    HEADER_ICON: 25,
   }
 };

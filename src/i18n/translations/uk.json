@@ -26,5 +26,10 @@
     "gigabytes": "Гб",
     "megabytes": "Мб",
     "kilobytes": "Кб",
-    "bytes": "байт"
+    "bytes": "байт",
+    "fileName": "Назва",
+    "fileSize": "Розмір",
+    "filePath": "Шлях",
+    "fileLastChange": "Остання зміна",
+    "ok": "Добре"
 }

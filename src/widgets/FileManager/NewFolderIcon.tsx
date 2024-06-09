@@ -13,7 +13,7 @@ const NewFolderIcon = () => {
       onPress={() => fileManager.createDirectory(navigation)}
       size={theme.sizes.HEADER_ICON}
       style={{ height: theme.sizes.HEADER_ICON }}
-      icon={'folder-plus'}
+      icon={'folder-plus-outline'}
     />
   );
 };

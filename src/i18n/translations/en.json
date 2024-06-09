@@ -26,5 +26,10 @@
     "gigabytes": "Gb",
     "megabytes": "Mb",
     "kilobytes": "Kb",
-    "bytes": "bytes"
+    "bytes": "bytes",
+    "fileName": "Name",
+    "fileSize": "Size",
+    "filePath": "Path",
+    "fileLastChange": "Last mofidied",
+    "ok": "Ok"
 }

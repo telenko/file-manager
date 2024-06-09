@@ -91,6 +91,7 @@ const DirectoryItemView: React.FC<DirItemProps> = ({ item }) => {
       [
         {
           title: t('share'),
+          icon: 'share-outline',
           key: 'share',
           enabled: item.isFile(),
           onPress: () => {
@@ -99,6 +100,7 @@ const DirectoryItemView: React.FC<DirItemProps> = ({ item }) => {
         },
         {
           title: t('openWith'),
+          icon: 'open-in-app',
           key: 'openWith',
           enabled: item.isFile(),
           onPress: () => {
@@ -107,6 +109,7 @@ const DirectoryItemView: React.FC<DirItemProps> = ({ item }) => {
         },
         {
           title: t('rename'),
+          icon: 'form-textbox',
           key: 'rename',
           enabled: true,
           onPress: () => {
@@ -115,6 +118,7 @@ const DirectoryItemView: React.FC<DirItemProps> = ({ item }) => {
         },
         {
           title: t('copy'),
+          icon: 'content-copy',
           key: 'copy',
           enabled: true,
           onPress: () => {
@@ -123,6 +127,7 @@ const DirectoryItemView: React.FC<DirItemProps> = ({ item }) => {
         },
         {
           title: t('move'),
+          icon: 'file-move-outline',
           key: 'move',
           enabled: true,
           onPress: () => {
@@ -132,6 +137,7 @@ const DirectoryItemView: React.FC<DirItemProps> = ({ item }) => {
         {
           title: t('delete'),
           key: 'delete',
+          icon: 'delete-outline',
           enabled: true,
           onPress: () => {
             fileManager.deleteContent(item).then(isDone => {
@@ -144,6 +150,7 @@ const DirectoryItemView: React.FC<DirItemProps> = ({ item }) => {
         {
           title: t('details'),
           key: 'details',
+          icon: 'information-outline',
           enabled: item.isFile(),
           onPress: () => {
             fileManager.showFileDetails(item);
@@ -257,7 +264,11 @@ const DirectoryItemView: React.FC<DirItemProps> = ({ item }) => {
                   />
                 }>
                 {menuItems.map(menuItem => (
-                  <Menu.Item {...menuItem} key={menuItem.key} />
+                  <Menu.Item
+                    {...menuItem}
+                    key={menuItem.key}
+                    leadingIcon={menuItem.icon}
+                  />
                 ))}
               </Menu>
             )

@@ -15,6 +15,7 @@ import RenameContentDialog from './RenameContentDialog';
 import CreateDirectoryDialog from './CreateDirectoryDialog';
 import NewFolderIcon from './NewFolderIcon';
 import FileDetailsDialog from './FileDetailsDialog';
+import { theme } from '../../theme';
 
 const Stack = createNativeStackNavigator<FileManagerNavigation>();
 export default function FileManager() {
@@ -69,12 +70,23 @@ export default function FileManager() {
       <CreateDirectoryDialog />
       <FileDetailsDialog />
       <NavigationContainer>
-        <Stack.Navigator>
+        <Stack.Navigator
+          screenOptions={{
+            headerTitleStyle: {
+              fontFamily: theme.regularText,
+              fontSize: 20,
+            },
+            contentStyle: {
+              backgroundColor: '#fff',
+              marginTop: -10,
+            }
+          }}>
           <Stack.Screen
             name="FileTree"
             options={{
               title: t('title'),
               headerRight: () => <NewFolderIcon />,
+              headerShadowVisible: false,
             }}
             // @ts-ignore
             component={FileTreeScreen}
@@ -82,11 +94,13 @@ export default function FileManager() {
               // @ts-ignore
               route: FileApi.ROOT_PATH,
             }}
+            
           />
           <Stack.Screen
             name="ImageViewer"
             options={{
               title: t('imageViewer'),
+              headerShadowVisible: false,
             }}
             // @ts-ignore
             component={ImagePreviewScreen}
