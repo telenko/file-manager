@@ -69,7 +69,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   text: {
-    fontSize: 13,
+    fontSize: 12,
+    lineHeight: 14,
   },
   item: {
     paddingTop: 0,
