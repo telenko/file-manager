@@ -74,7 +74,7 @@ export default function FileManager() {
           screenOptions={{
             headerTitleStyle: {
               fontFamily: theme.regularText,
-              fontSize: 20,
+              fontSize: theme.sizes.HEADER_TITLE_FONT,
             },
             contentStyle: {
               backgroundColor: '#fff',

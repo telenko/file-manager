@@ -15,5 +15,6 @@ export const theme = {
   sizes: {
     NO_DATA_ICON: 40,
     HEADER_ICON: 25,
+    HEADER_TITLE_FONT: 20,
   }
 };
