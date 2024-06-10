@@ -69,7 +69,7 @@ const VideoViewer: React.FC<{
       style={{ height: 90 }}
       icon={'play-circle'}
     />
-  ); //<Icon size={90} color={'#fff'} source={'play-circle'} />;
+  );
 
   const previewLayout = (
     <ImageBackground

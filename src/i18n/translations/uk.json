@@ -31,5 +31,7 @@
     "fileSize": "Розмір",
     "filePath": "Шлях",
     "fileLastChange": "Остання зміна",
-    "ok": "Добре"
+    "ok": "Добре",
+    "selectedNItems": "Обрано {{n}}",
+    "select": "Вибрати"
 }

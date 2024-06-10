@@ -79,7 +79,7 @@ export default function FileManager() {
             contentStyle: {
               backgroundColor: '#fff',
               marginTop: -10,
-            }
+            },
           }}>
           <Stack.Screen
             name="FileTree"
@@ -94,7 +94,6 @@ export default function FileManager() {
               // @ts-ignore
               route: FileApi.ROOT_PATH,
             }}
-            
           />
           <Stack.Screen
             name="ImageViewer"

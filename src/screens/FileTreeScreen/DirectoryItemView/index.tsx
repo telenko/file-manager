@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Image, ImageBackground, StyleSheet, View } from 'react-native';
-import { IconButton, List, Menu } from 'react-native-paper';
+import { Checkbox, IconButton, List, Menu } from 'react-native-paper';
 
 import {
   DirItem,
@@ -17,6 +17,7 @@ import {
   useFileManager,
 } from '../../../widgets/FileManager';
 import { type FileScreenProps } from '..';
+import { useFileTreeContext } from '../FileTreeContext';
 
 type DirItemProps = {
   item: DirectoryItemType;
@@ -75,6 +76,7 @@ const VideoThumbnail = ({ file }: { file: DirItem }) => {
 
 const DirectoryItemView: React.FC<DirItemProps> = ({ item }) => {
   const fileManager = useFileManager();
+  const fileTreeScreen = useFileTreeContext();
   const navigation = useNavigation();
   const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -89,6 +91,18 @@ const DirectoryItemView: React.FC<DirItemProps> = ({ item }) => {
   const menuItems = useMemo(
     () =>
       [
+        {
+          title: t('select'),
+          icon: 'select',
+          key: 'select',
+          enabled: true,
+          onPress: () => {
+            fileTreeScreen.setSelectedPaths([
+              ...fileTreeScreen.selectedPaths,
+              item.path,
+            ]);
+          },
+        },
         {
           title: t('share'),
           icon: 'share-outline',
@@ -169,6 +183,11 @@ const DirectoryItemView: React.FC<DirItemProps> = ({ item }) => {
     [item],
   );
 
+  const multiSelectActivated = fileTreeScreen.selectedPaths.length > 0;
+  const isSelected = fileTreeScreen.selectedPaths.includes(item.path);
+
+  const RIGHT_ICON_OFFSET = -20;
+
   return (
     <List.Item
       style={item.isDirectory() ? styles.folder : styles.file}
@@ -248,7 +267,24 @@ const DirectoryItemView: React.FC<DirItemProps> = ({ item }) => {
         )
       }
       right={
-        operationsAllowed
+        multiSelectActivated
+          ? () => (
+              <View style={{ marginRight: RIGHT_ICON_OFFSET }}>
+                <Checkbox
+                  status={isSelected ? 'checked' : 'unchecked'}
+                  onPress={() => {
+                    fileTreeScreen.setSelectedPaths(
+                      isSelected
+                        ? fileTreeScreen.selectedPaths.filter(
+                            p => p !== item.path,
+                          )
+                        : [...fileTreeScreen.selectedPaths, item.path],
+                    );
+                  }}
+                />
+              </View>
+            )
+          : operationsAllowed
           ? () => (
               <Menu
                 visible={menuOpen}
@@ -258,7 +294,10 @@ const DirectoryItemView: React.FC<DirItemProps> = ({ item }) => {
                     onPress={() => setMenuOpen(true)}
                     size={MENU_ICON_SIZE}
                     // @TODO Andrii - is there a way to make it cleaner?
-                    style={{ marginRight: -20, height: MENU_ICON_SIZE }}
+                    style={{
+                      marginRight: RIGHT_ICON_OFFSET,
+                      height: MENU_ICON_SIZE,
+                    }}
                     icon={'dots-vertical'}
                     iconColor={theme.fileMenuColor}
                   />
@@ -275,12 +314,20 @@ const DirectoryItemView: React.FC<DirItemProps> = ({ item }) => {
           : () => null
       }
       onLongPress={() => {
-        if (!operationsAllowed) {
-          return;
-        }
-        setMenuOpen(true);
+        fileTreeScreen.setSelectedPaths([
+          ...fileTreeScreen.selectedPaths,
+          item.path,
+        ]);
       }}
       onPress={() => {
+        if (multiSelectActivated) {
+          fileTreeScreen.setSelectedPaths(
+            isSelected
+              ? fileTreeScreen.selectedPaths.filter(p => p !== item.path)
+              : [...fileTreeScreen.selectedPaths, item.path],
+          );
+          return;
+        }
         if (item.isFile()) {
           if (operationsAllowed) {
             if (FileApi.isFileViewable(item)) {

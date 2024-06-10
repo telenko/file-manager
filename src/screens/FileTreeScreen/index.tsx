@@ -12,13 +12,13 @@ import {
 } from 'recyclerlistview';
 import { Cache } from '../../services/Cache';
 import { useTranslation } from 'react-i18next';
-import { Button, IconButton, Text } from 'react-native-paper';
+import { Checkbox, IconButton } from 'react-native-paper';
 import { navigateFromSelectable } from '../../common/utils/navigator';
 import { useFileManager } from '../../widgets/FileManager';
 import EmptyData from '../../common/components/EmptyData';
 import { RefreshControl, ScrollView } from 'react-native-gesture-handler';
-import { theme } from '../../theme';
 import ActionButton from '../../common/components/ActionButton';
+import NewFolderIcon from '../../widgets/FileManager/NewFolderIcon';
 
 export type FileScreenProps = {
   route: {
@@ -43,30 +43,65 @@ const FileScreen: React.FC<FileScreenProps> = ({
   const [dirItems, setDirItems] = useState<DirItem[]>([]);
   const [dirLoading, setDirLoading] = useState<boolean>(false);
   const [dirError, setDirError] = useState<Error | null>(null);
+  const [selectedPaths, setSelectedPaths] = useState<string[]>([]);
   const [copyInProgress, setCopyInProgress] = useState<boolean>(false);
   const [moveInProgress, setMoveInProgress] = useState<boolean>(false);
   const fileManager = useFileManager();
+  const isMultiSelectActivated = selectedPaths.length > 0;
+  const allSelected = selectedPaths.length === dirItems.length;
 
   useEffect(() => {
     let title = '';
-    switch (routeMetadatas.mode) {
-      case 'copy': {
-        title = t('copyInto');
-        break;
-      }
-      case 'move': {
-        title = t('moveInto');
-        break;
-      }
-      default: {
-        title = t('title');
-        break;
+    if (isMultiSelectActivated) {
+      title = t('selectedNItems', { n: selectedPaths.length });
+    } else {
+      switch (routeMetadatas.mode) {
+        case 'copy': {
+          title = t('copyInto');
+          break;
+        }
+        case 'move': {
+          title = t('moveInto');
+          break;
+        }
+        default: {
+          title = t('title');
+          break;
+        }
       }
     }
     navigator.setOptions({
       headerTitle: title,
+      headerRight: () =>
+        isMultiSelectActivated ? (
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+            }}>
+            <IconButton disabled icon={'delete-outline'} onPress={() => {}} />
+            <IconButton disabled icon={'content-copy'} onPress={() => {}} />
+            <IconButton
+              disabled
+              icon={'file-move-outline'}
+              onPress={() => {}}
+            />
+            <Checkbox
+              onPress={() => {
+                if (allSelected) {
+                  setSelectedPaths([]);
+                } else {
+                  setSelectedPaths(dirItems.map(dirIt => dirIt.path));
+                }
+              }}
+              status={allSelected ? 'checked' : 'indeterminate'}
+            />
+          </View>
+        ) : (
+          <NewFolderIcon />
+        ),
     });
-  }, [routeMetadatas.mode, navigator]);
+  }, [routeMetadatas.mode, navigator, selectedPaths]);
 
   const reloadDir = useCallback(async () => {
     setDirLoading(true);
@@ -93,8 +128,12 @@ const FileScreen: React.FC<FileScreenProps> = ({
     () => ({
       route: route ?? FileApi.ROOT_PATH,
       mode: routeMetadatas.mode ?? 'tree',
+      selectedPaths,
+      setSelectedPaths: (v: string[]) => {
+        setSelectedPaths([...new Set(v)]);
+      },
     }),
-    [route, routeMetadatas.mode],
+    [route, routeMetadatas.mode, selectedPaths],
   );
 
   useEffect(() => {
@@ -105,12 +144,14 @@ const FileScreen: React.FC<FileScreenProps> = ({
   }, [fileManager.reloadRequired]);
 
   useEffect(() => {
+    setSelectedPaths([]);
     reloadDir();
     Cache.clearVideoPreviews();
     return () => {
       Cache.clearDirItems();
       setDirLoadingDone(false);
       setDirItems([]);
+      setSelectedPaths([]);
     };
   }, [route, reloadDir]);
 

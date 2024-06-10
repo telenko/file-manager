@@ -31,5 +31,7 @@
     "fileSize": "Size",
     "filePath": "Path",
     "fileLastChange": "Last mofidied",
-    "ok": "Ok"
+    "ok": "Ok",
+    "selectedNItems": "Selected {{n}}",
+    "select": "Select"
 }
