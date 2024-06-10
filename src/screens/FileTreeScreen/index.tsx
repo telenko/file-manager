@@ -19,13 +19,14 @@ import EmptyData from '../../common/components/EmptyData';
 import { RefreshControl, ScrollView } from 'react-native-gesture-handler';
 import ActionButton from '../../common/components/ActionButton';
 import NewFolderIcon from '../../widgets/FileManager/NewFolderIcon';
+import MultiSelectActions from './MultiSelectActions';
 
 export type FileScreenProps = {
   route: {
     params: {
       route: string;
       mode?: 'tree' | 'copy' | 'move';
-      fromRoute?: string;
+      fromRoute?: string[];
     };
   };
 };
@@ -48,8 +49,6 @@ const FileScreen: React.FC<FileScreenProps> = ({
   const [moveInProgress, setMoveInProgress] = useState<boolean>(false);
   const fileManager = useFileManager();
   const isMultiSelectActivated = selectedPaths.length > 0;
-  const allSelected = selectedPaths.length === dirItems.length;
-
   useEffect(() => {
     let title = '';
     if (isMultiSelectActivated) {
@@ -74,34 +73,17 @@ const FileScreen: React.FC<FileScreenProps> = ({
       headerTitle: title,
       headerRight: () =>
         isMultiSelectActivated ? (
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-            }}>
-            <IconButton disabled icon={'delete-outline'} onPress={() => {}} />
-            <IconButton disabled icon={'content-copy'} onPress={() => {}} />
-            <IconButton
-              disabled
-              icon={'file-move-outline'}
-              onPress={() => {}}
-            />
-            <Checkbox
-              onPress={() => {
-                if (allSelected) {
-                  setSelectedPaths([]);
-                } else {
-                  setSelectedPaths(dirItems.map(dirIt => dirIt.path));
-                }
-              }}
-              status={allSelected ? 'checked' : 'indeterminate'}
-            />
-          </View>
+          <MultiSelectActions
+            dirItems={dirItems}
+            navigation={navigator}
+            selectedPaths={selectedPaths}
+            setSelectedPaths={setSelectedPaths}
+          />
         ) : (
           <NewFolderIcon />
         ),
     });
-  }, [routeMetadatas.mode, navigator, selectedPaths]);
+  }, [routeMetadatas.mode, navigator, selectedPaths, dirItems]);
 
   const reloadDir = useCallback(async () => {
     setDirLoading(true);
@@ -224,7 +206,7 @@ const FileScreen: React.FC<FileScreenProps> = ({
               disabled={!routeMetadatas.fromRoute || !route || copyInProgress}
               onPress={() => {
                 setCopyInProgress(true);
-                FileApi.copyFileOrDirectory(
+                FileApi.copyFilesOrDirectoriesBatched(
                   routeMetadatas.fromRoute!,
                   route,
                   true,
@@ -248,9 +230,19 @@ const FileScreen: React.FC<FileScreenProps> = ({
               disabled={!routeMetadatas.fromRoute || !route || copyInProgress}
               onPress={() => {
                 setMoveInProgress(true);
-                FileApi.moveFileOrDirectory(routeMetadatas.fromRoute!, route)
+                FileApi.moveFilesOrDirectoriesBatched(
+                  routeMetadatas.fromRoute!,
+                  route,
+                  true,
+                )
                   .then(() => {
                     navigateFromSelectable(navigator);
+                    // @TODO Andrii unselect not properly working
+                    setSelectedPaths(
+                      selectedPaths.filter(selectedPath =>
+                        routeMetadatas.fromRoute?.includes(selectedPath),
+                      ),
+                    );
                     fileManager.setReloadRequired(true);
                   })
                   // @TODO Andrii errors handling

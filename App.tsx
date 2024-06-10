@@ -40,7 +40,6 @@ const FontsProvider: React.FC<PropsWithChildren> = ({ children }) => {
 /**
  * @TODO Andrii list
  * - sort is bad
- * - multiselect
  */
 
 const App = () => {

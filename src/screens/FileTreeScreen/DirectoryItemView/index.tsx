@@ -136,7 +136,7 @@ const DirectoryItemView: React.FC<DirItemProps> = ({ item }) => {
           key: 'copy',
           enabled: true,
           onPress: () => {
-            fileManager.copyContent(item, navigation);
+            fileManager.copyContent([item], navigation);
           },
         },
         {
@@ -145,7 +145,7 @@ const DirectoryItemView: React.FC<DirItemProps> = ({ item }) => {
           key: 'move',
           enabled: true,
           onPress: () => {
-            fileManager.moveContent(item, navigation);
+            fileManager.moveContent([item], navigation);
           },
         },
         {
@@ -154,7 +154,7 @@ const DirectoryItemView: React.FC<DirItemProps> = ({ item }) => {
           icon: 'delete-outline',
           enabled: true,
           onPress: () => {
-            fileManager.deleteContent(item).then(isDone => {
+            fileManager.deleteContent([item]).then(isDone => {
               if (isDone) {
                 fileManager.setReloadRequired(true);
               }
@@ -293,7 +293,6 @@ const DirectoryItemView: React.FC<DirItemProps> = ({ item }) => {
                   <IconButton
                     onPress={() => setMenuOpen(true)}
                     size={MENU_ICON_SIZE}
-                    // @TODO Andrii - is there a way to make it cleaner?
                     style={{
                       marginRight: RIGHT_ICON_OFFSET,
                       height: MENU_ICON_SIZE,

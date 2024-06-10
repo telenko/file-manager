@@ -89,7 +89,7 @@ const ImagePreviewScreen: React.FC<ImageViewerScreenProps> = ({
         if (!file) {
           return;
         }
-        fileManager.deleteContent(file).then(isDone => {
+        fileManager.deleteContent([file]).then(isDone => {
           if (isDone) {
             fileManager.setReloadRequired(true);
             navigation.goBack();
@@ -104,7 +104,7 @@ const ImagePreviewScreen: React.FC<ImageViewerScreenProps> = ({
         if (!file) {
           return;
         }
-        fileManager.copyContent(file, navigation);
+        fileManager.copyContent([file], navigation);
       },
     },
     {
@@ -114,7 +114,7 @@ const ImagePreviewScreen: React.FC<ImageViewerScreenProps> = ({
         if (!file) {
           return;
         }
-        fileManager.moveContent(file, navigation);
+        fileManager.moveContent([file], navigation);
       },
     },
     {

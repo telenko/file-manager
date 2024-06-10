@@ -23,12 +23,14 @@ export const getRouteDirectory = (
 };
 
 export const FileGuiHelper = {
-  deleteContent: (file: DirItem): Promise<boolean> => {
+  deleteContent: (files: DirItem[]): Promise<boolean> => {
     let resolved = false;
     return new Promise((resolve, reject) => {
       Alert.alert(
         i18n.t('delete'),
-        i18n.t('deleteConfirm'),
+        files.length === 0
+          ? i18n.t('deleteConfirm')
+          : i18n.t('deleteConfirmPlural', { n: files.length }),
         [
           {
             text: i18n.t('cancel'),
@@ -37,7 +39,7 @@ export const FileGuiHelper = {
           {
             text: i18n.t('delete'),
             onPress: async () => {
-              await FileApi.deleteItem(file);
+              await FileApi.deleteItemsBatched(files);
               resolved = true;
               resolve(true);
             },
@@ -56,25 +58,25 @@ export const FileGuiHelper = {
     });
   },
   copyContent: (
-    content: DirItem,
+    contents: DirItem[],
     navigator: NavigationProp<FileManagerNavigation>,
   ) => {
     // @ts-ignore
     navigator.push('FileTree', {
       route: FileApi.ROOT_PATH,
       mode: 'copy',
-      fromRoute: content.path,
+      fromRoute: contents.map(c => c.path),
     });
   },
   moveContent: (
-    content: DirItem,
+    contents: DirItem[],
     navigator: NavigationProp<FileManagerNavigation>,
   ) => {
     // @ts-ignore
     navigator.push('FileTree', {
       route: FileApi.ROOT_PATH,
       mode: 'move',
-      fromRoute: content.path,
+      fromRoute: contents.map(c => c.path),
     });
   },
   openDirectory: (
