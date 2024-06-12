@@ -20,6 +20,7 @@ import { RefreshControl, ScrollView } from 'react-native-gesture-handler';
 import ActionButton from '../../common/components/ActionButton';
 import NewFolderIcon from '../../widgets/FileManager/NewFolderIcon';
 import MultiSelectActions from './MultiSelectActions';
+import { useBackAction } from '../../common/hooks/useBackAction';
 
 export type FileScreenProps = {
   route: {
@@ -122,6 +123,7 @@ const FileScreen: React.FC<FileScreenProps> = ({
     if (fileManager.reloadRequired) {
       reloadDir();
       fileManager.setReloadRequired(false);
+      setSelectedPaths([]);
     }
   }, [fileManager.reloadRequired]);
 
@@ -136,6 +138,15 @@ const FileScreen: React.FC<FileScreenProps> = ({
       setSelectedPaths([]);
     };
   }, [route, reloadDir]);
+
+  const backHandle = useCallback(() => {
+    if (selectedPaths.length > 0) {
+      setSelectedPaths([]);
+      return true;
+    }
+    return false;
+  }, [selectedPaths]);
+  useBackAction(backHandle);
 
   // virtualized memoized contents
   const dataProvider = useMemo(
@@ -237,12 +248,6 @@ const FileScreen: React.FC<FileScreenProps> = ({
                 )
                   .then(() => {
                     navigateFromSelectable(navigator);
-                    // @TODO Andrii unselect not properly working
-                    setSelectedPaths(
-                      selectedPaths.filter(selectedPath =>
-                        routeMetadatas.fromRoute?.includes(selectedPath),
-                      ),
-                    );
                     fileManager.setReloadRequired(true);
                   })
                   // @TODO Andrii errors handling
