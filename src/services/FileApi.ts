@@ -340,25 +340,33 @@ export const FileApi = {
   ): DirItem[] => {
     const koef = sortDirection === 'asc' ? 1 : -1;
     return [...dirItems].sort((dirItemA, dirItemB) => {
-      let pointsA = 0;
-      let pointsB = 0;
-      if (dirItemA.isDirectory()) {
-        pointsA -= 100;
+      if (dirItemA.isDirectory() && !dirItemB.isDirectory()) {
+        return -1 * koef;
+      } else if (!dirItemA.isDirectory() && dirItemB.isDirectory()) {
+        return 1 * koef;
       }
-      if (dirItemB.isDirectory()) {
-        pointsB -= 100;
+      if (dirItemA.isDirectory() && dirItemB.isDirectory()) {
+        if (dirItemA.name < dirItemB.name) {
+          return -1 * koef;
+        } else if (dirItemA.name > dirItemB.name) {
+          return 1 * koef;
+        }
+        return 0;
       }
-      if (dirItemA.name > dirItemB.name) {
-        pointsA += 50;
-      } else {
-        pointsB += 50;
+      if (!dirItemA.isDirectory() && !dirItemB.isDirectory()) {
+        if (dirItemA.mtime! < dirItemB.mtime!) {
+          return -1 * koef;
+        } else if (dirItemA.mtime! > dirItemB.mtime!) {
+          return 1 * koef;
+        }
+        if (dirItemA.name < dirItemB.name) {
+          return -1 * koef;
+        } else if (dirItemA.name > dirItemB.name) {
+          return 1 * koef;
+        }
+        return 0;
       }
-      if (dirItemA.mtime! > dirItemB.mtime!) {
-        pointsA += 20;
-      } else {
-        pointsB += 20;
-      }
-      return koef * (pointsA - pointsB);
+      return 0;
     });
   },
   formatSize: (bytes: number) => {

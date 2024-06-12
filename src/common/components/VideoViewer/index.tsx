@@ -6,6 +6,9 @@ import { ImageBackground, useWindowDimensions, View } from 'react-native';
 import { IconButton, Portal } from 'react-native-paper';
 import { Cache } from '../../../services/Cache';
 class CustomizedVideo extends Video {
+  renderTopControls() {
+    return null;
+  }
   renderBottomControls() {
     // @ts-ignore
     if (this.props.paused) {
@@ -74,6 +77,7 @@ const VideoViewer: React.FC<{
   const previewLayout = (
     <ImageBackground
       source={{ uri: preview ?? fallbackThumbnail }}
+      resizeMode="contain"
       style={{
         width,
         height: '100%',
@@ -97,6 +101,7 @@ const VideoViewer: React.FC<{
             // tapAnywhereToPause
             disableFullscreen
             disableBack
+            disableVolume
             onPause={() => setPaused(true)}
             onPlay={() => {
               setPaused(false);
@@ -104,7 +109,10 @@ const VideoViewer: React.FC<{
             showHours
             paused={paused}
             source={{ uri: `file://${file.path}` }}
+            videoStyle={{ backgroundColor: '#fff' }}
+            containerStyle={{ backgroundColor: '#fff' }}
             style={{ width, height: '100%' }}
+            resizeMode="contain"
             poster={preview ?? fallbackThumbnail}
           />
           {paused ? (

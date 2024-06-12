@@ -37,11 +37,6 @@ const FontsProvider: React.FC<PropsWithChildren> = ({ children }) => {
   return <PaperProvider theme={theme}>{children}</PaperProvider>;
 };
 
-/**
- * @TODO Andrii list
- * - sort is bad
- */
-
 const App = () => {
   const [permissionGranted, setPermissionGranted] = useState<boolean>(false);
   useDeviceLocale();
