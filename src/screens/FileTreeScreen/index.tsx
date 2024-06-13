@@ -18,10 +18,10 @@ import { useFileManager } from '../../widgets/FileManager';
 import EmptyData from '../../common/components/EmptyData';
 import { RefreshControl, ScrollView } from 'react-native-gesture-handler';
 import ActionButton from '../../common/components/ActionButton';
-import NewFolderIcon from '../../widgets/FileManager/NewFolderIcon';
 import MultiSelectActions from './MultiSelectActions';
 import { useBackAction } from '../../common/hooks/useBackAction';
 import { useExceptionHandler } from '../../common/components/ExceptionHandler';
+import DefaultFolderActions from '../../widgets/FileManager/DefaultFolderActions';
 
 export type FileScreenProps = {
   route: {
@@ -82,7 +82,7 @@ const FileScreen: React.FC<FileScreenProps> = ({
             setSelectedPaths={setSelectedPaths}
           />
         ) : (
-          <NewFolderIcon />
+          <DefaultFolderActions />
         ),
     });
   }, [routeMetadatas.mode, navigator, selectedPaths, dirItems]);
@@ -96,6 +96,7 @@ const FileScreen: React.FC<FileScreenProps> = ({
       const newDirItems = await FileApi.readDir(route ?? FileApi.ROOT_PATH);
       const sortedDirItems = FileApi.sortDirItems(
         newDirItems.filter(file => !FileApi.isItemHidden(file)),
+        fileManager.sort,
       );
       setDirItems(sortedDirItems);
       setDirLoadingDone(true);
@@ -108,6 +109,21 @@ const FileScreen: React.FC<FileScreenProps> = ({
       setDirLoading(false);
     }
   }, [route]);
+
+  useEffect(() => {
+    if (dirItems.length > 0) {
+      (async () => {
+        const sortedDirItems = FileApi.sortDirItems(
+          dirItems.filter(file => !FileApi.isItemHidden(file)),
+          fileManager.sort,
+        );
+        await new Promise<void>(r => setTimeout(r, 100));
+        setDirItems(sortedDirItems);
+        Cache.putDirItems(route ?? FileApi.ROOT_PATH, sortedDirItems);
+        await new Promise<void>(r => setTimeout(r, 100));
+      })();
+    }
+  }, [fileManager.sort]);
 
   const value = useMemo<FileTreeContextType>(
     () => ({

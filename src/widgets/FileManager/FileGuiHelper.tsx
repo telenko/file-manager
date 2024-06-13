@@ -29,7 +29,7 @@ export const FileGuiHelper = {
     return new Promise((resolve, reject) => {
       Alert.alert(
         i18n.t('delete'),
-        files.length === 0
+        files.length === 1
           ? i18n.t('deleteConfirm')
           : i18n.t('deleteConfirmPlural', { n: files.length }),
         [

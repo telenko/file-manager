@@ -5,6 +5,8 @@ import { NavigationProp } from '@react-navigation/native';
 import { FileManagerNavigation } from '../../common/types/navigation';
 
 export type FileManagerContextType = {
+  sort: 'asc' | 'desc';
+  toggleSort: () => void;
   reloadRequired?: boolean;
   setReloadRequired: (v: boolean) => void;
 
@@ -29,6 +31,8 @@ export const useFileManager = (): FileManagerContextType => {
 };
 
 export const FileManagerContext = React.createContext<FileManagerContextType>({
+  sort: 'asc',
+  toggleSort: () => {},
   reloadRequired: false,
   setReloadRequired: () => {},
 

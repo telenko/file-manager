@@ -39,8 +39,9 @@ const FontsProvider: React.FC<PropsWithChildren> = ({ children }) => {
 };
 
 /**
- * @TODO Andrii:
- * 1. add configurable sorting of files/folders
+ * @TODO Andrii now:
+ * 1. icon and title of app
+ * 2. localizations on other langs
  */
 
 const App = () => {
