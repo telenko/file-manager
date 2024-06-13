@@ -40,10 +40,6 @@ export const FileGuiHelper = {
           {
             text: i18n.t('delete'),
             onPress: async () => {
-              console.log(
-                'SSSSSSSSSSSSs',
-                getGlobalExceptionHandler()?.handleError,
-              );
               await FileApi.deleteItemsBatched(files).catch(
                 getGlobalExceptionHandler()?.handleError,
               );
