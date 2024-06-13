@@ -18,6 +18,7 @@ import {
 } from '../../../widgets/FileManager';
 import { type FileScreenProps } from '..';
 import { useFileTreeContext } from '../FileTreeContext';
+import { useExceptionHandler } from '../../../common/components/ExceptionHandler';
 
 type DirItemProps = {
   item: DirectoryItemType;
@@ -80,6 +81,7 @@ const DirectoryItemView: React.FC<DirItemProps> = ({ item }) => {
   const navigation = useNavigation();
   const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
+  const exceptionHandler = useExceptionHandler();
 
   const mode = useMemo<FileScreenProps['route']['params']['mode']>(
     () => getRouteMetadatas(navigation)?.mode,
@@ -118,7 +120,7 @@ const DirectoryItemView: React.FC<DirItemProps> = ({ item }) => {
           key: 'openWith',
           enabled: item.isFile(),
           onPress: () => {
-            FileApi.openFile(item);
+            FileApi.openFile(item).catch(exceptionHandler.handleError);
           },
         },
         {
@@ -332,7 +334,7 @@ const DirectoryItemView: React.FC<DirItemProps> = ({ item }) => {
             if (FileApi.isFileViewable(item)) {
               fileManager.openPreview(item, navigation);
             } else {
-              FileApi.openFile(item);
+              FileApi.openFile(item).catch(exceptionHandler.handleError);
             }
           }
         } else {

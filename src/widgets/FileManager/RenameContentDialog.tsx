@@ -3,9 +3,11 @@ import { Button, Dialog, Portal, Text, TextInput } from 'react-native-paper';
 import { useFileManager } from './FileManagerContext';
 import { FileApi } from '../../services/FileApi';
 import { useTranslation } from 'react-i18next';
+import { useExceptionHandler } from '../../common/components/ExceptionHandler';
 
 const RenameContentDialog: React.FC = () => {
   const fileManager = useFileManager();
+  const exceptionHandler = useExceptionHandler();
 
   const [text, setText] = useState('');
   const [textReady, setTextReady] = useState(false);
@@ -48,7 +50,10 @@ const RenameContentDialog: React.FC = () => {
           <Button
             onPress={async () => {
               hideDialog();
-              await FileApi.renameItem(fileManager.renameDialogItem!, text);
+              await FileApi.renameItem(
+                fileManager.renameDialogItem!,
+                text,
+              ).catch(exceptionHandler.handleError);
               fileManager.setReloadRequired(true);
             }}>
             {t('done')}

@@ -21,6 +21,7 @@ import ActionButton from '../../common/components/ActionButton';
 import NewFolderIcon from '../../widgets/FileManager/NewFolderIcon';
 import MultiSelectActions from './MultiSelectActions';
 import { useBackAction } from '../../common/hooks/useBackAction';
+import { useExceptionHandler } from '../../common/components/ExceptionHandler';
 
 export type FileScreenProps = {
   route: {
@@ -99,9 +100,10 @@ const FileScreen: React.FC<FileScreenProps> = ({
       setDirItems(sortedDirItems);
       setDirLoadingDone(true);
       Cache.putDirItems(route ?? FileApi.ROOT_PATH, sortedDirItems);
-    } catch (e) {
+    } catch (e: any) {
       setDirError(e as Error);
       setDirItems([]);
+      exceptionHandler.handleError(e);
     } finally {
       setDirLoading(false);
     }
@@ -147,6 +149,8 @@ const FileScreen: React.FC<FileScreenProps> = ({
     return false;
   }, [selectedPaths]);
   useBackAction(backHandle);
+
+  const exceptionHandler = useExceptionHandler();
 
   // virtualized memoized contents
   const dataProvider = useMemo(
@@ -226,8 +230,7 @@ const FileScreen: React.FC<FileScreenProps> = ({
                     navigateFromSelectable(navigator);
                     fileManager.setReloadRequired(true);
                   })
-                  // @TODO Andrii errors handling
-                  .catch(console.error)
+                  .catch(exceptionHandler.handleError)
                   .finally(() => setCopyInProgress(false));
               }}
             />
@@ -250,8 +253,7 @@ const FileScreen: React.FC<FileScreenProps> = ({
                     navigateFromSelectable(navigator);
                     fileManager.setReloadRequired(true);
                   })
-                  // @TODO Andrii errors handling
-                  .catch(console.error)
+                  .catch(exceptionHandler.handleError)
                   .finally(() => setMoveInProgress(false));
               }}
             />

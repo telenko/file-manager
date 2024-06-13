@@ -4,7 +4,10 @@ import Share from 'react-native-share';
 import { FileOpener } from './FileOpener';
 import i18n from '../i18n/i18n';
 import { makeQueueable } from '../common/utils/queue';
-
+import {
+  ErrorType,
+  FileManagerError,
+} from '../common/components/ExceptionHandler';
 export type DirItem = RNFS.ReadDirItem;
 
 const resolveCounterConflictRecursive = async (
@@ -28,34 +31,22 @@ const resolveCounterConflictRecursive = async (
 };
 
 const getMimeType = async (filePath: string) => {
-  try {
-    // const res = await RNFetchBlob.fs.readFile(filePath, 'base64');
-    // const type = RNFetchBlob.config(res);
-    const extension = filePath.split('.').pop()?.toLowerCase();
-    const mimeTypes: Record<string, string> = {
-      // Add more file extensions and corresponding MIME types as needed
-      jpg: 'image/jpeg',
-      jpeg: 'image/jpeg',
-      png: 'image/png',
-      gif: 'image/gif',
-      pdf: 'application/pdf',
-      // Add more here...
-    };
+  const extension = filePath.split('.').pop()?.toLowerCase();
+  const mimeTypes: Record<string, string> = {
+    // Add more file extensions and corresponding MIME types as needed
+    jpg: 'image/jpeg',
+    jpeg: 'image/jpeg',
+    png: 'image/png',
+    gif: 'image/gif',
+    pdf: 'application/pdf',
+    // Add more here...
+  };
 
-    return mimeTypes[extension ?? ''] || 'application/octet-stream'; // Default to binary if MIME type not found
-  } catch (error) {
-    console.error('Error getting MIME type:', error);
-    return null;
-  }
+  return mimeTypes[extension ?? ''] || 'application/octet-stream'; // Default to binary if MIME type not found
 };
 
 const generateContentUri = async (filePath: string) => {
-  try {
-    return `content://${filePath}`;
-  } catch (error) {
-    console.error('Error generating content URI:', error);
-    return null;
-  }
+  return `content://${filePath}`;
 };
 
 const makeVideoPreviewQueued = makeQueueable(
@@ -82,17 +73,35 @@ const makeVideoPreviewQueued = makeQueueable(
 
 export const FileApi = {
   ROOT_PATH: RNFS.ExternalStorageDirectoryPath,
-  readDir: RNFS.readDir,
-  getMetadata: async (path: string): Promise<DirItem> => {
-    const res = await RNFS.stat(path);
-    return {
-      ...res,
-      name: res.name ?? '',
-      ctime: new Date(res.ctime),
-      mtime: new Date(res.mtime),
-    };
+  readDir: (path: string) => {
+    try {
+      return RNFS.readDir(path);
+    } catch (e) {
+      throw new FileManagerError(
+        i18n.t('readDirFailed'),
+        ErrorType.FILE_API,
+        e,
+      );
+    }
   },
-  openFile: (item: DirItem) => {
+  getMetadata: async (path: string): Promise<DirItem> => {
+    try {
+      const res = await RNFS.stat(path);
+      return {
+        ...res,
+        name: res.name ?? '',
+        ctime: new Date(res.ctime),
+        mtime: new Date(res.mtime),
+      };
+    } catch (e) {
+      throw new FileManagerError(
+        i18n.t('fileMetadataFailed'),
+        ErrorType.FILE_API,
+        e,
+      );
+    }
+  },
+  openFile: async (item: DirItem) => {
     if (!item.isFile()) {
       return;
     }
@@ -104,7 +113,15 @@ export const FileApi = {
     });
   },
   createFolder: async (path: string) => {
-    return RNFS.mkdir(path);
+    try {
+      return RNFS.mkdir(path);
+    } catch (e) {
+      throw new FileManagerError(
+        i18n.t('createFolderFailed'),
+        ErrorType.FILE_API,
+        e,
+      );
+    }
   },
   copyFileOrDirectory: async (
     source: string,
@@ -160,11 +177,23 @@ export const FileApi = {
     destination: string,
     injectCopyNIfConflict: boolean = false,
   ) => {
-    return Promise.all(
-      sources.map(source =>
-        FileApi.copyFileOrDirectory(source, destination, injectCopyNIfConflict),
-      ),
-    );
+    try {
+      return Promise.all(
+        sources.map(source =>
+          FileApi.copyFileOrDirectory(
+            source,
+            destination,
+            injectCopyNIfConflict,
+          ),
+        ),
+      );
+    } catch (e) {
+      throw new FileManagerError(
+        i18n.t('copyBatchFailed'),
+        ErrorType.FILE_API,
+        e,
+      );
+    }
   },
 
   moveFileOrDirectory: async (
@@ -237,28 +266,52 @@ export const FileApi = {
     destination: string,
     injectCopyNIfConflict: boolean = false,
   ) => {
-    return Promise.all(
-      sources.map(source =>
-        FileApi.moveFileOrDirectory(source, destination, injectCopyNIfConflict),
-      ),
-    );
+    try {
+      return Promise.all(
+        sources.map(source =>
+          FileApi.moveFileOrDirectory(
+            source,
+            destination,
+            injectCopyNIfConflict,
+          ),
+        ),
+      );
+    } catch (e) {
+      throw new FileManagerError(
+        i18n.t('moveBatchFailed'),
+        ErrorType.FILE_API,
+        e,
+      );
+    }
   },
 
   renameItem: async (dirItem: DirItem, newName: string) => {
-    const dirItemPathTokens = dirItem.path.split('/');
-    const fileName = dirItemPathTokens.pop();
-    if (fileName === newName) {
-      return;
+    try {
+      const dirItemPathTokens = dirItem.path.split('/');
+      const fileName = dirItemPathTokens.pop();
+      if (fileName === newName) {
+        return;
+      }
+      const parentItem = dirItemPathTokens.join('/');
+      const destinationPath = parentItem + '/' + newName;
+      await FileApi.moveFileOrDirectory(dirItem.path, destinationPath);
+    } catch (e) {
+      throw new FileManagerError(i18n.t('renameFailed'), ErrorType.FILE_API, e);
     }
-    const parentItem = dirItemPathTokens.join('/');
-    const destinationPath = parentItem + '/' + newName;
-    await FileApi.moveFileOrDirectory(dirItem.path, destinationPath);
   },
   deleteItem: async (item: DirItem) => {
-    await RNFS.unlink(item.path);
+    try {
+      await RNFS.unlink(item.path);
+    } catch (e) {
+      throw new FileManagerError(i18n.t('deleteFailed'), ErrorType.FILE_API, e);
+    }
   },
   deleteItemsBatched: async (items: DirItem[]) => {
-    return Promise.all(items.map(FileApi.deleteItem));
+    try {
+      return Promise.all(items.map(FileApi.deleteItem));
+    } catch (e) {
+      throw new FileManagerError(i18n.t('deleteFailed'), ErrorType.FILE_API, e);
+    }
   },
   // Note, UNIX specific
   isItemHidden: (dirItem: DirItem) => {
@@ -324,15 +377,15 @@ export const FileApi = {
     });
   },
   shareFile: async (file: DirItem) => {
-    if (!file.isFile()) {
-      return;
+    try {
+      if (!file.isFile()) {
+        return;
+      }
+      const contentUri = await generateContentUri(file.path);
+      const mimeType = await getMimeType(file.path);
+      await Share.open({ url: contentUri, type: mimeType });
+    } finally {
     }
-    const contentUri = await generateContentUri(file.path);
-    const mimeType = await getMimeType(file.path);
-    if (!contentUri || !mimeType) {
-      throw new Error('Failed to share file - file path seem to be invalid');
-    }
-    await Share.open({ url: contentUri, type: mimeType });
   },
   sortDirItems: (
     dirItems: DirItem[],

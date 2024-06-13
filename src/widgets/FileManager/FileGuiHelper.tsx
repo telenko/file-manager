@@ -3,6 +3,7 @@ import i18n from '../../i18n/i18n';
 import { DirItem, FileApi } from '../../services/FileApi';
 import { NavigationProp } from '@react-navigation/native';
 import { FileManagerNavigation } from '../../common/types/navigation';
+import { getGlobalExceptionHandler } from '../../common/components/ExceptionHandler';
 
 export const getRouteMetadatas = (
   navigator: NavigationProp<FileManagerNavigation>,
@@ -39,7 +40,13 @@ export const FileGuiHelper = {
           {
             text: i18n.t('delete'),
             onPress: async () => {
-              await FileApi.deleteItemsBatched(files);
+              console.log(
+                'SSSSSSSSSSSSs',
+                getGlobalExceptionHandler()?.handleError,
+              );
+              await FileApi.deleteItemsBatched(files).catch(
+                getGlobalExceptionHandler()?.handleError,
+              );
               resolved = true;
               resolve(true);
             },

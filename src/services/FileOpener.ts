@@ -1,4 +1,9 @@
 import { NativeEventEmitter, NativeModules, Platform } from 'react-native';
+import {
+  ErrorType,
+  FileManagerError,
+} from '../common/components/ExceptionHandler';
+import i18n from '../i18n/i18n';
 
 const LocalFileViewer = NativeModules.LocalFileViewer;
 const eventEmitter = new NativeEventEmitter(LocalFileViewer);
@@ -62,7 +67,13 @@ function normalize(path: string) {
       path = path.substring(filePrefix.length);
       try {
         path = decodeURI(path);
-      } catch (e) {}
+      } catch (e) {
+        throw new FileManagerError(
+          i18n.t('failedToOpenPath'),
+          ErrorType.FILE_API,
+          e,
+        );
+      }
     }
   }
   return path;

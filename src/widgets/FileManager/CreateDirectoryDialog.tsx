@@ -3,9 +3,11 @@ import { Button, Dialog, Portal, Text, TextInput } from 'react-native-paper';
 import { useFileManager } from './FileManagerContext';
 import { FileApi } from '../../services/FileApi';
 import { useTranslation } from 'react-i18next';
+import { useExceptionHandler } from '../../common/components/ExceptionHandler';
 
 const CreateDirectoryDialog: React.FC = () => {
   const fileManager = useFileManager();
+  const exceptionHandler = useExceptionHandler();
 
   const [text, setText] = useState('');
 
@@ -38,7 +40,9 @@ const CreateDirectoryDialog: React.FC = () => {
           <Button
             onPress={async () => {
               hideDialog();
-              await FileApi.createFolder(`${fileManager.newDirPath}/${text}`);
+              await FileApi.createFolder(
+                `${fileManager.newDirPath}/${text}`,
+              ).catch(exceptionHandler.handleError);
               fileManager.setReloadRequired(true);
             }}>
             {t('done')}

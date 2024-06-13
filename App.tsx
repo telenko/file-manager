@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next';
 import { FileApi } from './src/services/FileApi';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import ExceptionHandler from './src/common/components/ExceptionHandler';
 
 // const App = AppLegacy;
 
@@ -37,6 +38,11 @@ const FontsProvider: React.FC<PropsWithChildren> = ({ children }) => {
   return <PaperProvider theme={theme}>{children}</PaperProvider>;
 };
 
+/**
+ * @TODO Andrii:
+ * 1. add configurable sorting of files/folders
+ */
+
 const App = () => {
   const [permissionGranted, setPermissionGranted] = useState<boolean>(false);
   useDeviceLocale();
@@ -49,7 +55,9 @@ const App = () => {
       <SafeAreaProvider>
         <FontsProvider>
           {permissionGranted ? (
-            <FileManager />
+            <ExceptionHandler>
+              <FileManager />
+            </ExceptionHandler>
           ) : (
             <Text>{t('permissionRequired')}</Text>
           )}

@@ -35,5 +35,16 @@
     "fileLastChange": "Last mofidied",
     "ok": "Ok",
     "selectedNItems": "Selected {{n}}",
-    "select": "Select"
+    "select": "Select",
+
+
+    "errorOccured": "Error happened :(",
+    "readDirFailed": "Cannot read directory. Please ensure app is given rights to read your file system",
+    "fileMetadataFailed": "Failed to process file. Please ensure app is given rights to read your file system",
+    "createFolderFailed": "Failed to create folder. Please ensure app is given rights to write to your file system",
+    "copyBatchFailed": "Failed to copy. Please ensure app is given rights to write to your file system",
+    "moveBatchFailed": "Failed to move. Please ensure app is given rights to write to your file system",
+    "renameFailed": "Failed to rename. Please ensure app is given rights to write to your file system",
+    "deleteFailed": "Failed to delete. Please ensure app is given rights to write to your file system",
+    "failedToOpenPath": "Failed to open file. Please ensure app is given rights to read your file system"
 }
