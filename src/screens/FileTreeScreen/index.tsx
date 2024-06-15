@@ -94,13 +94,8 @@ const FileScreen: React.FC<FileScreenProps> = ({
     await new Promise(r => setTimeout(r, 100));
     try {
       const newDirItems = await FileApi.readDir(route ?? FileApi.ROOT_PATH);
-      const sortedDirItems = FileApi.sortDirItems(
-        newDirItems.filter(file => !FileApi.isItemHidden(file)),
-        fileManager.sort,
-      );
-      setDirItems(sortedDirItems);
+      setDirItems(newDirItems.filter(file => !FileApi.isItemHidden(file)));
       setDirLoadingDone(true);
-      Cache.putDirItems(route ?? FileApi.ROOT_PATH, sortedDirItems);
     } catch (e: any) {
       setDirError(e as Error);
       setDirItems([]);
@@ -110,20 +105,15 @@ const FileScreen: React.FC<FileScreenProps> = ({
     }
   }, [route]);
 
+  const sortedDirItems = useMemo<DirItem[]>(() => {
+    return FileApi.sortDirItems(
+      dirItems.filter(file => !FileApi.isItemHidden(file)),
+      fileManager.sort,
+    );
+  }, [dirItems, fileManager.sort]);
   useEffect(() => {
-    if (dirItems.length > 0) {
-      (async () => {
-        const sortedDirItems = FileApi.sortDirItems(
-          dirItems.filter(file => !FileApi.isItemHidden(file)),
-          fileManager.sort,
-        );
-        await new Promise<void>(r => setTimeout(r, 100));
-        setDirItems(sortedDirItems);
-        Cache.putDirItems(route ?? FileApi.ROOT_PATH, sortedDirItems);
-        await new Promise<void>(r => setTimeout(r, 100));
-      })();
-    }
-  }, [fileManager.sort]);
+    Cache.putDirItems(route ?? FileApi.ROOT_PATH, sortedDirItems);
+  }, [sortedDirItems]);
 
   const value = useMemo<FileTreeContextType>(
     () => ({
@@ -170,8 +160,8 @@ const FileScreen: React.FC<FileScreenProps> = ({
 
   // virtualized memoized contents
   const dataProvider = useMemo(
-    () => new DataProvider((r1, r2) => r1 !== r2).cloneWithRows(dirItems),
-    [dirItems],
+    () => new DataProvider((r1, r2) => r1 !== r2).cloneWithRows(sortedDirItems),
+    [sortedDirItems],
   );
   const layoutProvider = useMemo(
     () =>
@@ -197,7 +187,7 @@ const FileScreen: React.FC<FileScreenProps> = ({
         <View style={styles.breadCrumbsContainer}>
           <FilePathBreadCrumb />
         </View>
-        {dirLoadingDone && dirItems.length === 0 ? (
+        {dirLoadingDone && sortedDirItems.length === 0 ? (
           <ScrollView
             contentContainerStyle={{
               flex: 1,

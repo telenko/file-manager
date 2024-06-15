@@ -79,7 +79,7 @@ const ImagePreviewScreen: React.FC<ImageViewerScreenProps> = ({
         if (!file) {
           return;
         }
-        FileApi.shareFile(file);
+        FileApi.shareFile([file]);
       },
     },
     {

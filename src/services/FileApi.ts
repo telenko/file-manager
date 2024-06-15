@@ -30,7 +30,7 @@ const resolveCounterConflictRecursive = async (
   return resultPath;
 };
 
-const getMimeType = async (filePath: string) => {
+const getMimeType = (filePath: string) => {
   const extension = filePath.split('.').pop()?.toLowerCase();
   const mimeTypes: Record<string, string> = {
     // Add more file extensions and corresponding MIME types as needed
@@ -45,7 +45,7 @@ const getMimeType = async (filePath: string) => {
   return mimeTypes[extension ?? ''] || 'application/octet-stream'; // Default to binary if MIME type not found
 };
 
-const generateContentUri = async (filePath: string) => {
+const generateContentUri = (filePath: string) => {
   return `content://${filePath}`;
 };
 
@@ -376,14 +376,23 @@ export const FileApi = {
       );
     });
   },
-  shareFile: async (file: DirItem) => {
+  shareFile: async (files: DirItem[]) => {
     try {
-      if (!file.isFile()) {
+      const filesChecked = files.filter(f => f.isFile());
+      if (filesChecked.length === 0) {
         return;
       }
-      const contentUri = await generateContentUri(file.path);
-      const mimeType = await getMimeType(file.path);
-      await Share.open({ url: contentUri, type: mimeType });
+      const contentUris = filesChecked.map(file =>
+        generateContentUri(file.path),
+      );
+      const mimeTypes = filesChecked.map(file => getMimeType(file.path));
+      const targetMimeType: string = (() => {
+        if (new Set(mimeTypes).size > 1) {
+          return 'application/octet-stream';
+        }
+        return mimeTypes[0];
+      })();
+      await Share.open({ urls: contentUris, type: targetMimeType });
     } finally {
     }
   },
@@ -394,15 +403,15 @@ export const FileApi = {
     const koef = sortDirection === 'asc' ? 1 : -1;
     return [...dirItems].sort((dirItemA, dirItemB) => {
       if (dirItemA.isDirectory() && !dirItemB.isDirectory()) {
-        return -1 * koef;
+        return -1;
       } else if (!dirItemA.isDirectory() && dirItemB.isDirectory()) {
-        return 1 * koef;
+        return 1;
       }
       if (dirItemA.isDirectory() && dirItemB.isDirectory()) {
         if (dirItemA.name < dirItemB.name) {
-          return -1 * koef;
+          return -1;
         } else if (dirItemA.name > dirItemB.name) {
-          return 1 * koef;
+          return 1;
         }
         return 0;
       }

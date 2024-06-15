@@ -40,8 +40,7 @@ const FontsProvider: React.FC<PropsWithChildren> = ({ children }) => {
 
 /**
  * @TODO Andrii now:
- * 1. icon and title of app
- * 2. localizations on other langs
+ * 3. delete in gallery behavior: keep gallery open
  */
 
 const App = () => {

@@ -111,7 +111,7 @@ const DirectoryItemView: React.FC<DirItemProps> = ({ item }) => {
           key: 'share',
           enabled: item.isFile(),
           onPress: () => {
-            FileApi.shareFile(item);
+            FileApi.shareFile([item]);
           },
         },
         {
