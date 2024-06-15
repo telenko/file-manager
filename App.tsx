@@ -40,6 +40,7 @@ const FontsProvider: React.FC<PropsWithChildren> = ({ children }) => {
 
 /**
  * @TODO Andrii now:
+ * 1. getAllExternalFilesDirs()
  * 3. delete in gallery behavior: keep gallery open
  */
 

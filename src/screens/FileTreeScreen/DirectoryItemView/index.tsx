@@ -315,13 +315,16 @@ const DirectoryItemView: React.FC<DirItemProps> = ({ item }) => {
           : () => null
       }
       onLongPress={() => {
+        if (!operationsAllowed) {
+          return;
+        }
         fileTreeScreen.setSelectedPaths([
           ...fileTreeScreen.selectedPaths,
           item.path,
         ]);
       }}
       onPress={() => {
-        if (multiSelectActivated) {
+        if (multiSelectActivated && operationsAllowed) {
           fileTreeScreen.setSelectedPaths(
             isSelected
               ? fileTreeScreen.selectedPaths.filter(p => p !== item.path)
