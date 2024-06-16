@@ -2,24 +2,43 @@ import { useMemo } from 'react';
 import { BreadCrumbItem } from '../components/BreadCrumbs';
 import { useNavigation } from './useNavigation';
 import { FileApi } from '../../services/FileApi';
+import { FileGuiHelper } from '../../widgets/FileManager/FileGuiHelper';
 
 export const usePathBreadCrumbs = (dirPath: string): BreadCrumbItem[] => {
   const navigation = useNavigation();
   const result = useMemo<BreadCrumbItem[]>(() => {
-    const rootPath = FileApi.ROOT_PATH;
+    if (FileApi.ROOTS.length === 0) {
+      return [];
+    }
+    const rootMatchingItem = FileApi.ROOTS.find(systemRoot =>
+      dirPath.includes(systemRoot.path),
+    );
+    if (!rootMatchingItem) {
+      return [];
+    }
+    const rootPath = rootMatchingItem.path;
     const rootPathSize = rootPath.split('/').length;
     const pathItems = dirPath.split('/').filter(item => item !== ''); // Split path and filter out empty strings
     const breadCrumbs: BreadCrumbItem[] = [];
     let accumulatedPath = '';
 
     breadCrumbs.push({
-      name: 'deviceRoot',
-      needTranslate: true,
+      name: rootMatchingItem.name,
       id: rootPath,
       onPress: () => {
         // @ts-ignore
         navigation.popToTop();
       },
+      menuItems:
+        FileApi.ROOTS.length > 0
+          ? FileApi.ROOTS.map(root => ({
+              id: `menu_${root.path}`,
+              name: root.name,
+              onPress: () => {
+                FileGuiHelper.openDirectory(root, navigation);
+              },
+            }))
+          : [],
     });
     for (let i = 0; i < pathItems.length; i++) {
       accumulatedPath += `/${pathItems[i]}`;
@@ -36,6 +55,6 @@ export const usePathBreadCrumbs = (dirPath: string): BreadCrumbItem[] => {
     }
 
     return breadCrumbs;
-  }, [dirPath, navigation]);
+  }, [dirPath, navigation, FileApi.ROOTS]);
   return result;
 };

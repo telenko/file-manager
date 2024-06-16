@@ -71,9 +71,63 @@ const makeVideoPreviewQueued = makeQueueable(
   4,
 );
 
+let ROOTS: DirItem[] = [];
+let ROOT_STORAGE: DirItem | null = null;
+
 export const FileApi = {
-  ROOT_PATH: RNFS.ExternalStorageDirectoryPath,
-  readDir: (path: string) => {
+  get ROOT_PATH() {
+    return ROOT_STORAGE?.path ?? '/storage/emulated/0';
+  },
+  get ROOTS() {
+    return ROOTS;
+  },
+  // @TODO Andrii work on it
+  /**
+   * https://code.nkslearning.com/blogs/get-absolute-paths-of-internal-and-external-storages-in-android_6560bb60cde142b303bf
+   */
+  prepareFsRoots: async (): Promise<DirItem[]> => {
+    try {
+      if (ROOTS.length > 0) {
+        return ROOTS;
+      }
+      const rootDirs = await RNFS.getAllExternalFilesDirs();
+      // @ts-ignore
+      const rootDirItems: DirItem[] = rootDirs
+        .map(path => path.replace(/\/Android\/data\/[^/]+\/files/, ''))
+        .map(rootPath => {
+          // @TODO Andrii - warning, Android specific logic
+          const isMainStorage = rootPath.endsWith('/0');
+          const builtinName = rootPath.split('/').pop();
+          return {
+            name: isMainStorage
+              ? i18n.t('deviceRoot')
+              : i18n.t('sdCardRoot', { name: builtinName }),
+            path: rootPath,
+            isDirectory: () => true,
+            isFile: () => false,
+            isStorage: true,
+            isMainStorage,
+          };
+        });
+
+      // @ts-ignore
+      ROOT_STORAGE = rootDirItems.find(r => r.isMainStorage);
+      if (!ROOT_STORAGE) {
+        ROOT_STORAGE = rootDirItems[0];
+      }
+
+      ROOTS = rootDirItems;
+
+      return ROOTS;
+    } catch (e) {
+      throw new FileManagerError(
+        i18n.t('readDirFailed'),
+        ErrorType.FILE_API,
+        e,
+      );
+    }
+  },
+  readDir: async (path: string) => {
     try {
       return RNFS.readDir(path);
     } catch (e) {

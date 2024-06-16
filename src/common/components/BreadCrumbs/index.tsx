@@ -1,14 +1,13 @@
-import React, { useEffect, useRef } from 'react';
-import { useTranslation } from 'react-i18next';
+import React, { useEffect, useRef, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
-import { Chip, Icon, MD3Colors } from 'react-native-paper';
+import { Chip, Icon, MD3Colors, Menu } from 'react-native-paper';
 import { theme } from '../../../theme';
 
 export type BreadCrumbItem = {
   id: string;
   name: string;
-  needTranslate?: boolean;
   onPress?: (id: string) => void;
+  menuItems?: (Omit<BreadCrumbItem, 'onPress'> & { onPress: () => void })[];
 };
 
 type BreadCrumbsProps = {
@@ -16,13 +15,13 @@ type BreadCrumbsProps = {
 };
 
 const BreadCrumbs: React.FC<BreadCrumbsProps> = ({ items }) => {
-  const { t } = useTranslation();
   const scrollViewRef = useRef<any>(null);
   useEffect(() => {
     if (scrollViewRef.current) {
       scrollViewRef.current.scrollToEnd({ animated: true });
     }
   }, [items]);
+  const [menuOpen, setMenuOpen] = useState(false);
   return (
     <ScrollView
       ref={scrollViewRef}
@@ -30,23 +29,55 @@ const BreadCrumbs: React.FC<BreadCrumbsProps> = ({ items }) => {
       showsHorizontalScrollIndicator={false}
       contentContainerStyle={styles.container}>
       {items.map((item, index) => {
+        const hasMenu = !!item.menuItems && item.menuItems.length > 0;
         const isActive = index === items.length - 1;
+        const chipLayout = (
+          <Chip
+            selected={isActive}
+            mode="flat"
+            onPress={() => {
+              if (isActive) {
+                if (hasMenu) {
+                  setMenuOpen(true);
+                }
+                return;
+              }
+              item.onPress?.(item.id);
+            }}
+            onClose={item.menuItems ? () => {} : undefined}
+            closeIcon={item.menuItems ? 'arrow-down' : undefined}
+            textStyle={{
+              ...styles.text,
+              fontFamily: isActive ? theme.mediumText : theme.regularText,
+            }}
+            style={{
+              ...styles.item,
+              ...(isActive ? styles.activeItem : styles.inactiveItem),
+            }}>
+            {item.name}
+          </Chip>
+        );
         return (
           <View key={item.id} style={styles.itemContainer}>
-            <Chip
-              selected={isActive}
-              mode="flat"
-              onPress={() => item.onPress?.(item.id)}
-              textStyle={{
-                ...styles.text,
-                fontFamily: isActive ? theme.mediumText : theme.regularText,
-              }}
-              style={{
-                ...styles.item,
-                ...(isActive ? styles.activeItem : styles.inactiveItem),
-              }}>
-              {item.needTranslate ? t(item.name) : item.name}
-            </Chip>
+            {hasMenu ? (
+              <Menu
+                visible={menuOpen}
+                onDismiss={() => setMenuOpen(false)}
+                anchor={chipLayout}>
+                {item.menuItems?.map(item => (
+                  <Menu.Item
+                    key={item.id}
+                    title={item.name}
+                    onPress={() => {
+                      setMenuOpen(false);
+                      item.onPress();
+                    }}
+                  />
+                ))}
+              </Menu>
+            ) : (
+              chipLayout
+            )}
             {index >= 0 && index < items.length - 1 ? (
               <Icon size={20} source="chevron-right" />
             ) : null}

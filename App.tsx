@@ -40,28 +40,38 @@ const FontsProvider: React.FC<PropsWithChildren> = ({ children }) => {
 
 /**
  * @TODO Andrii now:
- * 1. getAllExternalFilesDirs()
- * 3. delete in gallery behavior: keep gallery open
+ * 1. [MUST] getAllExternalFilesDirs()
+ * 2. [MUST] error modal : add button to generate support request with logs
+ * 3. handle not enough memory during COPY/MOVE case [SD + device]
+ * - gallery sliding bug
+ * 4. create regulations page on github
+ * 5. release beta
+ *
+ * FUTURE IMPS:
+ * 1. delete in gallery behavior: keep gallery open
  */
 
 const App = () => {
   const [permissionGranted, setPermissionGranted] = useState<boolean>(false);
+  const [fsReady, setFsReady] = useState(false);
   useDeviceLocale();
   const { t } = useTranslation();
   useEffect(() => {
-    FileApi.askForStoragePermission().then(() => setPermissionGranted(true));
+    FileApi.askForStoragePermission()
+      .then(() => setPermissionGranted(true))
+      .then(() => FileApi.prepareFsRoots())
+      .then(() => setFsReady(true));
   }, []);
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <FontsProvider>
-          {permissionGranted ? (
+          {permissionGranted && fsReady ? (
             <ExceptionHandler>
               <FileManager />
             </ExceptionHandler>
-          ) : (
-            <Text>{t('permissionRequired')}</Text>
-          )}
+          ) : null}
+          {!permissionGranted ? <Text>{t('permissionRequired')}</Text> : null}
         </FontsProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>

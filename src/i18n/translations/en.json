@@ -1,6 +1,7 @@
 {
     "title": "File Manager",
     "deviceRoot": "Storage",
+    "sdCardRoot": "SD Card {{name}}",
     "permissionRequired": "We need permission to access storage",
     "openWithTitle": "Open File With",
     "imageViewer": "Image preview",
