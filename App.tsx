@@ -40,7 +40,6 @@ const FontsProvider: React.FC<PropsWithChildren> = ({ children }) => {
 
 /**
  * @TODO Andrii now:
- * 1. [MUST] getAllExternalFilesDirs()
  * 2. [MUST] error modal : add button to generate support request with logs
  * 3. handle not enough memory during COPY/MOVE case [SD + device]
  * - gallery sliding bug
@@ -49,6 +48,9 @@ const FontsProvider: React.FC<PropsWithChildren> = ({ children }) => {
  *
  * FUTURE IMPS:
  * 1. delete in gallery behavior: keep gallery open
+ * 
+ * TEST:
+ * 1. SDCard
  */
 
 const App = () => {

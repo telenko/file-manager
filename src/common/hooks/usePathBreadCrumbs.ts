@@ -30,7 +30,7 @@ export const usePathBreadCrumbs = (dirPath: string): BreadCrumbItem[] => {
         navigation.popToTop();
       },
       menuItems:
-        FileApi.ROOTS.length > 0
+        FileApi.ROOTS.length > 1
           ? FileApi.ROOTS.map(root => ({
               id: `menu_${root.path}`,
               name: root.name,

@@ -44,8 +44,8 @@ const BreadCrumbs: React.FC<BreadCrumbsProps> = ({ items }) => {
               }
               item.onPress?.(item.id);
             }}
-            onClose={item.menuItems ? () => {} : undefined}
-            closeIcon={item.menuItems ? 'arrow-down' : undefined}
+            onClose={hasMenu ? () => {} : undefined}
+            closeIcon={hasMenu ? 'arrow-down' : undefined}
             textStyle={{
               ...styles.text,
               fontFamily: isActive ? theme.mediumText : theme.regularText,
