@@ -81,7 +81,6 @@ export const FileApi = {
   get ROOTS() {
     return ROOTS;
   },
-  // @TODO Andrii work on it
   /**
    * https://code.nkslearning.com/blogs/get-absolute-paths-of-internal-and-external-storages-in-android_6560bb60cde142b303bf
    */
