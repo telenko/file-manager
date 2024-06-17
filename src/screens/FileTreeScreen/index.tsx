@@ -22,6 +22,7 @@ import MultiSelectActions from './MultiSelectActions';
 import { useBackAction } from '../../common/hooks/useBackAction';
 import { useExceptionHandler } from '../../common/components/ExceptionHandler';
 import DefaultFolderActions from '../../widgets/FileManager/DefaultFolderActions';
+import StorageSelect from './StorageSelect';
 
 export type FileScreenProps = {
   route: {
@@ -51,6 +52,7 @@ const FileScreen: React.FC<FileScreenProps> = ({
   const [moveInProgress, setMoveInProgress] = useState<boolean>(false);
   const fileManager = useFileManager();
   const isMultiSelectActivated = selectedPaths.length > 0;
+  const isStorageLevel = FileApi.ROOTS.map(r => r.path).includes(route);
   useEffect(() => {
     let title = '';
     if (isMultiSelectActivated) {
@@ -185,7 +187,7 @@ const FileScreen: React.FC<FileScreenProps> = ({
     <FileTreeContext.Provider value={value}>
       <View style={styles.container}>
         <View style={styles.breadCrumbsContainer}>
-          <FilePathBreadCrumb />
+          {isStorageLevel ? <StorageSelect /> : <FilePathBreadCrumb />}
         </View>
         {dirLoadingDone && sortedDirItems.length === 0 ? (
           <ScrollView

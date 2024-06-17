@@ -2,7 +2,6 @@ import { useMemo } from 'react';
 import { BreadCrumbItem } from '../components/BreadCrumbs';
 import { useNavigation } from './useNavigation';
 import { FileApi } from '../../services/FileApi';
-import { FileGuiHelper } from '../../widgets/FileManager/FileGuiHelper';
 
 export const usePathBreadCrumbs = (dirPath: string): BreadCrumbItem[] => {
   const navigation = useNavigation();
@@ -29,16 +28,6 @@ export const usePathBreadCrumbs = (dirPath: string): BreadCrumbItem[] => {
         // @ts-ignore
         navigation.popToTop();
       },
-      menuItems:
-        FileApi.ROOTS.length > 1
-          ? FileApi.ROOTS.map(root => ({
-              id: `menu_${root.path}`,
-              name: root.name,
-              onPress: () => {
-                FileGuiHelper.openDirectory(root, navigation);
-              },
-            }))
-          : [],
     });
     for (let i = 0; i < pathItems.length; i++) {
       accumulatedPath += `/${pathItems[i]}`;

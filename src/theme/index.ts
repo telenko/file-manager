@@ -12,9 +12,11 @@ export const theme = {
   xlxFileColor: '#30b516',
   archiveFileColor: '#dba50f',
   fileMenuColor: '#ababab',
+  selectionColor: 'rgb(235, 235, 235)',
+  radiusPrimary: 10,
   sizes: {
     NO_DATA_ICON: 40,
     HEADER_ICON: 25,
     HEADER_TITLE_FONT: 20,
-  }
+  },
 };

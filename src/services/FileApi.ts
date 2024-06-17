@@ -8,7 +8,10 @@ import {
   ErrorType,
   FileManagerError,
 } from '../common/components/ExceptionHandler';
-export type DirItem = RNFS.ReadDirItem;
+export type DirItem = RNFS.ReadDirItem & {
+  isMainStorage?: boolean;
+  isStorage?: boolean;
+};
 
 const resolveCounterConflictRecursive = async (
   destination: string,

@@ -1,13 +1,12 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
-import { Chip, Icon, MD3Colors, Menu } from 'react-native-paper';
+import { Chip, Icon, MD3Colors } from 'react-native-paper';
 import { theme } from '../../../theme';
 
 export type BreadCrumbItem = {
   id: string;
   name: string;
   onPress?: (id: string) => void;
-  menuItems?: (Omit<BreadCrumbItem, 'onPress'> & { onPress: () => void })[];
 };
 
 type BreadCrumbsProps = {
@@ -21,7 +20,6 @@ const BreadCrumbs: React.FC<BreadCrumbsProps> = ({ items }) => {
       scrollViewRef.current.scrollToEnd({ animated: true });
     }
   }, [items]);
-  const [menuOpen, setMenuOpen] = useState(false);
   return (
     <ScrollView
       ref={scrollViewRef}
@@ -29,55 +27,25 @@ const BreadCrumbs: React.FC<BreadCrumbsProps> = ({ items }) => {
       showsHorizontalScrollIndicator={false}
       contentContainerStyle={styles.container}>
       {items.map((item, index) => {
-        const hasMenu = !!item.menuItems && item.menuItems.length > 0;
         const isActive = index === items.length - 1;
-        const chipLayout = (
-          <Chip
-            selected={isActive}
-            mode="flat"
-            onPress={() => {
-              if (isActive) {
-                if (hasMenu) {
-                  setMenuOpen(true);
-                }
-                return;
-              }
-              item.onPress?.(item.id);
-            }}
-            onClose={hasMenu ? () => {} : undefined}
-            closeIcon={hasMenu ? 'arrow-down' : undefined}
-            textStyle={{
-              ...styles.text,
-              fontFamily: isActive ? theme.mediumText : theme.regularText,
-            }}
-            style={{
-              ...styles.item,
-              ...(isActive ? styles.activeItem : styles.inactiveItem),
-            }}>
-            {item.name}
-          </Chip>
-        );
         return (
           <View key={item.id} style={styles.itemContainer}>
-            {hasMenu ? (
-              <Menu
-                visible={menuOpen}
-                onDismiss={() => setMenuOpen(false)}
-                anchor={chipLayout}>
-                {item.menuItems?.map(item => (
-                  <Menu.Item
-                    key={item.id}
-                    title={item.name}
-                    onPress={() => {
-                      setMenuOpen(false);
-                      item.onPress();
-                    }}
-                  />
-                ))}
-              </Menu>
-            ) : (
-              chipLayout
-            )}
+            <Chip
+              selected={isActive}
+              mode="flat"
+              onPress={() => {
+                item.onPress?.(item.id);
+              }}
+              textStyle={{
+                ...styles.text,
+                fontFamily: isActive ? theme.mediumText : theme.regularText,
+              }}
+              style={{
+                ...styles.item,
+                ...(isActive ? styles.activeItem : styles.inactiveItem),
+              }}>
+              {item.name}
+            </Chip>
             {index >= 0 && index < items.length - 1 ? (
               <Icon size={20} source="chevron-right" />
             ) : null}
@@ -90,10 +58,8 @@ const BreadCrumbs: React.FC<BreadCrumbsProps> = ({ items }) => {
 
 const styles = StyleSheet.create({
   container: {
-    // width: '100%',
     flexDirection: 'row',
     alignItems: 'center',
-    // flex: 1,
   },
   itemContainer: {
     flexDirection: 'row',
@@ -108,10 +74,10 @@ const styles = StyleSheet.create({
     paddingBottom: 0,
   },
   inactiveItem: {
-    backgroundColor: MD3Colors.neutral80,
+    backgroundColor: theme.selectionColor,
   },
   activeItem: {
-    backgroundColor: MD3Colors.neutral90,
+    backgroundColor: theme.selectionColor,
   },
 });
 
