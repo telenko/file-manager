@@ -17,6 +17,7 @@ import com.filemanager.viewer.LocalFileViewerPackage;
 import com.rnfs.RNFSPackage;
 import com.filemanager.fspermissions.PermissionFilePackage;
 import com.filemanager.thumbnail.ThumbnailPackage;
+import com.filemanager.storage.StorageMetaReaderPackage;
 import cl.json.RNSharePackage;
 import cl.json.ShareApplication;
 import com.th3rdwave.safeareacontext.SafeAreaContextPackage;
@@ -37,12 +38,12 @@ public class MainApplication extends Application implements ReactApplication {
           @SuppressWarnings("UnnecessaryLocalVariable")
           List<ReactPackage> packages = new PackageList(this).getPackages();
           // Packages that cannot be autolinked yet can be added manually here, for example:
-          // packages.add(new MyReactNativePackage());
           packages.add(new PermissionFilePackage());
           packages.add(new SafeAreaContextPackage());
           packages.add(new LocalFileViewerPackage());
           packages.add(new ThumbnailPackage());
           packages.add(new ReactVideoPackage());
+          packages.add(new StorageMetaReaderPackage());
           return packages;
         }
 

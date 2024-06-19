@@ -8,10 +8,17 @@ import {
   ErrorType,
   FileManagerError,
 } from '../common/components/ExceptionHandler';
-export type DirItem = RNFS.ReadDirItem & {
-  isMainStorage?: boolean;
+
+export type DirItem = RNFS.ReadDirItem & { isStorage?: boolean };
+export type StorageItem = {
+  isMainDeviceStorage?: boolean;
+  isSdCardStorage?: boolean;
   isStorage?: boolean;
-};
+  freeSpace?: number;
+  totalSpace?: number;
+  name: string;
+  path: string;
+} & DirItem;
 
 const resolveCounterConflictRecursive = async (
   destination: string,
@@ -74,12 +81,21 @@ const makeVideoPreviewQueued = makeQueueable(
   4,
 );
 
-let ROOTS: DirItem[] = [];
-let ROOT_STORAGE: DirItem | null = null;
+let ROOTS: StorageItem[] = [];
 
 export const FileApi = {
+  get ROOT_STORAGE() {
+    if (!ROOTS) {
+      return null;
+    }
+    let result = ROOTS.find(r => r.isMainDeviceStorage) ?? null;
+    if (!result) {
+      result = ROOTS[0];
+    }
+    return result;
+  },
   get ROOT_PATH() {
-    return ROOT_STORAGE?.path ?? '/storage/emulated/0';
+    return this.ROOT_STORAGE?.path!;
   },
   get ROOTS() {
     return ROOTS;
@@ -92,33 +108,21 @@ export const FileApi = {
       if (ROOTS.length > 0) {
         return ROOTS;
       }
-      const rootDirs = await RNFS.getAllExternalFilesDirs();
-      // @ts-ignore
-      const rootDirItems: DirItem[] = rootDirs
-        .map(path => path.replace(/\/Android\/data\/[^/]+\/files/, ''))
-        .map(rootPath => {
-          // @TODO Andrii - warning, Android specific logic
-          const isMainStorage = rootPath.endsWith('/0');
-          const builtinName = rootPath.split('/').pop();
-          return {
-            name: isMainStorage
-              ? i18n.t('deviceRoot')
-              : i18n.t('sdCardRoot', { name: builtinName }),
-            path: rootPath,
-            isDirectory: () => true,
-            isFile: () => false,
-            isStorage: true,
-            isMainStorage,
-          };
-        });
+      const rootDirs: StorageItem[] =
+        await NativeModules.StorageMetaReader.readAll();
+      const resultDirItems: StorageItem[] = rootDirs.map(storageItem => {
+        return {
+          ...storageItem,
+          name: storageItem.isMainDeviceStorage
+            ? i18n.t('deviceRoot')
+            : i18n.t('sdCardRoot', { name: storageItem.name }),
+          isDirectory: () => true,
+          isFile: () => false,
+          isStorage: true,
+        };
+      });
 
-      // @ts-ignore
-      ROOT_STORAGE = rootDirItems.find(r => r.isMainStorage);
-      if (!ROOT_STORAGE) {
-        ROOT_STORAGE = rootDirItems[0];
-      }
-
-      ROOTS = rootDirItems;
+      ROOTS = resultDirItems;
 
       return ROOTS;
     } catch (e) {
@@ -179,7 +183,7 @@ export const FileApi = {
       );
     }
   },
-  copyFileOrDirectory: async (
+  _copyFileOrDirectory: async (
     source: string,
     destination: string,
     injectCopyNIfConflict: boolean = false,
@@ -228,15 +232,40 @@ export const FileApi = {
     return copyRecursive(source, fileDest);
   },
 
+  validateFilesSizesToDest: async (sources: string[], destination: string) => {
+    try {
+      const dirItems = await Promise.all(
+        sources.map(source => RNFS.stat(source)),
+      );
+      const sizeCombined = dirItems.reduce((acc, item) => {
+        return item.size + acc;
+      }, 0);
+      const targetStorage = ROOTS.find(root => destination.includes(root.path));
+      if (!targetStorage) {
+        throw new Error('Destination folder is not valid');
+      }
+      if (targetStorage.freeSpace! < sizeCombined) {
+        throw new Error('Not enough space in disk');
+      }
+    } catch (e) {
+      throw new FileManagerError(
+        i18n.t('notEnoughSpace'),
+        ErrorType.FILE_API,
+        e,
+      );
+    }
+  },
+
   copyFilesOrDirectoriesBatched: async (
     sources: string[],
     destination: string,
     injectCopyNIfConflict: boolean = false,
   ) => {
+    await FileApi.validateFilesSizesToDest(sources, destination);
     try {
       return Promise.all(
         sources.map(source =>
-          FileApi.copyFileOrDirectory(
+          FileApi._copyFileOrDirectory(
             source,
             destination,
             injectCopyNIfConflict,

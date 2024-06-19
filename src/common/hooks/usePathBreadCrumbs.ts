@@ -9,8 +9,8 @@ export const usePathBreadCrumbs = (dirPath: string): BreadCrumbItem[] => {
     if (FileApi.ROOTS.length === 0) {
       return [];
     }
-    const rootMatchingItem = FileApi.ROOTS.find(systemRoot =>
-      dirPath.includes(systemRoot.path),
+    const rootMatchingItem = FileApi.ROOTS?.find(systemRoot =>
+      dirPath?.includes(systemRoot.path),
     );
     if (!rootMatchingItem) {
       return [];

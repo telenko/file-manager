@@ -1,7 +1,15 @@
 import React from 'react';
 import { useState } from 'react';
 import { useFileTreeContext } from '../FileTreeContext';
-import { Button, Icon, Menu, Text } from 'react-native-paper';
+import {
+  Button,
+  Icon,
+  List,
+  MD3Colors,
+  Menu,
+  ProgressBar,
+  Text,
+} from 'react-native-paper';
 import { FileApi } from '../../../services/FileApi';
 import { useFileManager } from '../../../widgets/FileManager';
 import { useNavigation } from '../../../common/hooks/useNavigation';
@@ -20,6 +28,7 @@ const StorageSelect: React.FC = () => {
   return (
     <Menu
       onDismiss={() => setOpen(false)}
+      // style={{ width: '50%' }}
       contentStyle={{ backgroundColor: theme.selectionColor }}
       anchor={
         <TouchableOpacity
@@ -36,7 +45,7 @@ const StorageSelect: React.FC = () => {
           <View style={{ marginRight: 5 }}>
             <Icon
               size={20}
-              source={matchingRoot.isMainStorage ? 'memory' : 'sd'}
+              source={matchingRoot.isMainDeviceStorage ? 'memory' : 'sd'}
             />
           </View>
           <Text>{matchingRoot?.name}</Text>
@@ -47,9 +56,21 @@ const StorageSelect: React.FC = () => {
       }
       visible={open}>
       {FileApi.ROOTS.map(root => (
-        <Menu.Item
+        <List.Item
           key={root.path}
-          leadingIcon={root.isMainStorage ? 'memory' : 'sd'}
+          left={() => (
+            <View
+              style={{
+                paddingLeft: 10,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
+              <Icon
+                size={25}
+                source={root.isMainDeviceStorage ? 'memory' : 'sd'}
+              />
+            </View>
+          )}
           title={root.name}
           onPress={() => {
             if (root.path === matchingRoot.path) {
@@ -58,7 +79,39 @@ const StorageSelect: React.FC = () => {
             }
             fileManager.openDirectory(root, navigator);
           }}
+          description={() => {
+            const percentage = 1 - (root.freeSpace ?? 0) / (root.totalSpace ?? 0);
+            const progressColor = (() => {
+              if (percentage < 0.8) {
+                return MD3Colors.primary50;
+              }
+              return MD3Colors.error50;
+            })();
+            return (
+              <View>
+                <Text>
+                  {FileApi.formatSize(root.freeSpace!)} /{' '}
+                  {FileApi.formatSize(root.totalSpace!)}
+                </Text>
+                <View style={{ marginTop: 5 }}>
+                  <ProgressBar progress={percentage} color={progressColor} />
+                </View>
+              </View>
+            );
+          }}
         />
+        // <Menu.Item
+        //   key={root.path}
+        //   leadingIcon={root.isMainDeviceStorage ? 'memory' : 'sd'}
+        //   title={root.name}
+        // onPress={() => {
+        //   if (root.path === matchingRoot.path) {
+        //     setOpen(false);
+        //     return;
+        //   }
+        //   fileManager.openDirectory(root, navigator);
+        // }}
+        // />
       ))}
     </Menu>
   );
