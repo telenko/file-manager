@@ -36,6 +36,9 @@
     "ok": "Ok",
     "selectedNItems": "Sélectionné {{n}}",
     "select": "Sélectionner",
+    "report": "Signaler une erreur",
+    "sdCardRoot": "Carte SD {{name}}",
+    
     "errorOccured": "Une erreur est survenue :(",
     "readDirFailed": "Impossible de lire le répertoire. Veuillez vous assurer que l'application a les droits pour lire votre système de fichiers",
     "fileMetadataFailed": "Échec du traitement du fichier. Veuillez vous assurer que l'application a les droits pour lire votre système de fichiers",
@@ -44,5 +47,6 @@
     "moveBatchFailed": "Échec du déplacement. Veuillez vous assurer que l'application a les droits pour écrire dans votre système de fichiers",
     "renameFailed": "Échec du renommage. Veuillez vous assurer que l'application a les droits pour écrire dans votre système de fichiers",
     "deleteFailed": "Échec de la suppression. Veuillez vous assurer que l'application a les droits pour écrire dans votre système de fichiers",
-    "failedToOpenPath": "Échec de l'ouverture du fichier. Veuillez vous assurer que l'application a les droits pour lire votre système de fichiers"
+    "failedToOpenPath": "Échec de l'ouverture du fichier. Veuillez vous assurer que l'application a les droits pour lire votre système de fichiers",
+    "notEnoughSpace": "Pas assez d'espace"
 }

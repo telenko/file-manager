@@ -36,6 +36,9 @@
     "ok": "Ok",
     "selectedNItems": "Selezionato {{n}}",
     "select": "Seleziona",
+    "report": "Segnala errore",
+    "sdCardRoot": "Scheda SD {{name}}",
+    
     "errorOccured": "Si è verificato un errore :(",
     "readDirFailed": "Impossibile leggere la directory. Assicurati che l'app abbia i diritti per leggere il tuo file system",
     "fileMetadataFailed": "Impossibile elaborare il file. Assicurati che l'app abbia i diritti per leggere il tuo file system",
@@ -44,5 +47,6 @@
     "moveBatchFailed": "Impossibile spostare. Assicurati che l'app abbia i diritti per scrivere nel tuo file system",
     "renameFailed": "Impossibile rinominare. Assicurati che l'app abbia i diritti per scrivere nel tuo file system",
     "deleteFailed": "Impossibile eliminare. Assicurati che l'app abbia i diritti per scrivere nel tuo file system",
-    "failedToOpenPath": "Impossibile aprire il file. Assicurati che l'app abbia i diritti per leggere il tuo file system"
+    "failedToOpenPath": "Impossibile aprire il file. Assicurati che l'app abbia i diritti per leggere il tuo file system",
+    "notEnoughSpace": "Spazio insufficiente"
 }

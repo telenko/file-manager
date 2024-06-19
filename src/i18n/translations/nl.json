@@ -36,7 +36,9 @@
     "ok": "Oké",
     "selectedNItems": "{{n}} geselecteerd",
     "select": "Selecteren",
-    
+    "report": "Fout melden",
+    "sdCardRoot": "SD-kaart {{name}}",
+
     "errorOccured": "Er is een fout opgetreden :(",
     "readDirFailed": "Kan directory niet lezen. Zorg ervoor dat de app rechten heeft om uw bestandssysteem te lezen",
     "fileMetadataFailed": "Kon het bestand niet verwerken. Zorg ervoor dat de app rechten heeft om uw bestandssysteem te lezen",
@@ -45,5 +47,6 @@
     "moveBatchFailed": "Verplaatsen mislukt. Zorg ervoor dat de app rechten heeft om naar uw bestandssysteem te schrijven",
     "renameFailed": "Hernoemen mislukt. Zorg ervoor dat de app rechten heeft om naar uw bestandssysteem te schrijven",
     "deleteFailed": "Verwijderen mislukt. Zorg ervoor dat de app rechten heeft om naar uw bestandssysteem te schrijven",
-    "failedToOpenPath": "Kan bestand niet openen. Zorg ervoor dat de app rechten heeft om uw bestandssysteem te lezen"
+    "failedToOpenPath": "Kan bestand niet openen. Zorg ervoor dat de app rechten heeft om uw bestandssysteem te lezen",
+    "notEnoughSpace": "Niet genoeg ruimte"
 }

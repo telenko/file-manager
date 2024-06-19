@@ -36,6 +36,9 @@
     "ok": "Ok",
     "selectedNItems": "Selecionado {{n}}",
     "select": "Selecionar",
+    "report": "Relatar erro",
+    "sdCardRoot": "Cartão SD {{name}}",
+    
     "errorOccured": "Ocorreu um erro :(",
     "readDirFailed": "Não é possível ler o diretório. Certifique-se de que o aplicativo tenha permissões para ler seu sistema de arquivos",
     "fileMetadataFailed": "Falha ao processar o arquivo. Certifique-se de que o aplicativo tenha permissões para ler seu sistema de arquivos",
@@ -44,5 +47,6 @@
     "moveBatchFailed": "Falha ao mover. Certifique-se de que o aplicativo tenha permissões para gravar em seu sistema de arquivos",
     "renameFailed": "Falha ao renomear. Certifique-se de que o aplicativo tenha permissões para gravar em seu sistema de arquivos",
     "deleteFailed": "Falha ao excluir. Certifique-se de que o aplicativo tenha permissões para gravar em seu sistema de arquivos",
-    "failedToOpenPath": "Falha ao abrir o arquivo. Certifique-se de que o aplicativo tenha permissões para ler seu sistema de arquivos"
+    "failedToOpenPath": "Falha ao abrir o arquivo. Certifique-se de que o aplicativo tenha permissões para ler seu sistema de arquivos",
+    "notEnoughSpace": "Espaço insuficiente"
 }

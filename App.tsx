@@ -40,13 +40,14 @@ const FontsProvider: React.FC<PropsWithChildren> = ({ children }) => {
 
 /**
  * @TODO Andrii now:
- * 2. [MUST] error modal : add button to generate support request with logs
  * - gallery sliding bug
  * 4. create regulations page on github
  * 5. release beta
  *
  * FUTURE IMPS:
  * 1. delete in gallery behavior: keep gallery open
+ * 2. add device details into error report
+ * 3. video restart
  * 
  * TEST:
  * 1. SDCard

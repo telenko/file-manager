@@ -21,6 +21,13 @@ export class FileManagerError extends Error {
     this.name = this.constructor.name;
     this.code = code;
     this.origError = origError;
+    if (origError instanceof Error) {
+      this.stack += `\nCaused by: ${origError.stack}`;
+    } else if (typeof origError === 'string') {
+      this.stack += `\nCaused by: ${origError}`;
+    } else if (origError !== null && origError !== undefined) {
+      this.stack += `\nCaused by: ${JSON.stringify(origError)}`;
+    }
   }
 }
 

@@ -36,7 +36,9 @@
     "ok": "OK",
     "selectedNItems": "{{n}} ausgewählt",
     "select": "Auswählen",
-    
+    "report": "Fehler melden",
+    "sdCardRoot": "SD-Karte {{name}}",
+
     "errorOccured": "Ein Fehler ist aufgetreten :(",
     "readDirFailed": "Verzeichnis kann nicht gelesen werden. Stellen Sie sicher, dass die App Berechtigungen zum Lesen Ihres Dateisystems hat",
     "fileMetadataFailed": "Verarbeitung der Datei fehlgeschlagen. Stellen Sie sicher, dass die App Berechtigungen zum Lesen Ihres Dateisystems hat",
@@ -45,5 +47,6 @@
     "moveBatchFailed": "Verschieben fehlgeschlagen. Stellen Sie sicher, dass die App Berechtigungen zum Schreiben in Ihr Dateisystem hat",
     "renameFailed": "Umbenennen fehlgeschlagen. Stellen Sie sicher, dass die App Berechtigungen zum Schreiben in Ihr Dateisystem hat",
     "deleteFailed": "Löschen fehlgeschlagen. Stellen Sie sicher, dass die App Berechtigungen zum Schreiben in Ihr Dateisystem hat",
-    "failedToOpenPath": "Öffnen der Datei fehlgeschlagen. Stellen Sie sicher, dass die App Berechtigungen zum Lesen Ihres Dateisystems hat"
+    "failedToOpenPath": "Öffnen der Datei fehlgeschlagen. Stellen Sie sicher, dass die App Berechtigungen zum Lesen Ihres Dateisystems hat",
+    "notEnoughSpace": "Nicht genug Speicherplatz"
 }

@@ -36,6 +36,10 @@
     "ok": "Ok",
     "selectedNItems": "Seleccionado {{n}}",
     "select": "Seleccionar",
+    "report": "Informar de un error",
+    "sdCardRoot": "Tarjeta SD {{name}}",
+
+
     "errorOccured": "Ocurrió un error :(",
     "readDirFailed": "No se puede leer el directorio. Asegúrese de que la aplicación tenga permisos para leer su sistema de archivos",
     "fileMetadataFailed": "No se pudo procesar el archivo. Asegúrese de que la aplicación tenga permisos para leer su sistema de archivos",
@@ -44,5 +48,6 @@
     "moveBatchFailed": "No se pudo mover. Asegúrese de que la aplicación tenga permisos para escribir en su sistema de archivos",
     "renameFailed": "No se pudo renombrar. Asegúrese de que la aplicación tenga permisos para escribir en su sistema de archivos",
     "deleteFailed": "No se pudo eliminar. Asegúrese de que la aplicación tenga permisos para escribir en su sistema de archivos",
-    "failedToOpenPath": "No se pudo abrir el archivo. Asegúrese de que la aplicación tenga permisos para leer su sistema de archivos"
+    "failedToOpenPath": "No se pudo abrir el archivo. Asegúrese de que la aplicación tenga permisos para leer su sistema de archivos",
+    "notEnoughSpace": "No hay suficiente espacio"
 }

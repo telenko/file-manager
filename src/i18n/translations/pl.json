@@ -36,6 +36,9 @@
     "ok": "Ok",
     "selectedNItems": "Wybrano {{n}}",
     "select": "Wybierz",
+    "report": "Zgłoś błąd",
+    "sdCardRoot": "Karta SD {{name}}",
+
     "errorOccured": "Wystąpił błąd :(",
     "readDirFailed": "Nie można odczytać katalogu. Upewnij się, że aplikacja ma uprawnienia do odczytu systemu plików",
     "fileMetadataFailed": "Nie udało się przetworzyć pliku. Upewnij się, że aplikacja ma uprawnienia do odczytu systemu plików",
@@ -44,5 +47,6 @@
     "moveBatchFailed": "Nie udało się przenieść. Upewnij się, że aplikacja ma uprawnienia do zapisu w systemie plików",
     "renameFailed": "Nie udało się zmienić nazwy. Upewnij się, że aplikacja ma uprawnienia do zapisu w systemie plików",
     "deleteFailed": "Nie udało się usunąć. Upewnij się, że aplikacja ma uprawnienia do zapisu w systemie plików",
-    "failedToOpenPath": "Nie udało się otworzyć pliku. Upewnij się, że aplikacja ma uprawnienia do odczytu systemu plików"
+    "failedToOpenPath": "Nie udało się otworzyć pliku. Upewnij się, że aplikacja ma uprawnienia do odczytu systemu plików",
+    "notEnoughSpace": "Za mało miejsca"
 }
