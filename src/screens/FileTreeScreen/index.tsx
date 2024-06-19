@@ -12,7 +12,6 @@ import {
 } from 'recyclerlistview';
 import { Cache } from '../../services/Cache';
 import { useTranslation } from 'react-i18next';
-import { Checkbox, IconButton } from 'react-native-paper';
 import { navigateFromSelectable } from '../../common/utils/navigator';
 import { useFileManager } from '../../widgets/FileManager';
 import EmptyData from '../../common/components/EmptyData';

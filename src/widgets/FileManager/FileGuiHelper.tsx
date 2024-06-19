@@ -89,7 +89,6 @@ export const FileGuiHelper = {
     if (!content.isDirectory()) {
       return;
     }
-    // @TODO Andrii solve parametrization typings
     // @ts-ignore
     navigator.push('FileTree', {
       route: content.path,
@@ -99,14 +98,15 @@ export const FileGuiHelper = {
   openPreview: (
     content: DirItem,
     navigator: NavigationProp<FileManagerNavigation>,
+    sort: 'asc' | 'desc' = 'asc',
   ) => {
     if (!FileApi.isFileViewable(content)) {
       return;
     }
-    // @TODO Andrii solve parametrization typings
     // @ts-ignore
     navigator.push('ImageViewer', {
       route: content.path,
+      sort,
       ...getRouteMetadatas(navigator),
     });
   },

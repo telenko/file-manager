@@ -1,6 +1,6 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Dimensions, View, VirtualizedList } from 'react-native';
-import { useAnimatedRef, useSharedValue } from 'react-native-reanimated';
+import { useAnimatedRef } from 'react-native-reanimated';
 
 const { width, height } = Dimensions.get('window');
 
@@ -21,9 +21,14 @@ function Gallery<T>({
 }) {
   const scrollViewRef = useAnimatedRef();
 
+  const itemsRef = useRef(items);
+
+  useEffect(() => {
+    itemsRef.current = items;
+  }, [items]);
+
   useEffect(() => {
     const nextIndex = items.findIndex(it => getItemKey(it) === selectedItemKey);
-    // setIndex(nextIndex);
     setTimeout(() => {
       // @ts-ignore
       scrollViewRef.current.scrollToIndex({
@@ -62,10 +67,9 @@ function Gallery<T>({
         index,
       })}
       onViewableItemsChanged={info => {
-        const newIdx = info.viewableItems.filter(i => i.isViewable)?.[0]?.index ?? 0;
-        onItemOpen?.(
-          items[newIdx],
-        );
+        const newIdx =
+          info.viewableItems.filter(i => i.isViewable)?.[0]?.index ?? 0;
+        onItemOpen?.(itemsRef.current[newIdx]);
       }}
       // @ts-ignore
       renderItem={info => {

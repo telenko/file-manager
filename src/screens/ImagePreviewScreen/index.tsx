@@ -1,21 +1,19 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Alert, Dimensions, StyleSheet, View } from 'react-native';
+import { Dimensions, StyleSheet, View } from 'react-native';
 import { DirItem, FileApi } from '../../services/FileApi';
 import { Cache } from '../../services/Cache';
 import Gallery from '../../common/components/Gallery';
 import ImageViewer from '../../common/components/ImageViewer';
 import { useNavigation } from '../../common/hooks/useNavigation';
-import { Button, IconButton, Text } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFileManager } from '../../widgets/FileManager';
 import VideoViewer from '../../common/components/VideoViewer';
-import { theme } from '../../theme';
 import ActionButton from '../../common/components/ActionButton';
 
 const { width, height } = Dimensions.get('window');
 export type ImageViewerScreenProps = {
-  route: { params: { route: string } };
+  route: { params: { route: string; sort: 'asc' | 'desc' } };
 };
 
 const ItemPreview: React.FC<{
@@ -32,7 +30,7 @@ const ItemPreview: React.FC<{
 
 const ImagePreviewScreen: React.FC<ImageViewerScreenProps> = ({
   route: {
-    params: { route },
+    params: { route, sort },
   },
 }) => {
   if (!route) {
@@ -55,10 +53,19 @@ const ImagePreviewScreen: React.FC<ImageViewerScreenProps> = ({
     });
   }, [file, navigation]);
   useEffect(() => {
-    FileApi.getMetadata(route).then(setFile);
-    const dirItems =
-      Cache.getDirItems(FileApi.getParentDirectoryPath(route)) ?? [];
-    setImagesInFolderSorted(dirItems.filter(FileApi.isFileViewable));
+    (async () => {
+      FileApi.getMetadata(route).then(setFile);
+
+      let dirItems = Cache.getDirItems(FileApi.getParentDirectoryPath(route));
+      if (!dirItems) {
+        // if no files in cache - then fetch them manually
+        dirItems = FileApi.sortDirItems(
+          await FileApi.readDir(FileApi.getParentDirectoryPath(route)),
+          sort,
+        );
+      }
+      setImagesInFolderSorted(dirItems.filter(FileApi.isFileViewable));
+    })();
   }, []);
 
   const imagesCarousel = useMemo<DirItem[]>(() => {

@@ -40,7 +40,6 @@ const FontsProvider: React.FC<PropsWithChildren> = ({ children }) => {
 
 /**
  * @TODO Andrii now:
- * - gallery sliding bug
  * 4. create regulations page on github
  * 5. release beta
  *
@@ -51,6 +50,7 @@ const FontsProvider: React.FC<PropsWithChildren> = ({ children }) => {
  * 
  * TEST:
  * 1. SDCard
+ * 2. gallery sliding bug
  */
 
 const App = () => {
