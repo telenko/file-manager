@@ -183,6 +183,15 @@ const FileScreen: React.FC<FileScreenProps> = ({
     [],
   );
 
+  const isMoveFolderToSame = () => {
+    return !!routeMetadatas.fromRoute?.some(fromRoute => {
+      const fromRouteTokens = fromRoute.split('/');
+      fromRouteTokens.pop();
+      const fromRouteFolder = fromRouteTokens.join('/');
+      return fromRouteFolder === route;
+    });
+  };
+
   return (
     <FileTreeContext.Provider value={value}>
       <View style={styles.container}>
@@ -249,7 +258,12 @@ const FileScreen: React.FC<FileScreenProps> = ({
               text={t('moveHere')}
               loading={moveInProgress}
               style={styles.actionButton}
-              disabled={!routeMetadatas.fromRoute || !route || copyInProgress}
+              disabled={
+                !routeMetadatas.fromRoute ||
+                !route ||
+                moveInProgress ||
+                isMoveFolderToSame()
+              }
               onPress={() => {
                 setMoveInProgress(true);
                 FileApi.moveFilesOrDirectoriesBatched(

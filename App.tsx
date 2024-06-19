@@ -41,7 +41,6 @@ const FontsProvider: React.FC<PropsWithChildren> = ({ children }) => {
 /**
  * @TODO Andrii now:
  * 2. [MUST] error modal : add button to generate support request with logs
- * - move to same should be banned
  * 3. handle not enough memory during COPY/MOVE case [SD + device]
  * - gallery sliding bug
  * 4. create regulations page on github
