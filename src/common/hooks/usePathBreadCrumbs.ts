@@ -26,7 +26,7 @@ export const usePathBreadCrumbs = (dirPath: string): BreadCrumbItem[] => {
       id: rootPath,
       onPress: () => {
         // @ts-ignore
-        navigation.popToTop();
+        navigation.pop(pathItems.length - rootPathSize + 1);
       },
     });
     for (let i = 0; i < pathItems.length; i++) {

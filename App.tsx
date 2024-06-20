@@ -42,12 +42,14 @@ const FontsProvider: React.FC<PropsWithChildren> = ({ children }) => {
  * @TODO Andrii now:
  * 4. create regulations page on github
  * 5. release beta
+ * - [BUG] cannot select folder in some cases (after creating)
  *
  * FUTURE IMPS:
  * 1. delete in gallery behavior: keep gallery open
  * 2. add device details into error report
  * 3. video restart
- * 
+ * - rename folder animations
+ *
  * TEST:
  * 1. SDCard
  * 2. gallery sliding bug
