@@ -83,10 +83,8 @@ const DirectoryItemView: React.FC<DirItemProps> = ({ item }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const exceptionHandler = useExceptionHandler();
 
-  const mode = useMemo<FileScreenProps['route']['params']['mode']>(
-    () => getRouteMetadatas(navigation)?.mode,
-    [navigation],
-  );
+  const mode: FileScreenProps['route']['params']['mode'] =
+    getRouteMetadatas(navigation)?.mode;
 
   const operationsAllowed = mode !== 'copy' && mode !== 'move';
 

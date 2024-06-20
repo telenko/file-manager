@@ -8,9 +8,9 @@ import { getGlobalExceptionHandler } from '../../common/components/ExceptionHand
 export const getRouteMetadatas = (
   navigator: NavigationProp<FileManagerNavigation>,
 ): any => {
-  const { routes } = navigator.getState() ?? {};
-  const lastRoute = routes[routes.length - 1];
-  const { route, ...routeMetadatas } = lastRoute?.params ?? {};
+  const { routes, index } = navigator.getState() ?? {};
+  const currentRoute = routes[index];
+  const { route, ...routeMetadatas } = currentRoute?.params ?? {};
   return routeMetadatas;
 };
 
