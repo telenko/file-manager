@@ -40,7 +40,6 @@ const FontsProvider: React.FC<PropsWithChildren> = ({ children }) => {
 
 /**
  * @TODO Andrii now:
- * 4. create regulations page on github
  * 5. release beta
  *
  * FUTURE IMPS:
