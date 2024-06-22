@@ -46,10 +46,11 @@ const ImagePreviewScreen: React.FC<ImageViewerScreenProps> = ({
   const fileManager = useFileManager();
 
   useEffect(() => {
+    const timeLocalized = `${file?.mtime?.toLocaleDateString()} ${file?.mtime
+      ?.toLocaleTimeString([], { hour12: false }) // Use 24-hour format to avoid AM/PM
+      ?.replace(/^(\d{1}):/, '0$1:')}`;
     navigation.setOptions({
-      headerTitle: `${file?.mtime?.toLocaleDateString()} ${file?.mtime
-        ?.toLocaleTimeString()
-        ?.slice(0, 5)}`,
+      headerTitle: timeLocalized,
     });
   }, [file, navigation]);
   useEffect(() => {
