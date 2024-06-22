@@ -77,7 +77,8 @@ const StorageSelect: React.FC = () => {
               setOpen(false);
               return;
             }
-            fileManager.openDirectory(root, navigator);
+            fileManager.openDirectory(root, navigator, true);
+            setOpen(false);
           }}
           description={() => {
             const percentage = 1 - (root.freeSpace ?? 0) / (root.totalSpace ?? 0);

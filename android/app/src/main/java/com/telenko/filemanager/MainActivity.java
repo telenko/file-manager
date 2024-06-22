@@ -1,4 +1,4 @@
-package com.filemanager;
+package com.telenko.filemanager;
 
 import android.os.Bundle;
 import com.facebook.react.ReactActivity;

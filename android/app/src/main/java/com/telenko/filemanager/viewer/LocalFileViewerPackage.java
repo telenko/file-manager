@@ -1,5 +1,5 @@
 
-package com.filemanager.viewer;
+package com.telenko.filemanager.viewer;
 
 import com.facebook.react.ReactPackage;
 import com.facebook.react.bridge.JavaScriptModule;

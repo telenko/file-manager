@@ -85,12 +85,13 @@ export const FileGuiHelper = {
   openDirectory: (
     content: DirItem,
     navigator: NavigationProp<FileManagerNavigation>,
+    replace: boolean = false,
   ) => {
     if (!content.isDirectory()) {
       return;
     }
     // @ts-ignore
-    navigator.push('FileTree', {
+    navigator[replace ? 'replace' : 'push']('FileTree', {
       route: content.path,
       ...getRouteMetadatas(navigator),
     });
