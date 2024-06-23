@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Dimensions, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { DirItem, FileApi } from '../../services/FileApi';
 import { Cache } from '../../services/Cache';
 import Gallery from '../../common/components/Gallery';
@@ -11,7 +11,6 @@ import { useFileManager } from '../../widgets/FileManager';
 import VideoViewer from '../../common/components/VideoViewer';
 import ActionButton from '../../common/components/ActionButton';
 
-const { width, height } = Dimensions.get('window');
 export type ImageViewerScreenProps = {
   route: { params: { route: string; sort: 'asc' | 'desc' } };
 };
@@ -188,15 +187,6 @@ const ImagePreviewScreen: React.FC<ImageViewerScreenProps> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  imageContainer: {
-    width: width,
-    justifyContent: 'center',
-    alignItems: 'center',
-    flexDirection: 'column',
-  },
-  image: {
-    width: width,
   },
 });
 

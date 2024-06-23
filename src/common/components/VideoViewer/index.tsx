@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 // @ts-ignore
 import Video from 'react-native-video-controls';
 import { DirItem, FileApi } from '../../../services/FileApi';
-import { ImageBackground, useWindowDimensions, View } from 'react-native';
+import { ImageBackground, View } from 'react-native';
 import { IconButton, Portal } from 'react-native-paper';
 import { Cache } from '../../../services/Cache';
 class CustomizedVideo extends Video {
@@ -37,7 +37,6 @@ const VideoViewer: React.FC<{
   onActive?: (v: boolean) => void;
 }> = ({ file, activeFile, onActive }) => {
   const isCurrentViewable = activeFile?.path === file.path;
-  const { width } = useWindowDimensions();
   const [paused, setPaused] = useState(true);
   const [preview, setPreview] = useState<string | null>('');
   const fallbackThumbnail =
@@ -79,7 +78,7 @@ const VideoViewer: React.FC<{
       source={{ uri: preview ?? fallbackThumbnail }}
       resizeMode="contain"
       style={{
-        width,
+        width: '100%',
         height: '100%',
         justifyContent: 'center',
         alignItems: 'center',
@@ -111,7 +110,7 @@ const VideoViewer: React.FC<{
             source={{ uri: `file://${file.path}` }}
             videoStyle={{ backgroundColor: '#fff' }}
             containerStyle={{ backgroundColor: '#fff' }}
-            style={{ width, height: '100%' }}
+            style={{ width: '100%', height: '100%' }}
             resizeMode="contain"
             poster={preview ?? fallbackThumbnail}
           />

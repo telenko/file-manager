@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
 import { DirItem } from '../../../services/FileApi';
-import { Dimensions, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { ImageZoom, ZOOM_TYPE } from '@likashefqet/react-native-image-zoom';
-
-const { width, height } = Dimensions.get('window');
 
 const ImageViewer: React.FC<{
   file: Partial<DirItem>;
@@ -19,7 +17,7 @@ const ImageViewer: React.FC<{
   };
 
   return (
-    <View style={{ width, height: '100%', flexDirection: 'column' }}>
+    <View style={{ width: '100%', height: '100%', flexDirection: 'column' }}>
       <ImageZoom
         uri={`file://${file.path}`}
         minScale={0.5}
@@ -38,7 +36,7 @@ const ImageViewer: React.FC<{
           }
         }}
         onResetAnimationEnd={() => sendZooming(false)}
-        style={styles.image}
+        style={[styles.image, { width: '100%' }]}
         resizeMode="contain"
       />
     </View>
@@ -50,14 +48,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   },
-  imageContainer: {
-    width: width,
-    justifyContent: 'center',
-    alignItems: 'center',
-    flexDirection: 'column',
-  },
   image: {
-    width: width,
     flex: 1,
   },
 });

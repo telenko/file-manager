@@ -1,8 +1,6 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Dimensions, View, VirtualizedList } from 'react-native';
 import { useAnimatedRef } from 'react-native-reanimated';
-
-const { width, height } = Dimensions.get('window');
 
 function Gallery<T>({
   getItemKey,
@@ -19,6 +17,10 @@ function Gallery<T>({
   onItemOpen?: (item: T) => void;
   disableScrolling?: boolean;
 }) {
+  const [{ width }, setDimensions] = useState(Dimensions.get('window'));
+  // const { width } = useWindowDimensions();
+  // const origWidth = useRef(width);
+  const curIdx = useRef(0);
   const scrollViewRef = useAnimatedRef();
 
   const itemsRef = useRef(items);
@@ -29,6 +31,7 @@ function Gallery<T>({
 
   useEffect(() => {
     const nextIndex = items.findIndex(it => getItemKey(it) === selectedItemKey);
+    curIdx.current = nextIndex;
     setTimeout(() => {
       // @ts-ignore
       scrollViewRef.current.scrollToIndex({
@@ -38,6 +41,68 @@ function Gallery<T>({
     }, 0);
   }, [items, selectedItemKey]);
 
+  useEffect(() => {
+    const onChange = ({ window }: any) => {
+      setDimensions(window);
+      // Scroll to the current index to ensure the item is centered
+      if (scrollViewRef.current) {
+        // @ts-ignore
+        scrollViewRef.current.scrollToOffset({
+          offset: curIdx.current * window.width,
+          animated: false,
+        });
+      }
+    };
+    const subscription = Dimensions.addEventListener('change', onChange);
+    return () => subscription?.remove();
+  }, []);
+
+  // useLayoutEffect(() => {
+  //   if (width !== origWidth.current) {
+  //     origWidth.current = width;
+  //     // @ts-ignore
+  //     scrollViewRef.current.scrollToOffset({
+  //       offset: curIdx.current * width,
+  //       animated: false,
+  //     });
+  //   }
+  // }, [width]);
+  // @TODO Andrii use this
+  /**\
+ * const [dimensions, setDimensions] = useState(Dimensions.get('window'));
+  const scrollViewRef = useRef(null);
+  const curIdx = useRef(0);
+  const itemsRef = useRef(items);
+  const scrollX = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const onChange = ({ window }) => {
+      setDimensions(window);
+      // Scroll to the current index to ensure the item is centered
+      if (scrollViewRef.current) {
+        scrollViewRef.current.scrollToOffset({
+          offset: curIdx.current * window.width,
+          animated: false,
+        });
+      }
+    };
+    const subscription = Dimensions.addEventListener('change', onChange);
+    return () => subscription?.remove();
+  }, []);
+
+  useEffect(() => {
+    scrollX.addListener(({ value }) => {
+      const index = Math.round(value / dimensions.width);
+      if (index !== curIdx.current) {
+        curIdx.current = index;
+        onItemOpen?.(itemsRef.current[index]);
+      }
+    });
+    return () => scrollX.removeAllListeners();
+  }, [scrollX, dimensions.width]);
+
+  const { width } = dimensions;
+ */
   return (
     <VirtualizedList
       horizontal
@@ -69,6 +134,9 @@ function Gallery<T>({
       onViewableItemsChanged={info => {
         const newIdx =
           info.viewableItems.filter(i => i.isViewable)?.[0]?.index ?? 0;
+        setTimeout(() => {
+          curIdx.current = newIdx;
+        }, 100);
         onItemOpen?.(itemsRef.current[newIdx]);
       }}
       // @ts-ignore
