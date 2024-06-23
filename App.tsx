@@ -40,6 +40,8 @@ const FontsProvider: React.FC<PropsWithChildren> = ({ children }) => {
 
 /**
  * @TODO Andrii now:
+ * [BUG?] - slow image opening on dev
+ * [BUG] - resize recyclerlistview bug with .y
  * 5. release beta
  *
  * FUTURE IMPS:

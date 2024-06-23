@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { DirItem, FileApi } from '../../services/FileApi';
 import FilePathBreadCrumb from './FilePathBreadCrumb';
 import { useNavigation } from '../../common/hooks/useNavigation';
-import { View, StyleSheet, Dimensions, VirtualizedList } from 'react-native';
+import { View, StyleSheet, useWindowDimensions } from 'react-native';
 import { FileTreeContext, FileTreeContextType } from './FileTreeContext';
 import DirectoryItemView from './DirectoryItemView';
 import {
@@ -33,13 +33,12 @@ export type FileScreenProps = {
   };
 };
 
-const SCREEN_WIDTH = Dimensions.get('window').width;
-
 const FileScreen: React.FC<FileScreenProps> = ({
   route: {
     params: { route, ...routeMetadatas },
   },
 }) => {
+  const { width: SCREEN_WIDTH } = useWindowDimensions();
   const navigator = useNavigation();
   const { t } = useTranslation();
   const [dirLoadingDone, setDirLoadingDone] = useState(false);
@@ -173,7 +172,7 @@ const FileScreen: React.FC<FileScreenProps> = ({
           dim.height = 70;
         },
       ),
-    [],
+    [SCREEN_WIDTH],
   );
   const rowRenderer = useCallback(
     (type: any, item: DirItem) => (
@@ -211,12 +210,8 @@ const FileScreen: React.FC<FileScreenProps> = ({
             <EmptyData message={t('noDataHere')} />
           </ScrollView>
         ) : (
-          // <ScrollView>
-          //   {sortedDirItems.slice(0, 50).map(item => (
-          //     <DirectoryItemView key={item.path} item={item} />
-          //   ))}
-          // </ScrollView>
           <RecyclerListView
+            canChangeSize
             dataProvider={dataProvider}
             layoutProvider={layoutProvider}
             rowRenderer={rowRenderer}
