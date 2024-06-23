@@ -196,7 +196,7 @@ const FileScreen: React.FC<FileScreenProps> = ({
         <View style={styles.breadCrumbsContainer}>
           {isStorageLevel ? <StorageSelect /> : <FilePathBreadCrumb />}
         </View>
-        {dirLoadingDone && sortedDirItems.length === 0 ? (
+        {sortedDirItems.length === 0 ? (
           <ScrollView
             contentContainerStyle={{
               flex: 1,
@@ -207,7 +207,7 @@ const FileScreen: React.FC<FileScreenProps> = ({
             refreshControl={
               <RefreshControl refreshing={dirLoading} onRefresh={reloadDir} />
             }>
-            <EmptyData message={t('noDataHere')} />
+            {dirLoadingDone ? <EmptyData message={t('noDataHere')} /> : null}
           </ScrollView>
         ) : (
           <RecyclerListView

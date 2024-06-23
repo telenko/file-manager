@@ -18,8 +18,6 @@ function Gallery<T>({
   disableScrolling?: boolean;
 }) {
   const [{ width }, setDimensions] = useState(Dimensions.get('window'));
-  // const { width } = useWindowDimensions();
-  // const origWidth = useRef(width);
   const curIdx = useRef(0);
   const scrollViewRef = useAnimatedRef();
 
@@ -44,68 +42,22 @@ function Gallery<T>({
   useEffect(() => {
     const onChange = ({ window }: any) => {
       setDimensions(window);
-      // Scroll to the current index to ensure the item is centered
-      if (scrollViewRef.current) {
+      setTimeout(() => {
         // @ts-ignore
-        scrollViewRef.current.scrollToOffset({
+        scrollViewRef.current?.scrollToOffset({
           offset: curIdx.current * window.width,
           animated: false,
         });
-      }
+      }, 0);
     };
     const subscription = Dimensions.addEventListener('change', onChange);
     return () => subscription?.remove();
   }, []);
 
-  // useLayoutEffect(() => {
-  //   if (width !== origWidth.current) {
-  //     origWidth.current = width;
-  //     // @ts-ignore
-  //     scrollViewRef.current.scrollToOffset({
-  //       offset: curIdx.current * width,
-  //       animated: false,
-  //     });
-  //   }
-  // }, [width]);
-  // @TODO Andrii use this
-  /**\
- * const [dimensions, setDimensions] = useState(Dimensions.get('window'));
-  const scrollViewRef = useRef(null);
-  const curIdx = useRef(0);
-  const itemsRef = useRef(items);
-  const scrollX = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    const onChange = ({ window }) => {
-      setDimensions(window);
-      // Scroll to the current index to ensure the item is centered
-      if (scrollViewRef.current) {
-        scrollViewRef.current.scrollToOffset({
-          offset: curIdx.current * window.width,
-          animated: false,
-        });
-      }
-    };
-    const subscription = Dimensions.addEventListener('change', onChange);
-    return () => subscription?.remove();
-  }, []);
-
-  useEffect(() => {
-    scrollX.addListener(({ value }) => {
-      const index = Math.round(value / dimensions.width);
-      if (index !== curIdx.current) {
-        curIdx.current = index;
-        onItemOpen?.(itemsRef.current[index]);
-      }
-    });
-    return () => scrollX.removeAllListeners();
-  }, [scrollX, dimensions.width]);
-
-  const { width } = dimensions;
- */
   return (
     <VirtualizedList
       horizontal
+      key={width}
       // @ts-ignore
       ref={scrollViewRef}
       viewabilityConfig={{

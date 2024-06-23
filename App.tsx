@@ -40,8 +40,6 @@ const FontsProvider: React.FC<PropsWithChildren> = ({ children }) => {
 
 /**
  * @TODO Andrii now:
- * [BUG?] - slow image opening on dev
- * [BUG] - resize recyclerlistview bug with .y
  * 5. release beta
  *
  * FUTURE IMPS:
@@ -49,9 +47,11 @@ const FontsProvider: React.FC<PropsWithChildren> = ({ children }) => {
  * 2. add device details into error report
  * 3. video restart
  * - rename folder animations
+ * [BUG?] - slow image opening on dev
+ * reorientation better animations, video to not interrupt
  *
  * TEST:
- * 1. SDCard
+ * 1. SDCard [DONE]
  * 2. gallery sliding bug
  */
 

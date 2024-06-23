@@ -190,7 +190,7 @@ const DirectoryItemView: React.FC<DirItemProps> = ({ item }) => {
 
   return (
     <List.Item
-      style={item.isDirectory() ? styles.folder : styles.file}
+      style={styles.item}
       title={item.name}
       disabled={!operationsAllowed && item.isFile()}
       titleStyle={{
@@ -347,8 +347,9 @@ const DirectoryItemView: React.FC<DirItemProps> = ({ item }) => {
 };
 
 const styles = StyleSheet.create({
-  folder: {},
-  file: {},
+  item: {
+    paddingLeft: 5,
+  },
 });
 
 export default React.memo(DirectoryItemView);
