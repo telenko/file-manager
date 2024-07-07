@@ -3,6 +3,7 @@ package com.telenko.filemanager.thumbnail;
 import android.graphics.Bitmap;
 import android.media.MediaMetadataRetriever;
 import android.util.Base64;
+import java.io.IOException;
 
 import java.io.ByteArrayOutputStream;
 
@@ -27,7 +28,12 @@ public class ThumbnailHelper {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.JPEG, 90, byteArrayOutputStream);
         byte[] byteArray = byteArrayOutputStream.toByteArray();
-        retriever.release();
+         try {
+            retriever.release();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
         return Base64.encodeToString(byteArray, Base64.DEFAULT);
     }
 }
