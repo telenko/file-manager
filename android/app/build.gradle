@@ -117,12 +117,6 @@ dependencies {
     // For animated GIF support
     implementation 'com.facebook.fresco:animated-gif:2.5.0'
 
-    implementation project(':react-native-fs')
-    implementation project(':react-native-share')
-    implementation project(':react-native-safe-area-context')
-    implementation project(':react-native-vector-icons')
-    implementation project(':react-native-screens')
-    implementation project(':react-native-video')
     implementation("com.facebook.react:react-android")
 
     if (hermesEnabled.toBoolean()) {
