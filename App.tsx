@@ -41,7 +41,9 @@ const FontsProvider: React.FC<PropsWithChildren> = ({ children }) => {
 /**
  * @TODO Andrii now:
  * 5. release beta
- * 6. !!!!DO https://react-native-community.github.io/upgrade-helper/?from=0.70.6&to=0.74.3&package=com.telenko.filemanager&name=FileManager
+ * 6. manifest internet ONLY for dev
+ * 7. shadow below header
+ * 8. deobfuscation
  *
  * FUTURE IMPS:
  * 1. delete in gallery behavior: keep gallery open
