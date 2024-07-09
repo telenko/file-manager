@@ -41,7 +41,6 @@ const FontsProvider: React.FC<PropsWithChildren> = ({ children }) => {
 /**
  * @TODO Andrii now:
  * 5. release beta
- * 6. manifest internet ONLY for dev
  * 7. shadow below header
  * 8. deobfuscation
  *
