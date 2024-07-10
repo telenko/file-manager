@@ -59,6 +59,111 @@ const generateContentUri = (filePath: string) => {
   return `content://${filePath}`;
 };
 
+/**
+ * Batch operations queued
+ */
+const FILE_API_CONCURRENCY = 30;
+let copyRecursive = async (
+  source: string,
+  destination: string,
+  injectCopyNIfConflict: boolean,
+) => {
+  const stats = await RNFS.stat(source);
+  if (stats.isDirectory()) {
+    if (await RNFS.exists(destination)) {
+      if (injectCopyNIfConflict) {
+        destination = await resolveCounterConflictRecursive(destination, 1);
+      } else {
+        throw new Error(
+          'Failed to copy contents, as destination already exists',
+        );
+      }
+    }
+    await RNFS.mkdir(destination);
+    const items = await RNFS.readDir(source);
+
+    for (const item of items) {
+      const itemSourcePath = `${source}/${item.name}`;
+      const itemDestinationPath = `${destination}/${item.name}`;
+
+      await copyRecursive(
+        itemSourcePath,
+        itemDestinationPath,
+        injectCopyNIfConflict,
+      );
+    }
+  } else {
+    if (await RNFS.exists(destination)) {
+      if (injectCopyNIfConflict) {
+        destination = await resolveCounterConflictRecursive(destination, 1);
+      } else {
+        throw new Error(
+          'Failed to copy file, as destination file already exists',
+        );
+      }
+    }
+    await RNFS.copyFile(source, destination);
+  }
+};
+let moveRecursive = async (
+  source: string,
+  destination: string,
+  injectCopyNIfConflict: boolean,
+) => {
+  const stats = await RNFS.stat(source);
+  if (stats.isDirectory()) {
+    if (await RNFS.exists(destination)) {
+      if (injectCopyNIfConflict) {
+        destination = await resolveCounterConflictRecursive(
+          destination,
+          1,
+          'moveCount',
+        );
+      } else {
+        throw new Error(
+          'Failed to move contents, as destination already exists',
+        );
+      }
+    }
+    await RNFS.mkdir(destination);
+    const items = await RNFS.readDir(source);
+
+    for (const item of items) {
+      const itemSourcePath = `${source}/${item.name}`;
+      const itemDestinationPath = `${destination}/${item.name}`;
+
+      await moveRecursive(itemSourcePath, itemDestinationPath, injectCopyNIfConflict);
+    }
+    // Remove the original directory after moving all its contents
+    await RNFS.unlink(source);
+  } else {
+    if (await RNFS.exists(destination)) {
+      if (injectCopyNIfConflict) {
+        destination = await resolveCounterConflictRecursive(
+          destination,
+          1,
+          'moveCount',
+        );
+      } else {
+        throw new Error(
+          'Failed to move file, as destination file already exists',
+        );
+      }
+    }
+    await RNFS.moveFile(source, destination);
+  }
+};
+let deleteItem = async (item: DirItem) => {
+  try {
+    await RNFS.unlink(item.path);
+  } catch (e) {
+    throw new FileManagerError(i18n.t('deleteFailed'), ErrorType.FILE_API, e);
+  }
+}
+copyRecursive = makeQueueable(copyRecursive, FILE_API_CONCURRENCY);
+moveRecursive = makeQueueable(moveRecursive, FILE_API_CONCURRENCY);
+deleteItem = makeQueueable(deleteItem, FILE_API_CONCURRENCY);
+
 const makeVideoPreviewQueued = makeQueueable(
   async (file: DirItem, width: number = 0): Promise<string | null> => {
     if (!FileApi.isFileVideo(file)) {
@@ -188,48 +293,13 @@ export const FileApi = {
     destination: string,
     injectCopyNIfConflict: boolean = false,
   ) => {
-    const copyRecursive = async (source: string, destination: string) => {
-      const stats = await RNFS.stat(source);
-      if (stats.isDirectory()) {
-        if (await RNFS.exists(destination)) {
-          if (injectCopyNIfConflict) {
-            destination = await resolveCounterConflictRecursive(destination, 1);
-          } else {
-            throw new Error(
-              'Failed to copy contents, as destination already exists',
-            );
-          }
-        }
-        await RNFS.mkdir(destination);
-        const items = await RNFS.readDir(source);
-
-        for (const item of items) {
-          const itemSourcePath = `${source}/${item.name}`;
-          const itemDestinationPath = `${destination}/${item.name}`;
-
-          await copyRecursive(itemSourcePath, itemDestinationPath);
-        }
-      } else {
-        if (await RNFS.exists(destination)) {
-          if (injectCopyNIfConflict) {
-            destination = await resolveCounterConflictRecursive(destination, 1);
-          } else {
-            throw new Error(
-              'Failed to copy file, as destination file already exists',
-            );
-          }
-        }
-        await RNFS.copyFile(source, destination);
-      }
-    };
-
     const destStats = await RNFS.stat(destination);
     const fileName = source.split('/').pop();
     let fileDest = destStats.isDirectory()
       ? `${destination}/${fileName}`
       : destination;
 
-    return copyRecursive(source, fileDest);
+    return copyRecursive(source, fileDest, injectCopyNIfConflict);
   },
 
   validateFilesSizesToDest: async (sources: string[], destination: string) => {
@@ -286,51 +356,6 @@ export const FileApi = {
     destination: string,
     injectCopyNIfConflict: boolean = false,
   ) => {
-    const moveRecursive = async (source: string, destination: string) => {
-      const stats = await RNFS.stat(source);
-      if (stats.isDirectory()) {
-        if (await RNFS.exists(destination)) {
-          if (injectCopyNIfConflict) {
-            destination = await resolveCounterConflictRecursive(
-              destination,
-              1,
-              'moveCount',
-            );
-          } else {
-            throw new Error(
-              'Failed to move contents, as destination already exists',
-            );
-          }
-        }
-        await RNFS.mkdir(destination);
-        const items = await RNFS.readDir(source);
-
-        for (const item of items) {
-          const itemSourcePath = `${source}/${item.name}`;
-          const itemDestinationPath = `${destination}/${item.name}`;
-
-          await moveRecursive(itemSourcePath, itemDestinationPath);
-        }
-        // Remove the original directory after moving all its contents
-        await RNFS.unlink(source);
-      } else {
-        if (await RNFS.exists(destination)) {
-          if (injectCopyNIfConflict) {
-            destination = await resolveCounterConflictRecursive(
-              destination,
-              1,
-              'moveCount',
-            );
-          } else {
-            throw new Error(
-              'Failed to move file, as destination file already exists',
-            );
-          }
-        }
-        await RNFS.moveFile(source, destination);
-      }
-    };
-
     const isDestDirectory = await (async () => {
       try {
         const destStats = await RNFS.stat(destination);
@@ -343,7 +368,7 @@ export const FileApi = {
     const fileName = source.split('/').pop();
     let fileDest = isDestDirectory ? `${destination}/${fileName}` : destination;
 
-    return moveRecursive(source, fileDest);
+    return moveRecursive(source, fileDest, injectCopyNIfConflict);
   },
 
   moveFilesOrDirectoriesBatched: async (
@@ -384,13 +409,7 @@ export const FileApi = {
       throw new FileManagerError(i18n.t('renameFailed'), ErrorType.FILE_API, e);
     }
   },
-  deleteItem: async (item: DirItem) => {
-    try {
-      await RNFS.unlink(item.path);
-    } catch (e) {
-      throw new FileManagerError(i18n.t('deleteFailed'), ErrorType.FILE_API, e);
-    }
-  },
+  deleteItem,
   deleteItemsBatched: async (items: DirItem[]) => {
     try {
       return Promise.all(items.map(FileApi.deleteItem));

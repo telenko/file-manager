@@ -14,8 +14,9 @@ import { FileGuiHelper, getRouteDirectory } from './FileGuiHelper';
 import RenameContentDialog from './RenameContentDialog';
 import CreateDirectoryDialog from './CreateDirectoryDialog';
 import FileDetailsDialog from './FileDetailsDialog';
-import { theme } from '../../theme';
 import DefaultFolderActions from './DefaultFolderActions';
+import AppHeader from '../../common/components/AppHeader';
+import LongOperationDialog from './LongOperationDialog';
 
 const Stack = createNativeStackNavigator<FileManagerNavigation>();
 export default function FileManager() {
@@ -27,6 +28,7 @@ export default function FileManager() {
   const [newDirName, setNewDirName] = useState<string>('');
   const [newDirPath, setNewDirPath] = useState<string | null>(null);
   const [fileDetails, setFileDetails] = useState<DirItem | null>(null);
+  const [longOperation, setLongOperation] = useState<string | null>(null);
   const [sort, setSort] = useState<'asc' | 'desc'>('asc');
 
   const createDirectory = useCallback(
@@ -63,6 +65,8 @@ export default function FileManager() {
       setFileDetails,
       showFileDetails,
       sort,
+      longOperation,
+      setLongOperation,
       toggleSort: () => setSort(sort === 'asc' ? 'desc' : 'asc'),
     }),
     [
@@ -71,6 +75,7 @@ export default function FileManager() {
       newDirName,
       newDirPath,
       fileDetails,
+      longOperation,
       sort,
     ],
   );
@@ -80,12 +85,10 @@ export default function FileManager() {
       <CreateDirectoryDialog />
       <FileDetailsDialog />
       <NavigationContainer>
+        <LongOperationDialog />
         <Stack.Navigator
           screenOptions={{
-            headerTitleStyle: {
-              fontFamily: theme.regularText,
-              fontSize: theme.sizes.HEADER_TITLE_FONT,
-            },
+            header: props => <AppHeader {...props} />,
             contentStyle: {
               backgroundColor: '#fff',
               marginTop: -10,
@@ -96,7 +99,6 @@ export default function FileManager() {
             options={{
               title: t('title'),
               headerRight: () => <DefaultFolderActions />,
-              headerShadowVisible: false,
             }}
             // @ts-ignore
             component={FileTreeScreen}
@@ -109,7 +111,6 @@ export default function FileManager() {
             name="ImageViewer"
             options={{
               title: t('imageViewer'),
-              headerShadowVisible: false,
             }}
             // @ts-ignore
             component={ImagePreviewScreen}

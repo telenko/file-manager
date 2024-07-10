@@ -235,19 +235,23 @@ const FileScreen: React.FC<FileScreenProps> = ({
               text={t('copyHere')}
               loading={copyInProgress}
               disabled={!routeMetadatas.fromRoute || !route || copyInProgress}
-              onPress={() => {
+              onPress={async () => {
                 setCopyInProgress(true);
-                FileApi.copyFilesOrDirectoriesBatched(
-                  routeMetadatas.fromRoute!,
-                  route,
-                  true,
-                )
-                  .then(() => {
-                    navigateFromSelectable(navigator);
-                    fileManager.setReloadRequired(true);
-                  })
-                  .catch(exceptionHandler.handleError)
-                  .finally(() => setCopyInProgress(false));
+                fileManager.setLongOperation(t('copyInProgress'));
+                try {
+                  await FileApi.copyFilesOrDirectoriesBatched(
+                    routeMetadatas.fromRoute!,
+                    route,
+                    true,
+                  );
+                  navigateFromSelectable(navigator);
+                  fileManager.setReloadRequired(true);
+                } catch (e: any) {
+                  exceptionHandler.handleError(e);
+                } finally {
+                  setCopyInProgress(false);
+                  fileManager.setLongOperation(null);
+                }
               }}
             />
           ) : null}

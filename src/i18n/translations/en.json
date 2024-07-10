@@ -48,5 +48,10 @@
     "renameFailed": "Failed to rename. Please ensure app is given rights to write to your file system",
     "deleteFailed": "Failed to delete. Please ensure app is given rights to write to your file system",
     "failedToOpenPath": "Failed to open file. Please ensure app is given rights to read your file system",
-    "notEnoughSpace": "Not enough space in disk"
+    "notEnoughSpace": "Not enough space in disk",
+
+    "hide": "Hide",
+    "copyInProgress": "Please wait. Copy in progress",
+    "moveInProgress": "Please wait. Move in progress",
+    "deleteInProgress": "Please wait. Delete in progress"
 }

@@ -23,6 +23,8 @@ export type FileManagerContextType = {
   showFileDetails: (dirItem: DirItem) => void;
   setFileDetails: (v: DirItem | null) => void;
   fileDetails?: DirItem | null;
+  longOperation?: string | null;
+  setLongOperation: (v: string | null) => void;
 } & typeof FileGuiHelper;
 
 export const useFileManager = (): FileManagerContextType => {
@@ -44,6 +46,8 @@ export const FileManagerContext = React.createContext<FileManagerContextType>({
 
   showFileDetails: () => {},
   setFileDetails: () => {},
+  longOperation: null,
+  setLongOperation: () => {},
 
   ...FileGuiHelper,
 });

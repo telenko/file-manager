@@ -41,6 +41,8 @@ const FontsProvider: React.FC<PropsWithChildren> = ({ children }) => {
 /**
  * @TODO Andrii now:
  * 5. release beta
+ * 7. long operations modal (for all operations) + add missing i18n
+ * 8. deobfuscation
  *
  * FUTURE IMPS:
  * 1. delete in gallery behavior: keep gallery open
@@ -49,6 +51,8 @@ const FontsProvider: React.FC<PropsWithChildren> = ({ children }) => {
  * - rename folder animations
  * [BUG?] - slow image opening on dev
  * reorientation better animations, video to not interrupt
+ * cancelable long operations with percentage visible
+ * notifications for operations/long operations
  *
  * TEST:
  * 1. SDCard [DONE]
