@@ -1,9 +1,35 @@
 import React, { useEffect, useState } from 'react';
-import Video from 'react-native-video';
+// @ts-ignore
+import Video from 'react-native-video-controls';
 import { DirItem, FileApi } from '../../../services/FileApi';
 import { ImageBackground, View } from 'react-native';
-import { IconButton } from 'react-native-paper';
+import { IconButton, Portal } from 'react-native-paper';
 import { Cache } from '../../../services/Cache';
+class CustomizedVideo extends Video {
+  renderTopControls() {
+    return null;
+  }
+  renderBottomControls() {
+    // @ts-ignore
+    if (this.props.paused) {
+      return null;
+    }
+    return (
+      <Portal>
+        <View
+          style={{
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            backgroundColor: 'rgba(120,120,120,0.5)',
+          }}>
+          {super.renderBottomControls()}
+        </View>
+      </Portal>
+    );
+  }
+}
 
 const VideoViewer: React.FC<{
   file: Partial<DirItem>;
@@ -11,20 +37,10 @@ const VideoViewer: React.FC<{
   onActive?: (v: boolean) => void;
 }> = ({ file, activeFile, onActive }) => {
   const isCurrentViewable = activeFile?.path === file.path;
-  const [videoActivated, setVideoActivated] = useState(false);
   const [paused, setPaused] = useState(true);
   const [preview, setPreview] = useState<string | null>('');
   const fallbackThumbnail =
     'data:image/gif;base64,R0lGODlhAQABAIAAAMLCwgAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==';
-
-  useEffect(() => {
-    if (videoActivated) {
-      return;
-    }
-    if (!paused) {
-      setVideoActivated(true);
-    }
-  }, [paused]);
 
   useEffect(() => {
     if (!file.path) {
@@ -77,13 +93,23 @@ const VideoViewer: React.FC<{
   }
   return (
     <>
-      {isCurrentViewable && videoActivated ? (
+      {isCurrentViewable ? (
         <>
-          <Video
-            controls
-            onPlaybackStateChanged={({ isPlaying }) => setPaused(!isPlaying)}
+          {/* @ts-ignore */}
+          <CustomizedVideo
+            // tapAnywhereToPause
+            disableFullscreen
+            disableBack
+            disableVolume
+            onPause={() => setPaused(true)}
+            onPlay={() => {
+              setPaused(false);
+            }}
+            showHours
             paused={paused}
             source={{ uri: `file://${file.path}` }}
+            videoStyle={{ backgroundColor: '#fff' }}
+            containerStyle={{ backgroundColor: '#fff' }}
             style={{ width: '100%', height: '100%' }}
             resizeMode="contain"
             poster={preview ?? fallbackThumbnail}

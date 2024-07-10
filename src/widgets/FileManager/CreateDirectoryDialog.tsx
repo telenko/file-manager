@@ -38,6 +38,7 @@ const CreateDirectoryDialog: React.FC = () => {
         </Dialog.Content>
         <Dialog.Actions>
           <Button
+            disabled={!text}
             onPress={async () => {
               hideDialog();
               await FileApi.createFolder(

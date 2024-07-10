@@ -41,7 +41,7 @@ const FontsProvider: React.FC<PropsWithChildren> = ({ children }) => {
 /**
  * @TODO Andrii now:
  * 5. release beta
- * 7. video navigation
+ * 7. batched concurrency
  * 8. deobfuscation
  *
  * FUTURE IMPS:
