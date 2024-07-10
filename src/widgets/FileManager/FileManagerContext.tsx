@@ -20,6 +20,17 @@ export type FileManagerContextType = {
   setNewDirName: (v: string) => void;
   setNewDirPath: (v: string | null) => void;
 
+  performCopyContent: (
+    sources: string[],
+    destination: string,
+    injectIfConflict: boolean,
+  ) => Promise<void>;
+  performMoveContent: (
+    sources: string[],
+    destination: string,
+    injectIfConflict: boolean,
+  ) => Promise<void>;
+
   showFileDetails: (dirItem: DirItem) => void;
   setFileDetails: (v: DirItem | null) => void;
   fileDetails?: DirItem | null;
@@ -48,6 +59,8 @@ export const FileManagerContext = React.createContext<FileManagerContextType>({
   setFileDetails: () => {},
   longOperation: null,
   setLongOperation: () => {},
+  performCopyContent: async () => {},
+  performMoveContent: async () => {},
 
   ...FileGuiHelper,
 });

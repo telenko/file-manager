@@ -47,6 +47,61 @@ export default function FileManager() {
     setFileDetails(dirItem);
   }, []);
 
+  const performCopyContent = useCallback(
+    async (
+      sources: string[],
+      destination: string,
+      injectIfConflict: boolean,
+    ) => {
+      try {
+        setLongOperation(t('copyInProgress'));
+        await FileApi.copyFilesOrDirectoriesBatched(
+          sources,
+          destination,
+          injectIfConflict,
+        );
+      } catch (e: any) {
+        throw e;
+      } finally {
+        setLongOperation(null);
+      }
+    },
+    [],
+  );
+
+  const performMoveContent = useCallback(
+    async (
+      sources: string[],
+      destination: string,
+      injectIfConflict: boolean,
+    ) => {
+      try {
+        setLongOperation(t('moveInProgress'));
+        await FileApi.moveFilesOrDirectoriesBatched(
+          sources,
+          destination,
+          injectIfConflict,
+        );
+      } catch (e: any) {
+        throw e;
+      } finally {
+        setLongOperation(null);
+      }
+    },
+    [],
+  );
+
+  const deleteContent = useCallback(async (files: DirItem[]) => {
+    try {
+      setLongOperation(t('deleteInProgress'));
+      return await FileGuiHelper.deleteContent(files);
+    } catch (e: any) {
+      throw e;
+    } finally {
+      setLongOperation(null);
+    }
+  }, []);
+
   const ctxValue = useMemo<FileManagerContextType>(
     () => ({
       reloadRequired,
@@ -60,6 +115,9 @@ export default function FileManager() {
       setNewDirName,
       newDirPath,
       setNewDirPath,
+      performCopyContent,
+      performMoveContent,
+      deleteContent,
 
       fileDetails,
       setFileDetails,

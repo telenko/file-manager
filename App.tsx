@@ -41,7 +41,7 @@ const FontsProvider: React.FC<PropsWithChildren> = ({ children }) => {
 /**
  * @TODO Andrii now:
  * 5. release beta
- * 7. long operations modal (for all operations) + add missing i18n
+ * 7. add missing i18n
  * 8. deobfuscation
  *
  * FUTURE IMPS:
