@@ -16,6 +16,7 @@ import CreateDirectoryDialog from './CreateDirectoryDialog';
 import FileDetailsDialog from './FileDetailsDialog';
 import DefaultFolderActions from './DefaultFolderActions';
 import AppHeader from '../../common/components/AppHeader';
+import LongOperationDialog from './LongOperationDialog';
 
 const Stack = createNativeStackNavigator<FileManagerNavigation>();
 export default function FileManager() {
@@ -27,6 +28,7 @@ export default function FileManager() {
   const [newDirName, setNewDirName] = useState<string>('');
   const [newDirPath, setNewDirPath] = useState<string | null>(null);
   const [fileDetails, setFileDetails] = useState<DirItem | null>(null);
+  const [longOperation, setLongOperation] = useState<string | null>(null);
   const [sort, setSort] = useState<'asc' | 'desc'>('asc');
 
   const createDirectory = useCallback(
@@ -63,6 +65,8 @@ export default function FileManager() {
       setFileDetails,
       showFileDetails,
       sort,
+      longOperation,
+      setLongOperation,
       toggleSort: () => setSort(sort === 'asc' ? 'desc' : 'asc'),
     }),
     [
@@ -71,6 +75,7 @@ export default function FileManager() {
       newDirName,
       newDirPath,
       fileDetails,
+      longOperation,
       sort,
     ],
   );
@@ -80,6 +85,7 @@ export default function FileManager() {
       <CreateDirectoryDialog />
       <FileDetailsDialog />
       <NavigationContainer>
+        <LongOperationDialog />
         <Stack.Navigator
           screenOptions={{
             header: props => <AppHeader {...props} />,
