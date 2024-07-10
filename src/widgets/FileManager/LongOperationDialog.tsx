@@ -12,7 +12,7 @@ import { useTranslation } from 'react-i18next';
 import { useBackAction } from '../../common/hooks/useBackAction';
 import { View } from 'react-native';
 
-const STARTUP_DELAY_MS = 3000;
+const STARTUP_DELAY_MS = 1500;
 
 const LongOperationDialog: React.FC = () => {
   const fileManager = useFileManager();

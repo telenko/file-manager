@@ -237,9 +237,8 @@ const FileScreen: React.FC<FileScreenProps> = ({
               disabled={!routeMetadatas.fromRoute || !route || copyInProgress}
               onPress={async () => {
                 setCopyInProgress(true);
-                fileManager.setLongOperation(t('copyInProgress'));
                 try {
-                  await FileApi.copyFilesOrDirectoriesBatched(
+                  await fileManager.performCopyContent(
                     routeMetadatas.fromRoute!,
                     route,
                     true,
@@ -250,7 +249,6 @@ const FileScreen: React.FC<FileScreenProps> = ({
                   exceptionHandler.handleError(e);
                 } finally {
                   setCopyInProgress(false);
-                  fileManager.setLongOperation(null);
                 }
               }}
             />
@@ -269,11 +267,8 @@ const FileScreen: React.FC<FileScreenProps> = ({
               }
               onPress={() => {
                 setMoveInProgress(true);
-                FileApi.moveFilesOrDirectoriesBatched(
-                  routeMetadatas.fromRoute!,
-                  route,
-                  true,
-                )
+                fileManager
+                  .performMoveContent(routeMetadatas.fromRoute!, route, true)
                   .then(() => {
                     navigateFromSelectable(navigator);
                     fileManager.setReloadRequired(true);
