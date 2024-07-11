@@ -25,6 +25,8 @@ import DefaultFolderActions from './DefaultFolderActions';
 import AppHeader from '../../common/components/AppHeader';
 import LongOperationDialog from './LongOperationDialog';
 import { useSnackbar } from 'react-native-paper-snackbar-stack';
+import { ActivityIndicator } from 'react-native-paper';
+import { useFsRoots } from './useFsRoots';
 
 const SNACK_DEFAULT_DURATION_MS = 4000;
 
@@ -43,6 +45,7 @@ export default function FileManager() {
     useState<FileLongOperationType | null>(null);
   const hasLongOperationVisibleRef = useRef(false);
   const [sort, setSort] = useState<'asc' | 'desc'>('asc');
+  const { refresh: refreshRoots, rootsReady, roots } = useFsRoots();
 
   const createDirectory = useCallback(
     (navigation: NavigationProp<FileManagerNavigation>) => {
@@ -83,6 +86,7 @@ export default function FileManager() {
             duration: SNACK_DEFAULT_DURATION_MS,
           });
         }
+        refreshRoots();
       } catch (e: any) {
         throw e;
       } finally {
@@ -115,6 +119,7 @@ export default function FileManager() {
             duration: SNACK_DEFAULT_DURATION_MS,
           });
         }
+        refreshRoots();
       } catch (e: any) {
         throw e;
       } finally {
@@ -141,6 +146,7 @@ export default function FileManager() {
           duration: SNACK_DEFAULT_DURATION_MS,
         });
       }
+      refreshRoots();
       return res;
     } catch (e: any) {
       throw e;
@@ -167,6 +173,8 @@ export default function FileManager() {
       performCopyContent,
       performMoveContent,
       deleteContent,
+      roots,
+      rootsReady,
 
       fileDetails,
       setFileDetails,
@@ -183,6 +191,8 @@ export default function FileManager() {
       newDirPath,
       fileDetails,
       longOperation,
+      roots,
+      rootsReady,
       sort,
     ],
   );
@@ -190,6 +200,14 @@ export default function FileManager() {
   useEffect(() => {
     hasLongOperationVisibleRef.current = !longOperation?.hidden;
   }, [longOperation]);
+
+  useEffect(() => {
+    refreshRoots();
+  }, []);
+
+  if (!rootsReady) {
+    return <ActivityIndicator size={24} />;
+  }
 
   return (
     <FileManagerContext.Provider value={ctxValue}>

@@ -1,15 +1,16 @@
 import { useMemo } from 'react';
 import { BreadCrumbItem } from '../components/BreadCrumbs';
 import { useNavigation } from './useNavigation';
-import { FileApi } from '../../services/FileApi';
+import { useFileManager } from '../../widgets/FileManager';
 
 export const usePathBreadCrumbs = (dirPath: string): BreadCrumbItem[] => {
   const navigation = useNavigation();
+  const { roots } = useFileManager();
   const result = useMemo<BreadCrumbItem[]>(() => {
-    if (FileApi.ROOTS.length === 0) {
+    if (roots.length === 0) {
       return [];
     }
-    const rootMatchingItem = FileApi.ROOTS?.find(systemRoot =>
+    const rootMatchingItem = roots?.find(systemRoot =>
       dirPath?.includes(systemRoot.path),
     );
     if (!rootMatchingItem) {
@@ -44,6 +45,6 @@ export const usePathBreadCrumbs = (dirPath: string): BreadCrumbItem[] => {
     }
 
     return breadCrumbs;
-  }, [dirPath, navigation, FileApi.ROOTS]);
+  }, [dirPath, navigation, roots]);
   return result;
 };

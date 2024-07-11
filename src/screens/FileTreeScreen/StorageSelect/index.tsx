@@ -2,7 +2,6 @@ import React from 'react';
 import { useState } from 'react';
 import { useFileTreeContext } from '../FileTreeContext';
 import {
-  Button,
   Icon,
   List,
   MD3Colors,
@@ -23,12 +22,11 @@ const StorageSelect: React.FC = () => {
   const navigator = useNavigation();
 
   const matchingRoot =
-    FileApi.ROOTS.find(r => fileScreen.route.includes(r.path)) ??
-    FileApi.ROOTS[0];
+    fileManager.roots.find(r => fileScreen.route.includes(r.path)) ??
+    fileManager.roots[0];
   return (
     <Menu
       onDismiss={() => setOpen(false)}
-      // style={{ width: '50%' }}
       contentStyle={{ backgroundColor: theme.selectionColor }}
       anchor={
         <TouchableOpacity
@@ -55,7 +53,7 @@ const StorageSelect: React.FC = () => {
         </TouchableOpacity>
       }
       visible={open}>
-      {FileApi.ROOTS.map(root => (
+      {fileManager.roots.map(root => (
         <List.Item
           key={root.path}
           left={() => (
@@ -81,7 +79,8 @@ const StorageSelect: React.FC = () => {
             setOpen(false);
           }}
           description={() => {
-            const percentage = 1 - (root.freeSpace ?? 0) / (root.totalSpace ?? 0);
+            const percentage =
+              1 - (root.freeSpace ?? 0) / (root.totalSpace ?? 0);
             const progressColor = (() => {
               if (percentage < 0.8) {
                 return MD3Colors.primary50;
@@ -91,7 +90,7 @@ const StorageSelect: React.FC = () => {
             return (
               <View>
                 <Text>
-                  {FileApi.formatSize(root.freeSpace!)} /{' '}
+                  {FileApi.formatSize(root.totalSpace! - root.freeSpace!)} /{' '}
                   {FileApi.formatSize(root.totalSpace!)}
                 </Text>
                 <View style={{ marginTop: 5 }}>
@@ -101,18 +100,6 @@ const StorageSelect: React.FC = () => {
             );
           }}
         />
-        // <Menu.Item
-        //   key={root.path}
-        //   leadingIcon={root.isMainDeviceStorage ? 'memory' : 'sd'}
-        //   title={root.name}
-        // onPress={() => {
-        //   if (root.path === matchingRoot.path) {
-        //     setOpen(false);
-        //     return;
-        //   }
-        //   fileManager.openDirectory(root, navigator);
-        // }}
-        // />
       ))}
     </Menu>
   );

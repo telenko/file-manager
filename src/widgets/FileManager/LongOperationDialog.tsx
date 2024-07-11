@@ -68,7 +68,7 @@ const LongOperationDialog: React.FC = () => {
               alignItems: 'center',
               justifyContent: 'flex-start',
             }}>
-            <View style={{ marginRight: 10 }}>
+            <View style={{ marginRight: 15 }}>
               <ActivityIndicator animating color={MD2Colors.blueA400} />
             </View>
             <View style={{ flex: 1 }}>

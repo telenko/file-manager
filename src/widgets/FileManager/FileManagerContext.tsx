@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import { FileGuiHelper } from './FileGuiHelper';
-import { DirItem } from '../../services/FileApi';
+import { DirItem, StorageItem } from '../../services/FileApi';
 import { NavigationProp } from '@react-navigation/native';
 import { FileManagerNavigation } from '../../common/types/navigation';
 
@@ -14,6 +14,8 @@ export type FileManagerContextType = {
   toggleSort: () => void;
   reloadRequired?: boolean;
   setReloadRequired: (v: boolean) => void;
+  roots: StorageItem[];
+  rootsReady: boolean;
 
   renameContent: (dirItem: DirItem) => void;
   renameDialogItem?: DirItem | null;
@@ -53,6 +55,8 @@ export const FileManagerContext = React.createContext<FileManagerContextType>({
   toggleSort: () => {},
   reloadRequired: false,
   setReloadRequired: () => {},
+  roots: [],
+  rootsReady: false,
 
   renameContent: () => {},
   setRenameDialogActive: () => {},

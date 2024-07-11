@@ -1,5 +1,5 @@
 import React, { PropsWithChildren, useEffect, useState } from 'react';
-import { Platform, StyleSheet } from 'react-native';
+import { Platform } from 'react-native';
 import FileManager from './src/widgets/FileManager/FileManager';
 import { useDeviceLocale } from './src/i18n/hooks/useDeviceLocale';
 import {
@@ -43,6 +43,8 @@ const FontsProvider: React.FC<PropsWithChildren> = ({ children }) => {
  * @TODO Andrii now:
  * 5. release beta
  * 8. deobfuscation
+ * blocking delete - improvement?
+ * [BUG] copy halts forever with no result!
  *
  * FUTURE IMPS:
  * 1. delete in gallery behavior: keep gallery open
@@ -54,6 +56,7 @@ const FontsProvider: React.FC<PropsWithChildren> = ({ children }) => {
  * cancelable long operations with percentage visible
  * refactor to Redux
  * bad animation when copy/move just started (navigated)
+ * wrong total size of storage? some memory size is missing, system one?
  *
  * TEST:
  * 2. gallery sliding bug
@@ -61,20 +64,16 @@ const FontsProvider: React.FC<PropsWithChildren> = ({ children }) => {
 
 const App = () => {
   const [permissionGranted, setPermissionGranted] = useState<boolean>(false);
-  const [fsReady, setFsReady] = useState(false);
   useDeviceLocale();
   const { t } = useTranslation();
   useEffect(() => {
-    FileApi.askForStoragePermission()
-      .then(() => setPermissionGranted(true))
-      .then(() => FileApi.prepareFsRoots())
-      .then(() => setFsReady(true));
+    FileApi.askForStoragePermission().then(() => setPermissionGranted(true));
   }, []);
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <FontsProvider>
-          {permissionGranted && fsReady ? (
+          {permissionGranted ? (
             <ExceptionHandler>
               <SnackbarProvider maxSnack={MAX_SNACK}>
                 <FileManager />

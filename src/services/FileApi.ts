@@ -205,14 +205,8 @@ export const FileApi = {
   get ROOTS() {
     return ROOTS;
   },
-  /**
-   * https://code.nkslearning.com/blogs/get-absolute-paths-of-internal-and-external-storages-in-android_6560bb60cde142b303bf
-   */
-  prepareFsRoots: async (): Promise<DirItem[]> => {
+  prepareFsRoots: async (): Promise<StorageItem[]> => {
     try {
-      if (ROOTS.length > 0) {
-        return ROOTS;
-      }
       const rootDirs: StorageItem[] =
         await NativeModules.StorageMetaReader.readAll();
       const resultDirItems: StorageItem[] = rootDirs.map(storageItem => {

@@ -51,7 +51,7 @@ const FileScreen: React.FC<FileScreenProps> = ({
   const [moveInProgress, setMoveInProgress] = useState<boolean>(false);
   const fileManager = useFileManager();
   const isMultiSelectActivated = selectedPaths.length > 0;
-  const isStorageLevel = FileApi.ROOTS.map(r => r.path).includes(route);
+  const isStorageLevel = fileManager.roots.map(r => r.path).includes(route);
   useEffect(() => {
     let title = '';
     if (isMultiSelectActivated) {
