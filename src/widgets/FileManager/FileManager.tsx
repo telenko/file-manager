@@ -1,4 +1,10 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { NavigationContainer, NavigationProp } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import FileTreeScreen from '../../screens/FileTreeScreen';
@@ -7,6 +13,7 @@ import { FileManagerNavigation } from '../../common/types/navigation';
 import { useTranslation } from 'react-i18next';
 import ImagePreviewScreen from '../../screens/ImagePreviewScreen';
 import {
+  FileLongOperationType,
   FileManagerContext,
   FileManagerContextType,
 } from './FileManagerContext';
@@ -17,10 +24,14 @@ import FileDetailsDialog from './FileDetailsDialog';
 import DefaultFolderActions from './DefaultFolderActions';
 import AppHeader from '../../common/components/AppHeader';
 import LongOperationDialog from './LongOperationDialog';
+import { useSnackbar } from 'react-native-paper-snackbar-stack';
+
+const SNACK_DEFAULT_DURATION_MS = 4000;
 
 const Stack = createNativeStackNavigator<FileManagerNavigation>();
 export default function FileManager() {
   const { t } = useTranslation();
+  const { enqueueSnackbar } = useSnackbar();
   const [reloadRequired, setReloadRequired] = useState(false);
   const [renameDialogActive, setRenameDialogActive] = useState<DirItem | null>(
     null,
@@ -28,7 +39,9 @@ export default function FileManager() {
   const [newDirName, setNewDirName] = useState<string>('');
   const [newDirPath, setNewDirPath] = useState<string | null>(null);
   const [fileDetails, setFileDetails] = useState<DirItem | null>(null);
-  const [longOperation, setLongOperation] = useState<string | null>(null);
+  const [longOperation, setLongOperation] =
+    useState<FileLongOperationType | null>(null);
+  const hasLongOperationVisibleRef = useRef(false);
   const [sort, setSort] = useState<'asc' | 'desc'>('asc');
 
   const createDirectory = useCallback(
@@ -54,12 +67,22 @@ export default function FileManager() {
       injectIfConflict: boolean,
     ) => {
       try {
-        setLongOperation(t('copyInProgress'));
+        setLongOperation({
+          message: t('copyInProgress'),
+        });
         await FileApi.copyFilesOrDirectoriesBatched(
           sources,
           destination,
           injectIfConflict,
         );
+        // user manually closed dialog of long operation
+        if (!hasLongOperationVisibleRef.current) {
+          enqueueSnackbar({
+            variant: 'success',
+            message: t('copyIsDone'),
+            duration: SNACK_DEFAULT_DURATION_MS,
+          });
+        }
       } catch (e: any) {
         throw e;
       } finally {
@@ -76,12 +99,22 @@ export default function FileManager() {
       injectIfConflict: boolean,
     ) => {
       try {
-        setLongOperation(t('moveInProgress'));
+        setLongOperation({
+          message: t('moveInProgress'),
+        });
         await FileApi.moveFilesOrDirectoriesBatched(
           sources,
           destination,
           injectIfConflict,
         );
+        // user manually closed dialog of long operation
+        if (!hasLongOperationVisibleRef.current) {
+          enqueueSnackbar({
+            variant: 'success',
+            message: t('moveIsDone'),
+            duration: SNACK_DEFAULT_DURATION_MS,
+          });
+        }
       } catch (e: any) {
         throw e;
       } finally {
@@ -92,13 +125,29 @@ export default function FileManager() {
   );
 
   const deleteContent = useCallback(async (files: DirItem[]) => {
+    let deleteInitiated = false;
     try {
-      setLongOperation(t('deleteInProgress'));
-      return await FileGuiHelper.deleteContent(files);
+      const res = await FileGuiHelper.deleteContent(files, () => {
+        deleteInitiated = true;
+        setLongOperation({
+          message: t('deleteInProgress'),
+        });
+      });
+      // user manually closed dialog of long operation
+      if (deleteInitiated && !hasLongOperationVisibleRef.current) {
+        enqueueSnackbar({
+          variant: 'success',
+          message: t('deleteIsDone'),
+          duration: SNACK_DEFAULT_DURATION_MS,
+        });
+      }
+      return res;
     } catch (e: any) {
       throw e;
     } finally {
-      setLongOperation(null);
+      if (deleteInitiated) {
+        setLongOperation(null);
+      }
     }
   }, []);
 
@@ -137,6 +186,11 @@ export default function FileManager() {
       sort,
     ],
   );
+
+  useEffect(() => {
+    hasLongOperationVisibleRef.current = !longOperation?.hidden;
+  }, [longOperation]);
+
   return (
     <FileManagerContext.Provider value={ctxValue}>
       <RenameContentDialog />

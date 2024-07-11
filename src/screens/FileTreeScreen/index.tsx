@@ -22,6 +22,7 @@ import { useBackAction } from '../../common/hooks/useBackAction';
 import { useExceptionHandler } from '../../common/components/ExceptionHandler';
 import DefaultFolderActions from '../../widgets/FileManager/DefaultFolderActions';
 import StorageSelect from './StorageSelect';
+import { ActivityIndicator } from 'react-native-paper';
 
 export type FileScreenProps = {
   route: {
@@ -74,7 +75,11 @@ const FileScreen: React.FC<FileScreenProps> = ({
     navigator.setOptions({
       headerTitle: title,
       headerRight: () =>
-        isMultiSelectActivated ? (
+        fileManager.longOperation ? (
+          <View style={{ marginRight: 10 }}>
+            <ActivityIndicator size={24} />
+          </View>
+        ) : isMultiSelectActivated ? (
           <MultiSelectActions
             dirItems={dirItems}
             navigation={navigator}
@@ -85,7 +90,13 @@ const FileScreen: React.FC<FileScreenProps> = ({
           <DefaultFolderActions />
         ),
     });
-  }, [routeMetadatas.mode, navigator, selectedPaths, dirItems]);
+  }, [
+    routeMetadatas.mode,
+    navigator,
+    selectedPaths,
+    dirItems,
+    fileManager.longOperation,
+  ]);
 
   const reloadDir = useCallback(async () => {
     setDirLoading(true);
@@ -238,12 +249,13 @@ const FileScreen: React.FC<FileScreenProps> = ({
               onPress={async () => {
                 setCopyInProgress(true);
                 try {
-                  await fileManager.performCopyContent(
+                  const promise = fileManager.performCopyContent(
                     routeMetadatas.fromRoute!,
                     route,
                     true,
                   );
                   navigateFromSelectable(navigator);
+                  await promise;
                   fileManager.setReloadRequired(true);
                 } catch (e: any) {
                   exceptionHandler.handleError(e);
@@ -265,16 +277,22 @@ const FileScreen: React.FC<FileScreenProps> = ({
                 moveInProgress ||
                 isMoveFolderToSame()
               }
-              onPress={() => {
+              onPress={async () => {
                 setMoveInProgress(true);
-                fileManager
-                  .performMoveContent(routeMetadatas.fromRoute!, route, true)
-                  .then(() => {
-                    navigateFromSelectable(navigator);
-                    fileManager.setReloadRequired(true);
-                  })
-                  .catch(exceptionHandler.handleError)
-                  .finally(() => setMoveInProgress(false));
+                try {
+                  const promise = fileManager.performMoveContent(
+                    routeMetadatas.fromRoute!,
+                    route,
+                    true,
+                  );
+                  navigateFromSelectable(navigator);
+                  await promise;
+                  fileManager.setReloadRequired(true);
+                } catch (e: any) {
+                  exceptionHandler.handleError(e);
+                } finally {
+                  setMoveInProgress(false);
+                }
               }}
             />
           ) : null}

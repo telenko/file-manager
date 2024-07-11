@@ -24,7 +24,7 @@ export const getRouteDirectory = (
 };
 
 export const FileGuiHelper = {
-  deleteContent: (files: DirItem[]): Promise<boolean> => {
+  deleteContent: (files: DirItem[], onDeleteStart?: () => void): Promise<boolean> => {
     let resolved = false;
     return new Promise((resolve, reject) => {
       Alert.alert(
@@ -40,6 +40,8 @@ export const FileGuiHelper = {
           {
             text: i18n.t('delete'),
             onPress: async () => {
+              onDeleteStart?.();
+              await new Promise(r => setTimeout(r, 500));
               await FileApi.deleteItemsBatched(files).catch(
                 getGlobalExceptionHandler()?.handleError,
               );

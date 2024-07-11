@@ -49,5 +49,13 @@
     "renameFailed": "No se pudo renombrar. Asegúrese de que la aplicación tenga permisos para escribir en su sistema de archivos",
     "deleteFailed": "No se pudo eliminar. Asegúrese de que la aplicación tenga permisos para escribir en su sistema de archivos",
     "failedToOpenPath": "No se pudo abrir el archivo. Asegúrese de que la aplicación tenga permisos para leer su sistema de archivos",
-    "notEnoughSpace": "No hay suficiente espacio"
+    "notEnoughSpace": "No hay suficiente espacio",
+
+    "hide": "Ocultar",
+    "copyInProgress": "Por favor, espere. Copia en progreso",
+    "moveInProgress": "Por favor, espere. Movimiento en progreso",
+    "deleteInProgress": "Por favor, espere. Eliminación en progreso",
+    "copyIsDone": "Copia completada",
+    "moveIsDone": "Movimiento completado",
+    "deleteIsDone": "Eliminación completada"
 }

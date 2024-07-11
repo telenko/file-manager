@@ -48,5 +48,13 @@
     "renameFailed": "Impossibile rinominare. Assicurati che l'app abbia i diritti per scrivere nel tuo file system",
     "deleteFailed": "Impossibile eliminare. Assicurati che l'app abbia i diritti per scrivere nel tuo file system",
     "failedToOpenPath": "Impossibile aprire il file. Assicurati che l'app abbia i diritti per leggere il tuo file system",
-    "notEnoughSpace": "Spazio insufficiente"
+    "notEnoughSpace": "Spazio insufficiente",
+
+    "hide": "Nascondi",
+    "copyInProgress": "Attendere prego. Copia in corso",
+    "moveInProgress": "Attendere prego. Spostamento in corso",
+    "deleteInProgress": "Attendere prego. Eliminazione in corso",
+    "copyIsDone": "Copia completata",
+    "moveIsDone": "Spostamento completato",
+    "deleteIsDone": "Eliminazione completata"
 }

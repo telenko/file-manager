@@ -48,5 +48,13 @@
     "renameFailed": "Hernoemen mislukt. Zorg ervoor dat de app rechten heeft om naar uw bestandssysteem te schrijven",
     "deleteFailed": "Verwijderen mislukt. Zorg ervoor dat de app rechten heeft om naar uw bestandssysteem te schrijven",
     "failedToOpenPath": "Kan bestand niet openen. Zorg ervoor dat de app rechten heeft om uw bestandssysteem te lezen",
-    "notEnoughSpace": "Niet genoeg ruimte"
+    "notEnoughSpace": "Niet genoeg ruimte",
+
+    "hide": "Verbergen",
+    "copyInProgress": "Even geduld. Kopiëren bezig",
+    "moveInProgress": "Even geduld. Verplaatsen bezig",
+    "deleteInProgress": "Even geduld. Verwijderen bezig",
+    "copyIsDone": "Kopiëren voltooid",
+    "moveIsDone": "Verplaatsen voltooid",
+    "deleteIsDone": "Verwijderen voltooid"
 }

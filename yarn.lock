@@ -5133,6 +5133,7 @@ __metadata:
     react-native-localize: 3.2.0
     react-native-manage-external-storage: ^0.1.8
     react-native-paper: ^5.12.3
+    react-native-paper-snackbar-stack: ^0.2.0
     react-native-reanimated: 3.13.0
     react-native-safe-area-context: 4.10.7
     react-native-screens: 3.32.0
@@ -8473,6 +8474,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-native-paper-snackbar-stack@npm:^0.2.0":
+  version: 0.2.0
+  resolution: "react-native-paper-snackbar-stack@npm:0.2.0"
+  dependencies:
+    use-event-callback: ^0.1.0
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+    react-native-paper: ^4.12.5
+  checksum: 9f5dcf7968bb3bd1a597dae769bc00da5098417df7ad54f4e867c075dacc625dab447fe28bba48a69c8771b2040408c782ae577f3df5774e6d0f8ed8ed44448c
+  languageName: node
+  linkType: hard
+
 "react-native-paper@npm:^5.12.3":
   version: 5.12.3
   resolution: "react-native-paper@npm:5.12.3"
@@ -9992,6 +10006,15 @@ __metadata:
   dependencies:
     punycode: ^2.1.0
   checksum: 7167432de6817fe8e9e0c9684f1d2de2bb688c94388f7569f7dbdb1587c9f4ca2a77962f134ec90be0cc4d004c939ff0d05acc9f34a0db39a3c797dada262633
+  languageName: node
+  linkType: hard
+
+"use-event-callback@npm:^0.1.0":
+  version: 0.1.0
+  resolution: "use-event-callback@npm:0.1.0"
+  peerDependencies:
+    react: ">=16.8"
+  checksum: 1e15fb21306c74f877e9d57686546c363165429412dcb9260254d2dd8f56692cb01ba2162f9169e6fc15b01cf3921b9cd8a9c60cf777d0143afcee92c1a7976a
   languageName: node
   linkType: hard
 

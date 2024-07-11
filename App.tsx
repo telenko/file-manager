@@ -13,8 +13,9 @@ import { FileApi } from './src/services/FileApi';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import ExceptionHandler from './src/common/components/ExceptionHandler';
+import { SnackbarProvider } from 'react-native-paper-snackbar-stack';
 
-// const App = AppLegacy;
+const MAX_SNACK = 2;
 
 const fontConfig = {
   customVariant: {
@@ -41,7 +42,6 @@ const FontsProvider: React.FC<PropsWithChildren> = ({ children }) => {
 /**
  * @TODO Andrii now:
  * 5. release beta
- * 7. add missing i18n
  * 8. deobfuscation
  *
  * FUTURE IMPS:
@@ -52,10 +52,10 @@ const FontsProvider: React.FC<PropsWithChildren> = ({ children }) => {
  * [BUG?] - slow image opening on dev
  * reorientation better animations, video to not interrupt
  * cancelable long operations with percentage visible
- * notifications for operations/long operations
+ * refactor to Redux
+ * bad animation when copy/move just started (navigated)
  *
  * TEST:
- * 1. SDCard [DONE]
  * 2. gallery sliding bug
  */
 
@@ -76,7 +76,9 @@ const App = () => {
         <FontsProvider>
           {permissionGranted && fsReady ? (
             <ExceptionHandler>
-              <FileManager />
+              <SnackbarProvider maxSnack={MAX_SNACK}>
+                <FileManager />
+              </SnackbarProvider>
             </ExceptionHandler>
           ) : null}
           {!permissionGranted ? <Text>{t('permissionRequired')}</Text> : null}
@@ -85,7 +87,5 @@ const App = () => {
     </GestureHandlerRootView>
   );
 };
-
-const styles = StyleSheet.create({});
 
 export default App;

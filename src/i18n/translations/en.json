@@ -53,5 +53,8 @@
     "hide": "Hide",
     "copyInProgress": "Please wait. Copy in progress",
     "moveInProgress": "Please wait. Move in progress",
-    "deleteInProgress": "Please wait. Delete in progress"
+    "deleteInProgress": "Please wait. Delete in progress",
+    "copyIsDone": "Copy is done",
+    "moveIsDone": "Move is done",
+    "deleteIsDone": "Delete is done"
 }

@@ -48,5 +48,13 @@
     "renameFailed": "Nie udało się zmienić nazwy. Upewnij się, że aplikacja ma uprawnienia do zapisu w systemie plików",
     "deleteFailed": "Nie udało się usunąć. Upewnij się, że aplikacja ma uprawnienia do zapisu w systemie plików",
     "failedToOpenPath": "Nie udało się otworzyć pliku. Upewnij się, że aplikacja ma uprawnienia do odczytu systemu plików",
-    "notEnoughSpace": "Za mało miejsca"
+    "notEnoughSpace": "Za mało miejsca",
+
+    "hide": "Ukryj",
+    "copyInProgress": "Proszę czekać. Trwa kopiowanie",
+    "moveInProgress": "Proszę czekać. Trwa przenoszenie",
+    "deleteInProgress": "Proszę czekać. Trwa usuwanie",
+    "copyIsDone": "Kopiowanie zakończone",
+    "moveIsDone": "Przenoszenie zakończone",
+    "deleteIsDone": "Usuwanie zakończone"
 }

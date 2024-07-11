@@ -4,6 +4,11 @@ import { DirItem } from '../../services/FileApi';
 import { NavigationProp } from '@react-navigation/native';
 import { FileManagerNavigation } from '../../common/types/navigation';
 
+export type FileLongOperationType = {
+  message: string;
+  hidden?: boolean;
+};
+
 export type FileManagerContextType = {
   sort: 'asc' | 'desc';
   toggleSort: () => void;
@@ -34,8 +39,8 @@ export type FileManagerContextType = {
   showFileDetails: (dirItem: DirItem) => void;
   setFileDetails: (v: DirItem | null) => void;
   fileDetails?: DirItem | null;
-  longOperation?: string | null;
-  setLongOperation: (v: string | null) => void;
+  longOperation?: FileLongOperationType | null;
+  setLongOperation: (v: FileLongOperationType | null) => void;
 } & typeof FileGuiHelper;
 
 export const useFileManager = (): FileManagerContextType => {

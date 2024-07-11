@@ -17,17 +17,19 @@ const STARTUP_DELAY_MS = 1500;
 const LongOperationDialog: React.FC = () => {
   const fileManager = useFileManager();
   const [dialogActive, setDialogActive] = useState(false);
-
+  const hasLongOperation = !!fileManager.longOperation;
+  const isVisibleLongOperation =
+    hasLongOperation && !fileManager.longOperation?.hidden;
   const backHandle = useCallback(() => {
-    if (fileManager.longOperation) {
+    if (isVisibleLongOperation) {
       return true;
     }
     return false;
-  }, [fileManager.longOperation]);
+  }, [isVisibleLongOperation]);
   useBackAction(backHandle);
 
   useEffect(() => {
-    if (!fileManager.longOperation) {
+    if (!isVisibleLongOperation) {
       setDialogActive(false);
       return;
     }
@@ -37,7 +39,7 @@ const LongOperationDialog: React.FC = () => {
     return () => {
       clearTimeout(timer);
     };
-  }, [fileManager.longOperation]);
+  }, [isVisibleLongOperation]);
 
   const { t } = useTranslation();
 
@@ -45,15 +47,21 @@ const LongOperationDialog: React.FC = () => {
     return null;
   }
   const hideDialog = () => {
-    fileManager.setLongOperation(null);
+    if (!fileManager.longOperation) {
+      return;
+    }
+    fileManager.setLongOperation({
+      message: fileManager.longOperation?.message,
+      hidden: true,
+    });
   };
   return (
     <Portal>
       <Dialog
-        visible={!!dialogActive || fileManager.longOperation}
+        visible={!!dialogActive && isVisibleLongOperation}
         dismissable={false}
         dismissableBackButton={false}>
-        <Dialog.Title>
+        <Dialog.Content>
           <View
             style={{
               flexDirection: 'row',
@@ -64,7 +72,9 @@ const LongOperationDialog: React.FC = () => {
               <ActivityIndicator animating color={MD2Colors.blueA400} />
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={{ fontSize: 16 }}>{fileManager.longOperation}</Text>
+              <Text style={{ fontSize: 16, flexWrap: 'wrap', width: '100%' }}>
+                {fileManager.longOperation?.message}
+              </Text>
             </View>
             <View style={{ marginLeft: 'auto' }}>
               <Button
@@ -76,7 +86,7 @@ const LongOperationDialog: React.FC = () => {
               </Button>
             </View>
           </View>
-        </Dialog.Title>
+        </Dialog.Content>
       </Dialog>
     </Portal>
   );

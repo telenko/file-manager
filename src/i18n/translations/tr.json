@@ -48,5 +48,13 @@
     "renameFailed": "Yeniden adlandırılamadı. Uygulamanın dosya sisteminize yazma yetkisine sahip olduğundan emin olun",
     "deleteFailed": "Silinemedi. Uygulamanın dosya sisteminize yazma yetkisine sahip olduğundan emin olun",
     "failedToOpenPath": "Dosya açılamadı. Uygulamanın dosya sisteminizi okuma yetkisine sahip olduğundan emin olun",
-    "notEnoughSpace": "Yeterli alan yok"
+    "notEnoughSpace": "Yeterli alan yok",
+
+    "hide": "Gizle",
+    "copyInProgress": "Lütfen bekleyin. Kopyalama devam ediyor",
+    "moveInProgress": "Lütfen bekleyin. Taşıma devam ediyor",
+    "deleteInProgress": "Lütfen bekleyin. Silme devam ediyor",
+    "copyIsDone": "Kopyalama tamamlandı",
+    "moveIsDone": "Taşıma tamamlandı",
+    "deleteIsDone": "Silme tamamlandı"
 }

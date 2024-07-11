@@ -48,5 +48,13 @@
     "renameFailed": "Falha ao renomear. Certifique-se de que o aplicativo tenha permissões para gravar em seu sistema de arquivos",
     "deleteFailed": "Falha ao excluir. Certifique-se de que o aplicativo tenha permissões para gravar em seu sistema de arquivos",
     "failedToOpenPath": "Falha ao abrir o arquivo. Certifique-se de que o aplicativo tenha permissões para ler seu sistema de arquivos",
-    "notEnoughSpace": "Espaço insuficiente"
+    "notEnoughSpace": "Espaço insuficiente",
+
+    "hide": "Esconder",
+    "copyInProgress": "Por favor, aguarde. Cópia em andamento",
+    "moveInProgress": "Por favor, aguarde. Movimento em andamento",
+    "deleteInProgress": "Por favor, aguarde. Exclusão em andamento",
+    "copyIsDone": "Cópia concluída",
+    "moveIsDone": "Movimento concluído",
+    "deleteIsDone": "Exclusão concluída"
 }
