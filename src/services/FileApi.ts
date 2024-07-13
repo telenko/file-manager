@@ -1,15 +1,14 @@
-import * as RNFS from 'react-native-fs';
+import RnfsQueued, { limitFileApi, ReadDirItem } from './RnfsQueued';
 import { NativeModules } from 'react-native';
 import Share from 'react-native-share';
 import { FileOpener } from './FileOpener';
 import i18n from '../i18n/i18n';
-import { makeQueueable } from '../common/utils/queue';
 import {
   ErrorType,
   FileManagerError,
 } from '../common/components/ExceptionHandler';
 
-export type DirItem = RNFS.ReadDirItem & { isStorage?: boolean };
+export type DirItem = ReadDirItem & { isStorage?: boolean };
 export type StorageItem = {
   isMainDeviceStorage?: boolean;
   isSdCardStorage?: boolean;
@@ -34,7 +33,7 @@ const resolveCounterConflictRecursive = async (
     n: count,
   })}${ext ? '.' + ext : ''}`;
 
-  if (await RNFS.exists(resultPath)) {
+  if (await RnfsQueued.exists(resultPath)) {
     return resolveCounterConflictRecursive(destination, count + 1);
   }
   return resultPath;
@@ -59,18 +58,14 @@ const generateContentUri = (filePath: string) => {
   return `content://${filePath}`;
 };
 
-/**
- * Batch operations queued
- */
-const FILE_API_CONCURRENCY = 30;
-let copyRecursive = async (
+const copyRecursive = async (
   source: string,
   destination: string,
   injectCopyNIfConflict: boolean,
 ) => {
-  const stats = await RNFS.stat(source);
+  const stats = await RnfsQueued.stat(source);
   if (stats.isDirectory()) {
-    if (await RNFS.exists(destination)) {
+    if (await RnfsQueued.exists(destination)) {
       if (injectCopyNIfConflict) {
         destination = await resolveCounterConflictRecursive(destination, 1);
       } else {
@@ -79,8 +74,8 @@ let copyRecursive = async (
         );
       }
     }
-    await RNFS.mkdir(destination);
-    const items = await RNFS.readDir(source);
+    await RnfsQueued.mkdir(destination);
+    const items = await RnfsQueued.readDir(source);
 
     for (const item of items) {
       const itemSourcePath = `${source}/${item.name}`;
@@ -93,7 +88,7 @@ let copyRecursive = async (
       );
     }
   } else {
-    if (await RNFS.exists(destination)) {
+    if (await RnfsQueued.exists(destination)) {
       if (injectCopyNIfConflict) {
         destination = await resolveCounterConflictRecursive(destination, 1);
       } else {
@@ -102,17 +97,17 @@ let copyRecursive = async (
         );
       }
     }
-    await RNFS.copyFile(source, destination);
+    await RnfsQueued.copyFile(source, destination);
   }
 };
-let moveRecursive = async (
+const moveRecursive = async (
   source: string,
   destination: string,
   injectCopyNIfConflict: boolean,
 ) => {
-  const stats = await RNFS.stat(source);
+  const stats = await RnfsQueued.stat(source);
   if (stats.isDirectory()) {
-    if (await RNFS.exists(destination)) {
+    if (await RnfsQueued.exists(destination)) {
       if (injectCopyNIfConflict) {
         destination = await resolveCounterConflictRecursive(
           destination,
@@ -125,19 +120,23 @@ let moveRecursive = async (
         );
       }
     }
-    await RNFS.mkdir(destination);
-    const items = await RNFS.readDir(source);
+    await RnfsQueued.mkdir(destination);
+    const items = await RnfsQueued.readDir(source);
 
     for (const item of items) {
       const itemSourcePath = `${source}/${item.name}`;
       const itemDestinationPath = `${destination}/${item.name}`;
 
-      await moveRecursive(itemSourcePath, itemDestinationPath, injectCopyNIfConflict);
+      await moveRecursive(
+        itemSourcePath,
+        itemDestinationPath,
+        injectCopyNIfConflict,
+      );
     }
     // Remove the original directory after moving all its contents
-    await RNFS.unlink(source);
+    await RnfsQueued.unlink(source);
   } else {
-    if (await RNFS.exists(destination)) {
+    if (await RnfsQueued.exists(destination)) {
       if (injectCopyNIfConflict) {
         destination = await resolveCounterConflictRecursive(
           destination,
@@ -150,41 +149,40 @@ let moveRecursive = async (
         );
       }
     }
-    await RNFS.moveFile(source, destination);
+    await RnfsQueued.moveFile(source, destination);
   }
 };
-let deleteItem = async (item: DirItem) => {
+const deleteItem = async (item: DirItem) => {
   try {
-    await RNFS.unlink(item.path);
+    await RnfsQueued.unlink(item.path);
   } catch (e) {
     throw new FileManagerError(i18n.t('deleteFailed'), ErrorType.FILE_API, e);
   }
-}
-copyRecursive = makeQueueable(copyRecursive, FILE_API_CONCURRENCY);
-moveRecursive = makeQueueable(moveRecursive, FILE_API_CONCURRENCY);
-deleteItem = makeQueueable(deleteItem, FILE_API_CONCURRENCY);
+};
 
-const makeVideoPreviewQueued = makeQueueable(
-  async (file: DirItem, width: number = 0): Promise<string | null> => {
-    if (!FileApi.isFileVideo(file)) {
-      return null;
-    }
-    return new Promise((resolve, reject) => {
-      const { ThumbnailModule } = NativeModules;
-      ThumbnailModule.createVideoThumbnail(
-        file.path,
-        width,
-        (base64Thumbnail: string) => {
-          resolve(`data:image/jpeg;base64,${base64Thumbnail}`);
-        },
-        (error: string) => {
-          reject(error);
-        },
-      );
-    });
-  },
-  4,
-);
+const makeVideoPreview = async (
+  file: DirItem,
+  width: number = 0,
+): Promise<string | null> => {
+  if (!FileApi.isFileVideo(file)) {
+    return null;
+  }
+  return new Promise((resolve, reject) => {
+    const { ThumbnailModule } = NativeModules;
+    ThumbnailModule.createVideoThumbnail(
+      file.path,
+      width,
+      (base64Thumbnail: string) => {
+        resolve(`data:image/jpeg;base64,${base64Thumbnail}`);
+      },
+      (error: string) => {
+        reject(error);
+      },
+    );
+  });
+};
+const makeVideoPreviewQueued: typeof makeVideoPreview = (...args) =>
+  limitFileApi(() => makeVideoPreview(...args));
 
 let ROOTS: StorageItem[] = [];
 
@@ -234,7 +232,7 @@ export const FileApi = {
   },
   readDir: async (path: string) => {
     try {
-      return RNFS.readDir(path);
+      return RnfsQueued.readDir(path);
     } catch (e) {
       throw new FileManagerError(
         i18n.t('readDirFailed'),
@@ -245,7 +243,7 @@ export const FileApi = {
   },
   getMetadata: async (path: string): Promise<DirItem> => {
     try {
-      const res = await RNFS.stat(path);
+      const res = await RnfsQueued.stat(path);
       return {
         ...res,
         name: res.name ?? '',
@@ -273,7 +271,7 @@ export const FileApi = {
   },
   createFolder: async (path: string) => {
     try {
-      return RNFS.mkdir(path);
+      return RnfsQueued.mkdir(path);
     } catch (e) {
       throw new FileManagerError(
         i18n.t('createFolderFailed'),
@@ -287,7 +285,7 @@ export const FileApi = {
     destination: string,
     injectCopyNIfConflict: boolean = false,
   ) => {
-    const destStats = await RNFS.stat(destination);
+    const destStats = await RnfsQueued.stat(destination);
     const fileName = source.split('/').pop();
     let fileDest = destStats.isDirectory()
       ? `${destination}/${fileName}`
@@ -299,7 +297,7 @@ export const FileApi = {
   validateFilesSizesToDest: async (sources: string[], destination: string) => {
     try {
       const dirItems = await Promise.all(
-        sources.map(source => RNFS.stat(source)),
+        sources.map(source => RnfsQueued.stat(source)),
       );
       const sizeCombined = dirItems.reduce((acc, item) => {
         return item.size + acc;
@@ -352,7 +350,7 @@ export const FileApi = {
   ) => {
     const isDestDirectory = await (async () => {
       try {
-        const destStats = await RNFS.stat(destination);
+        const destStats = await RnfsQueued.stat(destination);
         return destStats.isDirectory();
       } catch {
         return false;
