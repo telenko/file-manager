@@ -551,10 +551,10 @@ export const FileApi = {
       return 0;
     });
   },
-  formatSize: (bytes: number) => {
-    const kiloBytes = 1024;
-    const megaBytes = kiloBytes * 1024;
-    const gigaBytes = megaBytes * 1024;
+  formatSize: (bytes: number, base: 1000 | 1024 = 1000) => {
+    const kiloBytes = base;
+    const megaBytes = kiloBytes * base;
+    const gigaBytes = megaBytes * base;
     /**
  *  "gigabytes": "Гб",
     "megabytes": "Мб",
