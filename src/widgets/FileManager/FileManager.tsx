@@ -57,9 +57,6 @@ export default function FileManager() {
   );
 
   const showFileDetails = useCallback((dirItem: DirItem) => {
-    if (!dirItem.isFile()) {
-      return;
-    }
     setFileDetails(dirItem);
   }, []);
 

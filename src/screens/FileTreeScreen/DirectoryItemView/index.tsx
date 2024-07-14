@@ -165,7 +165,7 @@ const DirectoryItemView: React.FC<DirItemProps> = ({ item }) => {
           title: t('details'),
           key: 'details',
           icon: 'information-outline',
-          enabled: item.isFile(),
+          enabled: true,
           onPress: () => {
             fileManager.showFileDetails(item);
           },

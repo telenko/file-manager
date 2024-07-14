@@ -160,6 +160,19 @@ const deleteItem = async (item: DirItem) => {
   }
 };
 
+const getSafeSize = async (path: string) => {
+  const fileStats = await RnfsQueued.stat(path);
+  if (fileStats.isFile()) {
+    return fileStats.size;
+  }
+  let totalSize = 0;
+  const files = await RnfsQueued.readDir(path);
+  for (const file of files) {
+    totalSize += await getSafeSize(file.path);
+  }
+  return totalSize;
+};
+
 const makeVideoPreview = async (
   file: DirItem,
   width: number = 0,
@@ -230,9 +243,20 @@ export const FileApi = {
       );
     }
   },
+  getItemSize: async (path: string) => {
+    try {
+      return await getSafeSize(path);
+    } catch (e) {
+      throw new FileManagerError(
+        i18n.t('readDirFailed'),
+        ErrorType.FILE_API,
+        e,
+      );
+    }
+  },
   readDir: async (path: string) => {
     try {
-      return RnfsQueued.readDir(path);
+      return await RnfsQueued.readDir(path);
     } catch (e) {
       throw new FileManagerError(
         i18n.t('readDirFailed'),
@@ -294,13 +318,13 @@ export const FileApi = {
     return copyRecursive(source, fileDest, injectCopyNIfConflict);
   },
 
-  validateFilesSizesToDest: async (sources: string[], destination: string) => {
+  _validateItemSizesToDest: async (sources: string[], destination: string) => {
     try {
-      const dirItems = await Promise.all(
-        sources.map(source => RnfsQueued.stat(source)),
+      const sizes = await Promise.all(
+        sources.map(source => getSafeSize(source)),
       );
-      const sizeCombined = dirItems.reduce((acc, item) => {
-        return item.size + acc;
+      const sizeCombined = sizes.reduce((acc, size) => {
+        return size + acc;
       }, 0);
       const targetStorage = ROOTS.find(root => destination.includes(root.path));
       if (!targetStorage) {
@@ -323,7 +347,7 @@ export const FileApi = {
     destination: string,
     injectCopyNIfConflict: boolean = false,
   ) => {
-    await FileApi.validateFilesSizesToDest(sources, destination);
+    await FileApi._validateItemSizesToDest(sources, destination);
     try {
       return Promise.all(
         sources.map(source =>

@@ -1,5 +1,11 @@
-import React from 'react';
-import { Button, Dialog, Portal, Text } from 'react-native-paper';
+import React, { useEffect, useState } from 'react';
+import {
+  ActivityIndicator,
+  Button,
+  Dialog,
+  Portal,
+  Text,
+} from 'react-native-paper';
 import { useFileManager } from './FileManagerContext';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
@@ -9,6 +15,11 @@ import { FileApi } from '../../services/FileApi';
 const styles = StyleSheet.create({
   text: {
     flex: 1,
+    flexWrap: 'wrap',
+    overflow: 'hidden',
+  },
+  loader: {
+    flex: 2,
     flexWrap: 'wrap',
     overflow: 'hidden',
   },
@@ -22,6 +33,27 @@ const styles = StyleSheet.create({
 const FileDetailsDialog: React.FC = () => {
   const fileManager = useFileManager();
   const { t } = useTranslation();
+  const [size, setSize] = useState('');
+  const [sizeLoading, setSizeLoading] = useState(false);
+
+  useEffect(() => {
+    if (!fileManager?.fileDetails?.path) {
+      return;
+    }
+    (async () => {
+      setSizeLoading(true);
+      try {
+        setSize(
+          FileApi.formatSize(
+            await FileApi.getItemSize(fileManager?.fileDetails?.path!),
+          ),
+        );
+      } catch {
+      } finally {
+        setSizeLoading(false);
+      }
+    })();
+  }, [fileManager?.fileDetails?.path]);
 
   if (!fileManager.fileDetails) {
     return;
@@ -38,7 +70,8 @@ const FileDetailsDialog: React.FC = () => {
     },
     {
       label: t('fileSize'),
-      value: FileApi.formatSize(fileManager.fileDetails.size),
+      loading: sizeLoading,
+      value: size,
     },
   ];
 
@@ -53,13 +86,19 @@ const FileDetailsDialog: React.FC = () => {
                 <Text style={[styles.text, { fontFamily: theme.regularText }]}>
                   {detail.label}
                 </Text>
-                <Text
-                  style={[
-                    styles.text,
-                    { fontFamily: theme.mediumText, flex: 2 },
-                  ]}>
-                  {detail.value}
-                </Text>
+                {detail.loading ? (
+                  <View style={styles.loader}>
+                    <ActivityIndicator size={24} />
+                  </View>
+                ) : (
+                  <Text
+                    style={[
+                      styles.text,
+                      { fontFamily: theme.mediumText, flex: 2 },
+                    ]}>
+                    {detail.value}
+                  </Text>
+                )}
               </View>
             );
           })}
