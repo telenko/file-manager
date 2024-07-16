@@ -51,7 +51,6 @@ public class PermissionFileModule extends ReactContextBaseJavaModule implements 
         try {
             if (checkPermission()) {
                 successCallback.invoke(true);
-                Toast.makeText(getReactApplicationContext(), "Permission already granted", Toast.LENGTH_SHORT).show();
             } else {
                 pendingSuccessCallback = successCallback;
                 pendingErrorCallback = errorCallback;
@@ -77,7 +76,6 @@ public class PermissionFileModule extends ReactContextBaseJavaModule implements 
     private boolean requestPermission() {
         Activity currentActivity = getCurrentActivity();
         if (currentActivity == null) {
-            Toast.makeText(getReactApplicationContext(), "Current activity is null, will retry", Toast.LENGTH_SHORT).show();
             return false;
         }
 
