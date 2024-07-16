@@ -485,13 +485,17 @@ export const FileApi = {
   },
   askForStoragePermission: () => {
     const PermissionFile = NativeModules.PermissionFile;
-    return new Promise((resolve, reject) => {
+    return new Promise<void>((resolve, reject) => {
       PermissionFile.checkAndGrantPermission(
         (err: any): any => {
           reject(err);
         },
-        (res: any): any => {
-          resolve(res);
+        (granted: boolean): any => {
+          if (!granted) {
+            reject('permission is not granted');
+          } else {
+            resolve();
+          }
         },
       );
     });

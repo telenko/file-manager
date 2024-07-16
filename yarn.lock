@@ -5132,7 +5132,6 @@ __metadata:
     react-native-fs: 2.20.0
     react-native-gesture-handler: 2.17.1
     react-native-localize: 3.2.0
-    react-native-manage-external-storage: ^0.1.8
     react-native-paper: ^5.12.3
     react-native-paper-snackbar-stack: ^0.2.0
     react-native-reanimated: 3.13.0
@@ -8471,16 +8470,6 @@ __metadata:
     react-native-macos:
       optional: true
   checksum: a7493203638535253abfab65631372cbdb064d5af4c321d2b67e7f244a2a4063b57f236e22bb3a8288c987219d9e87271116f0b5fb96824c7effd267f0f0fde7
-  languageName: node
-  linkType: hard
-
-"react-native-manage-external-storage@npm:^0.1.8":
-  version: 0.1.8
-  resolution: "react-native-manage-external-storage@npm:0.1.8"
-  peerDependencies:
-    react: "*"
-    react-native: "*"
-  checksum: 0e6316fbf22985d7c75cd87bce6c26e5cfbb941b5b7eea5a1a45548ea7df6a2af1e87a5b837e5753f8d2a9cccf81fd73b3f98926f242cb6c359698ce3cfefe66
   languageName: node
   linkType: hard
 

@@ -3,10 +3,10 @@ import { Platform } from 'react-native';
 import FileManager from './src/widgets/FileManager/FileManager';
 import { useDeviceLocale } from './src/i18n/hooks/useDeviceLocale';
 import {
+  Button,
   configureFonts,
   MD3LightTheme,
   PaperProvider,
-  Text,
 } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import { FileApi } from './src/services/FileApi';
@@ -43,7 +43,6 @@ const FontsProvider: React.FC<PropsWithChildren> = ({ children }) => {
  * @TODO Andrii now:
  * 5. release beta
  * 8. deobfuscation
- * PROD BUG: 1st launch only ----> nullpointer - attempt to invoke virtual method void android.app.Activity.startActivityForResult(android.content.Intent, int) on a null object reference at com.telenko.filemanager.fspermissions.PermissionFileModule.requestPermission(PermissionFileModule.java:75) at --> checkAndGrantPermission(.java:45)
  *
  * FUTURE IMPS: * 1. delete in gallery behavior: keep gallery open
  * 2. add device details into error report
@@ -65,9 +64,16 @@ const App = () => {
   const [permissionGranted, setPermissionGranted] = useState<boolean>(false);
   useDeviceLocale();
   const { t } = useTranslation();
+  const askPermission = () =>
+    FileApi.askForStoragePermission()
+      .then(() => setPermissionGranted(true))
+      .catch(e => {
+        // do nothing here...
+      });
   useEffect(() => {
-    FileApi.askForStoragePermission().then(() => setPermissionGranted(true));
+    askPermission();
   }, []);
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
@@ -79,7 +85,9 @@ const App = () => {
               </SnackbarProvider>
             </ExceptionHandler>
           ) : null}
-          {!permissionGranted ? <Text>{t('permissionRequired')}</Text> : null}
+          {!permissionGranted ? (
+            <Button onPress={askPermission}>{t('permissionRequired')}</Button>
+          ) : null}
         </FontsProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
