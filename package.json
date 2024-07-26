@@ -1,6 +1,6 @@
 {
   "name": "file-manager",
-  "version": "6.0",
+  "version": "7.0",
   "private": true,
   "scripts": {
     "android": "react-native run-android",

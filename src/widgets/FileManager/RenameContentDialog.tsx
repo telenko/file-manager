@@ -11,11 +11,9 @@ import { useFileManager } from './FileManagerContext';
 import { FileApi } from '../../services/FileApi';
 import { useTranslation } from 'react-i18next';
 import { useExceptionHandler } from '../../common/components/ExceptionHandler';
-import { Cache } from '../../services/Cache';
 
 const RenameContentDialog: React.FC = () => {
   const fileManager = useFileManager();
-  const [valid, setValid] = useState(true);
   const [error, setError] = useState('');
   const exceptionHandler = useExceptionHandler();
 
@@ -33,30 +31,6 @@ const RenameContentDialog: React.FC = () => {
       setTextReady(false);
     };
   }, [fileManager.renameDialogItem]);
-
-  const nameIsUntouched = text === fileManager?.renameDialogItem?.name;
-
-  useEffect(() => {
-    if (!fileManager.renameDialogItem) {
-      setValid(true);
-      setError('');
-      return;
-    }
-    const parentFolderPath = FileApi.getParentDirectoryPath(
-      fileManager.renameDialogItem.path,
-    );
-    const dirItems = Cache.getDirItems(parentFolderPath);
-    if (text === fileManager.renameDialogItem.name) {
-      setValid(false);
-      setError('');
-    } else if ((dirItems ?? []).some(dirItem => dirItem.name === text)) {
-      setValid(false);
-      setError(t('nameAlreadyExists'));
-    } else {
-      setValid(true);
-      setError('');
-    }
-  }, [text, fileManager.renameDialogItem]);
 
   if (!fileManager.renameDialogItem) {
     return null;
@@ -77,7 +51,6 @@ const RenameContentDialog: React.FC = () => {
               // value={text}
               onChangeText={setText}
               defaultValue={text}
-              error={!valid && !nameIsUntouched}
             />
           )}
           {error ? (
@@ -86,7 +59,7 @@ const RenameContentDialog: React.FC = () => {
         </Dialog.Content>
         <Dialog.Actions>
           <Button
-            disabled={!text || !valid}
+            disabled={!text}
             onPress={async () => {
               hideDialog();
               await FileApi.renameItem(

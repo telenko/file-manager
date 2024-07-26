@@ -51,13 +51,14 @@ const FontsProvider: React.FC<PropsWithChildren> = ({ children }) => {
  * - rename folder animations
  * [BUG?] - slow image opening on dev
  * reorientation better animations, video to not interrupt
- * cancelable long operations with percentage visible
+ * make cancelable long operations with percentage visible
  * refactor to Redux
  * bad animation when copy/move just started (navigated)
  * wrong total size of storage? some memory size is missing, system one?
  * blocking delete - looks like unkink operation is sync and blocking UI
  * video sometimes not opening (white screen)
  * more smart sorting (remember + folders sorting)
+ * disable create/rename for existing path in folder
  *
  * TEST:
  * 2. gallery sliding bug
