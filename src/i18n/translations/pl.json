@@ -56,5 +56,6 @@
     "deleteInProgress": "Proszę czekać. Trwa usuwanie",
     "copyIsDone": "Kopiowanie zakończone",
     "moveIsDone": "Przenoszenie zakończone",
-    "deleteIsDone": "Usuwanie zakończone"
+    "deleteIsDone": "Usuwanie zakończone",
+    "nameAlreadyExists": "Nazwa już istnieje"
 }

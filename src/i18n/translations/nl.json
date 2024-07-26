@@ -56,5 +56,6 @@
     "deleteInProgress": "Even geduld. Verwijderen bezig",
     "copyIsDone": "Kopiëren voltooid",
     "moveIsDone": "Verplaatsen voltooid",
-    "deleteIsDone": "Verwijderen voltooid"
+    "deleteIsDone": "Verwijderen voltooid",
+    "nameAlreadyExists": "Naam bestaat al"
 }

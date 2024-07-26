@@ -56,5 +56,6 @@
     "deleteInProgress": "Будь ласка, зачекайте. Видалення триває",
     "copyIsDone": "Копіювання завершено",
     "moveIsDone": "Переміщення завершено",
-    "deleteIsDone": "Видалення завершено"
+    "deleteIsDone": "Видалення завершено",
+     "nameAlreadyExists": "Ім'я вже існує"
 }

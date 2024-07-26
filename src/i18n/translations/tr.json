@@ -56,5 +56,6 @@
     "deleteInProgress": "Lütfen bekleyin. Silme devam ediyor",
     "copyIsDone": "Kopyalama tamamlandı",
     "moveIsDone": "Taşıma tamamlandı",
-    "deleteIsDone": "Silme tamamlandı"
+    "deleteIsDone": "Silme tamamlandı",
+    "nameAlreadyExists": "İsim zaten var"
 }

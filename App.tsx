@@ -40,11 +40,12 @@ const FontsProvider: React.FC<PropsWithChildren> = ({ children }) => {
 };
 
 /**
- * @TODO Andrii now:
- * 5. release beta
- * 8. deobfuscation
+ * @TODO Andrii:
+ * CURRENT RELEASE BUGS:
+ * -
  *
- * FUTURE IMPS: * 1. delete in gallery behavior: keep gallery open
+ * FUTURE IMPROVEMENTS/BUGS(Not Critical):
+ * 1. delete in gallery behavior: keep gallery open
  * 2. add device details into error report
  * 3. video restart
  * - rename folder animations
@@ -55,6 +56,8 @@ const FontsProvider: React.FC<PropsWithChildren> = ({ children }) => {
  * bad animation when copy/move just started (navigated)
  * wrong total size of storage? some memory size is missing, system one?
  * blocking delete - looks like unkink operation is sync and blocking UI
+ * video sometimes not opening (white screen)
+ * more smart sorting (remember + folders sorting)
  *
  * TEST:
  * 2. gallery sliding bug

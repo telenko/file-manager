@@ -4,9 +4,19 @@ import { useEffect } from 'react';
 
 export const useDeviceLocale = () => {
   useEffect(() => {
-    // Set the initial language based on device locale
-    const locale = RNLocalize.getLocales()[0].languageCode;
-    console.log('Detected locale...', locale);
-    i18n.changeLanguage(locale);
+    // Get device locale and country
+    const locales = RNLocalize.getLocales();
+    const locale = locales[0]?.languageCode;
+    const language = locale?.split('-')[0] ?? 'en';
+    const country = RNLocalize.getCountry();
+
+    console.debug('Detected locale...', language);
+    console.debug('Detected country...', country);
+
+    if ((country === 'UA' && locale === 'ru') || language === 'ua') {
+      i18n.changeLanguage('uk');
+    } else {
+      i18n.changeLanguage(language);
+    }
   }, []);
 };

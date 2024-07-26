@@ -56,5 +56,6 @@
     "deleteInProgress": "Please wait. Delete in progress",
     "copyIsDone": "Copy is done",
     "moveIsDone": "Move is done",
-    "deleteIsDone": "Delete is done"
+    "deleteIsDone": "Delete is done",
+    "nameAlreadyExists": "Name already exists"
 }

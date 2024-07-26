@@ -295,6 +295,9 @@ export const FileApi = {
   },
   createFolder: async (path: string) => {
     try {
+      if (await RnfsQueued.exists(path)) {
+        throw new Error('Folder or file with such name already exists');
+      }
       return RnfsQueued.mkdir(path);
     } catch (e) {
       throw new FileManagerError(
@@ -420,6 +423,9 @@ export const FileApi = {
       }
       const parentItem = dirItemPathTokens.join('/');
       const destinationPath = parentItem + '/' + newName;
+      if (await RnfsQueued.exists(destinationPath)) {
+        throw new Error('Folder or file with such name already exists');
+      }
       await FileApi.moveFileOrDirectory(dirItem.path, destinationPath);
     } catch (e) {
       throw new FileManagerError(i18n.t('renameFailed'), ErrorType.FILE_API, e);
