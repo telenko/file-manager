@@ -39,6 +39,7 @@ const VideoViewer: React.FC<{
   const isCurrentViewable = activeFile?.path === file.path;
   const [paused, setPaused] = useState(true);
   const [preview, setPreview] = useState<string | null>('');
+  const [wasPlayed, setWasPlayed] = useState(false);
   const fallbackThumbnail =
     'data:image/gif;base64,R0lGODlhAQABAIAAAMLCwgAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==';
 
@@ -58,6 +59,12 @@ const VideoViewer: React.FC<{
   }, [file?.path]);
 
   useEffect(() => {
+    if (!paused && !wasPlayed) {
+      setWasPlayed(true);
+    }
+  }, [paused]);
+
+  useEffect(() => {
     if (!isCurrentViewable) {
       setPaused(true);
     }
@@ -73,9 +80,9 @@ const VideoViewer: React.FC<{
     />
   );
 
-  const previewLayout = (
+  const previewLayout = preview ? (
     <ImageBackground
-      source={{ uri: preview ?? fallbackThumbnail }}
+      source={{ uri: preview }}
       resizeMode="contain"
       style={{
         width: '100%',
@@ -86,18 +93,26 @@ const VideoViewer: React.FC<{
       }}>
       {playIcon}
     </ImageBackground>
+  ) : (
+    <View
+      style={{
+        width: '100%',
+        height: '100%',
+        justifyContent: 'center',
+        alignItems: 'center',
+        overflow: 'hidden',
+        backgroundColor: '#fafafa',
+      }}>
+      {playIcon}
+    </View>
   );
 
-  if (!preview) {
-    return null;
-  }
   return (
     <>
       {isCurrentViewable ? (
         <>
           {/* @ts-ignore */}
           <CustomizedVideo
-            // tapAnywhereToPause
             disableFullscreen
             disableBack
             disableVolume
@@ -112,9 +127,23 @@ const VideoViewer: React.FC<{
             containerStyle={{ backgroundColor: '#fff' }}
             style={{ width: '100%', height: '100%' }}
             resizeMode="contain"
-            poster={preview ?? fallbackThumbnail}
           />
-          {paused ? (
+          {wasPlayed ? (
+            paused ? (
+              <View
+                style={{
+                  position: 'absolute',
+                  left: 0,
+                  top: 0,
+                  right: 0,
+                  bottom: 0,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}>
+                {playIcon}
+              </View>
+            ) : null
+          ) : (
             <View
               style={{
                 position: 'absolute',
@@ -125,9 +154,9 @@ const VideoViewer: React.FC<{
                 justifyContent: 'center',
                 alignItems: 'center',
               }}>
-              {playIcon}
+              {preview ? previewLayout : playIcon}
             </View>
-          ) : null}
+          )}
         </>
       ) : (
         previewLayout
