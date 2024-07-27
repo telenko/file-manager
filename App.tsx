@@ -43,8 +43,8 @@ const FontsProvider: React.FC<PropsWithChildren> = ({ children }) => {
  * @TODO Andrii:
  * CURRENT RELEASE BUGS:
  * - [FIX_ONGOING][BUG] startup - 07-27 15:38:00.282 E/AndroidRuntime(30891): java.lang.RuntimeException: Unable to start activity ComponentInfo{com.telenko.filemanager/com.telenko.filemanager.MainActivity}: androidx.fragment.app.Fragment$f: Unable to instantiate fragment com.swmansion.rnscreens.t: calling Fragment constructor caused an exception
- * - [FIX_ONGOING][BUG] video - video sometimes not opening (white screen)
- * - [BUG] details outdated when opening folder before to system one
+ * - [BUG] video - video sometimes not opening (white screen), flushes
+ * - [FIX_ONGOING][BUG] details outdated when opening folder before to system one
  *
  * FUTURE IMPROVEMENTS/BUGS(Not Critical):
  * 1. delete in gallery behavior: keep gallery open

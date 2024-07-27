@@ -40,8 +40,6 @@ const VideoViewer: React.FC<{
   const [paused, setPaused] = useState(true);
   const [preview, setPreview] = useState<string | null>('');
   const [wasPlayed, setWasPlayed] = useState(false);
-  const fallbackThumbnail =
-    'data:image/gif;base64,R0lGODlhAQABAIAAAMLCwgAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==';
 
   useEffect(() => {
     if (!file.path) {

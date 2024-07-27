@@ -37,6 +37,7 @@ const FileDetailsDialog: React.FC = () => {
   const [sizeLoading, setSizeLoading] = useState(false);
 
   useEffect(() => {
+    setSize('');
     if (!fileManager?.fileDetails?.path) {
       return;
     }
@@ -96,7 +97,7 @@ const FileDetailsDialog: React.FC = () => {
                       styles.text,
                       { fontFamily: theme.mediumText, flex: 2 },
                     ]}>
-                    {detail.value}
+                    {detail.value || '-'}
                   </Text>
                 )}
               </View>
