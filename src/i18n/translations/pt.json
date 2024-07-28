@@ -40,14 +40,14 @@
     "sdCardRoot": "Cartão SD {{name}}",
     
     "errorOccured": "Ocorreu um erro :(",
-    "readDirFailed": "Não é possível ler o diretório. Certifique-se de que o aplicativo tenha permissões para ler seu sistema de arquivos",
+    "readDirFailed": "Não é possível ler o diretório. Por favor, certifique-se de que a aplicação tem permissões para ler esta pasta",
     "fileMetadataFailed": "Falha ao processar o arquivo. Certifique-se de que o aplicativo tenha permissões para ler seu sistema de arquivos",
     "createFolderFailed": "Falha ao criar pasta. Certifique-se de que o aplicativo tenha permissões para gravar em seu sistema de arquivos",
     "copyBatchFailed": "Falha ao copiar. Certifique-se de que o aplicativo tenha permissões para gravar em seu sistema de arquivos",
     "moveBatchFailed": "Falha ao mover. Certifique-se de que o aplicativo tenha permissões para gravar em seu sistema de arquivos",
     "renameFailed": "Falha ao renomear. Certifique-se de que o aplicativo tenha permissões para gravar em seu sistema de arquivos",
     "deleteFailed": "Falha ao excluir. Certifique-se de que o aplicativo tenha permissões para gravar em seu sistema de arquivos",
-    "failedToOpenPath": "Falha ao abrir o arquivo. Certifique-se de que o aplicativo tenha permissões para ler seu sistema de arquivos",
+    "failedToOpenPath": "Falha ao abrir o arquivo. Por favor, certifique-se de que tem aplicações instaladas para abrir este tipo de arquivo",
     "notEnoughSpace": "Espaço insuficiente",
 
     "hide": "Esconder",

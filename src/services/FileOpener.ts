@@ -37,7 +37,15 @@ function open(
       ({ id, error }) => {
         if (id === currentId) {
           openSubscription.remove();
-          return error ? reject(new Error(error)) : resolve();
+          return error
+            ? reject(
+                new FileManagerError(
+                  i18n.t('failedToOpenPath'),
+                  ErrorType.FILE_API,
+                  error,
+                ),
+              )
+            : resolve();
         }
       },
     );

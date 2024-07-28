@@ -41,14 +41,14 @@
 
 
     "errorOccured": "Ocurrió un error :(",
-    "readDirFailed": "No se puede leer el directorio. Asegúrese de que la aplicación tenga permisos para leer su sistema de archivos",
+    "readDirFailed": "No se puede leer el directorio. Asegúrese de que la aplicación tenga permisos para leer esta carpeta",
     "fileMetadataFailed": "No se pudo procesar el archivo. Asegúrese de que la aplicación tenga permisos para leer su sistema de archivos",
     "createFolderFailed": "No se pudo crear la carpeta. Asegúrese de que la aplicación tenga permisos para escribir en su sistema de archivos",
     "copyBatchFailed": "No se pudo copiar. Asegúrese de que la aplicación tenga permisos para escribir en su sistema de archivos",
     "moveBatchFailed": "No se pudo mover. Asegúrese de que la aplicación tenga permisos para escribir en su sistema de archivos",
     "renameFailed": "No se pudo renombrar. Asegúrese de que la aplicación tenga permisos para escribir en su sistema de archivos",
     "deleteFailed": "No se pudo eliminar. Asegúrese de que la aplicación tenga permisos para escribir en su sistema de archivos",
-    "failedToOpenPath": "No se pudo abrir el archivo. Asegúrese de que la aplicación tenga permisos para leer su sistema de archivos",
+    "failedToOpenPath": "No se pudo abrir el archivo. Asegúrese de tener instaladas aplicaciones para abrir este tipo de archivo",
     "notEnoughSpace": "No hay suficiente espacio",
 
     "hide": "Ocultar",

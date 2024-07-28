@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Button, Dialog, MD3Colors, Modal, Text } from 'react-native-paper';
-import { FileManagerError } from '.';
+import { ErrorType, FileManagerError } from '.';
 import { theme } from '../../../theme';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -62,25 +62,28 @@ const ErrorModal: React.FC<{
           </Text>
         </Dialog.Content>
         <Dialog.Actions>
-          <Button
-            mode="contained"
-            onPress={() => {
-              const subject = encodeURIComponent(`Error in File Manager app`);
-              const details = encodeURIComponent(error.stack);
-              const link = `mailto:${EMAIL}?subject=${subject}&body=${details}`;
+          {error.code !== ErrorType.FILE_API ? (
+            <Button
+              mode="contained"
+              onPress={() => {
+                const subject = encodeURIComponent(`Error in File Manager app`);
+                const details = encodeURIComponent(error.stack);
+                const link = `mailto:${EMAIL}?subject=${subject}&body=${details}`;
 
-              Linking.canOpenURL(link)
-                .then(supported => {
-                  if (supported) {
-                    Linking.openURL(link);
-                  } else {
-                    setReportView(true);
-                  }
-                })
-                .catch(() => setReportView(true));
-            }}>
-            {t('report')}
-          </Button>
+                Linking.canOpenURL(link)
+                  .then(supported => {
+                    if (supported) {
+                      Linking.openURL(link);
+                    } else {
+                      setReportView(true);
+                    }
+                  })
+                  .catch(() => setReportView(true));
+              }}>
+              {t('report')}
+            </Button>
+          ) : null}
+
           <Button onPress={onDismiss}>{t('ok')}</Button>
         </Dialog.Actions>
       </Dialog>

@@ -40,14 +40,14 @@
     "sdCardRoot": "Carte SD {{name}}",
     
     "errorOccured": "Une erreur est survenue :(",
-    "readDirFailed": "Impossible de lire le répertoire. Veuillez vous assurer que l'application a les droits pour lire votre système de fichiers",
+    "readDirFailed": "Impossible de lire le répertoire. Veuillez vous assurer que l'application dispose des droits pour lire ce dossier",
     "fileMetadataFailed": "Échec du traitement du fichier. Veuillez vous assurer que l'application a les droits pour lire votre système de fichiers",
     "createFolderFailed": "Échec de la création du dossier. Veuillez vous assurer que l'application a les droits pour écrire dans votre système de fichiers",
     "copyBatchFailed": "Échec de la copie. Veuillez vous assurer que l'application a les droits pour écrire dans votre système de fichiers",
     "moveBatchFailed": "Échec du déplacement. Veuillez vous assurer que l'application a les droits pour écrire dans votre système de fichiers",
     "renameFailed": "Échec du renommage. Veuillez vous assurer que l'application a les droits pour écrire dans votre système de fichiers",
     "deleteFailed": "Échec de la suppression. Veuillez vous assurer que l'application a les droits pour écrire dans votre système de fichiers",
-    "failedToOpenPath": "Échec de l'ouverture du fichier. Veuillez vous assurer que l'application a les droits pour lire votre système de fichiers",
+    "failedToOpenPath": "Impossible d'ouvrir le fichier. Veuillez vous assurer que vous avez installé des applications pour ouvrir ce type de fichier",
     "notEnoughSpace": "Pas assez d'espace",
 
     "hide": "Cacher",

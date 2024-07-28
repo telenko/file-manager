@@ -40,14 +40,14 @@
     "sdCardRoot": "Scheda SD {{name}}",
     
     "errorOccured": "Si è verificato un errore :(",
-    "readDirFailed": "Impossibile leggere la directory. Assicurati che l'app abbia i diritti per leggere il tuo file system",
+    "readDirFailed": "Impossibile leggere la directory. Assicurarsi che l'app abbia i diritti per leggere questa cartella",
     "fileMetadataFailed": "Impossibile elaborare il file. Assicurati che l'app abbia i diritti per leggere il tuo file system",
     "createFolderFailed": "Impossibile creare la cartella. Assicurati che l'app abbia i diritti per scrivere nel tuo file system",
     "copyBatchFailed": "Impossibile copiare. Assicurati che l'app abbia i diritti per scrivere nel tuo file system",
     "moveBatchFailed": "Impossibile spostare. Assicurati che l'app abbia i diritti per scrivere nel tuo file system",
     "renameFailed": "Impossibile rinominare. Assicurati che l'app abbia i diritti per scrivere nel tuo file system",
     "deleteFailed": "Impossibile eliminare. Assicurati che l'app abbia i diritti per scrivere nel tuo file system",
-    "failedToOpenPath": "Impossibile aprire il file. Assicurati che l'app abbia i diritti per leggere il tuo file system",
+    "failedToOpenPath": "Impossibile aprire il file. Assicurarsi di aver installato le applicazioni per aprire questo tipo di file",
     "notEnoughSpace": "Spazio insufficiente",
 
     "hide": "Nascondi",

@@ -42,7 +42,6 @@ const FontsProvider: React.FC<PropsWithChildren> = ({ children }) => {
 /**
  * @TODO Andrii:
  * CURRENT RELEASE BUGS:
- * handle errors: opening system dir/opening not-supported file
  *
  * FUTURE IMPROVEMENTS/BUGS(Not Critical):
  * [FIX_ONGOING][BUG] startup - 07-27 15:38:00.282 E/AndroidRuntime(30891): java.lang.RuntimeException: Unable to start activity ComponentInfo{com.telenko.filemanager/com.telenko.filemanager.MainActivity}: androidx.fragment.app.Fragment$f: Unable to instantiate fragment com.swmansion.rnscreens.t: calling Fragment constructor caused an exception
