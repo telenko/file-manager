@@ -439,6 +439,7 @@ export const FileApi = {
       throw new FileManagerError(i18n.t('deleteFailed'), ErrorType.FILE_API, e);
     }
   },
+  exists: RnfsQueued.exists,
   // Note, UNIX specific
   isItemHidden: (dirItem: DirItem) => {
     return dirItem.name.startsWith('.');
@@ -483,6 +484,9 @@ export const FileApi = {
   },
   makeVideoPreview: makeVideoPreviewQueued,
   getParentDirectoryPath: (filePath: string) => {
+    if (!filePath) {
+      return '';
+    }
     const normalizedPath = filePath.endsWith('/')
       ? filePath.slice(0, -1)
       : filePath;

@@ -42,11 +42,10 @@ const FontsProvider: React.FC<PropsWithChildren> = ({ children }) => {
 /**
  * @TODO Andrii:
  * CURRENT RELEASE BUGS:
- * - [FIX_ONGOING][BUG] startup - 07-27 15:38:00.282 E/AndroidRuntime(30891): java.lang.RuntimeException: Unable to start activity ComponentInfo{com.telenko.filemanager/com.telenko.filemanager.MainActivity}: androidx.fragment.app.Fragment$f: Unable to instantiate fragment com.swmansion.rnscreens.t: calling Fragment constructor caused an exception
- * - [BUG] video - video sometimes not opening (white screen), flushes
- * - [FIX_ONGOING][BUG] details outdated when opening folder before to system one
+ * handle errors: opening system dir/opening not-supported file
  *
  * FUTURE IMPROVEMENTS/BUGS(Not Critical):
+ * [FIX_ONGOING][BUG] startup - 07-27 15:38:00.282 E/AndroidRuntime(30891): java.lang.RuntimeException: Unable to start activity ComponentInfo{com.telenko.filemanager/com.telenko.filemanager.MainActivity}: androidx.fragment.app.Fragment$f: Unable to instantiate fragment com.swmansion.rnscreens.t: calling Fragment constructor caused an exception
  * 1. delete in gallery behavior: keep gallery open
  * 2. add device details into error report
  * 3. video restart
@@ -59,8 +58,9 @@ const FontsProvider: React.FC<PropsWithChildren> = ({ children }) => {
  * wrong total size of storage? some memory size is missing, system one?
  * blocking delete - looks like unkink operation is sync and blocking UI
  * more smart sorting (remember + folders sorting)
- * disable create/rename for existing path in folder
  * grid media view for images/videos
+ * [IMP] video player - flushes of black background
+
  *
  * TEST:
  * 2. gallery sliding bug

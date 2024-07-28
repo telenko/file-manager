@@ -52,6 +52,10 @@ const FileScreen: React.FC<FileScreenProps> = ({
   const fileManager = useFileManager();
   const isMultiSelectActivated = selectedPaths.length > 0;
   const isStorageLevel = fileManager.roots.map(r => r.path).includes(route);
+  const hasFiles = useMemo(
+    () => dirItems.some(dirIt => dirIt.isFile()),
+    [dirItems],
+  );
   useEffect(() => {
     let title = '';
     if (isMultiSelectActivated) {
@@ -87,7 +91,7 @@ const FileScreen: React.FC<FileScreenProps> = ({
             setSelectedPaths={setSelectedPaths}
           />
         ) : (
-          <DefaultFolderActions />
+          <DefaultFolderActions folderHasFiles={hasFiles} />
         ),
     });
   }, [

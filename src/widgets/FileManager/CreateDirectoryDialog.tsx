@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Button,
   Dialog,
@@ -11,15 +11,22 @@ import { useFileManager } from './FileManagerContext';
 import { FileApi } from '../../services/FileApi';
 import { useTranslation } from 'react-i18next';
 import { useExceptionHandler } from '../../common/components/ExceptionHandler';
+import { useItemExists } from './useItemExists';
 
 const CreateDirectoryDialog: React.FC = () => {
   const fileManager = useFileManager();
   const exceptionHandler = useExceptionHandler();
-  const [error, setError] = useState('');
 
   const [text, setText] = useState('');
-
   const { t } = useTranslation();
+
+  const { exists, loading } = useItemExists(fileManager.newDirPath ?? '', text);
+  const error = useMemo(() => {
+    if (exists) {
+      return t('nameAlreadyExists');
+    }
+    return '';
+  }, [exists]);
 
   useEffect(() => {
     setText(fileManager.newDirName ?? '');
@@ -46,6 +53,7 @@ const CreateDirectoryDialog: React.FC = () => {
             // value={text}
             onChangeText={setText}
             defaultValue={text}
+            error={exists && !loading}
           />
           {error ? (
             <Text style={{ color: MD3Colors.error30 }}>{error}</Text>
@@ -53,7 +61,7 @@ const CreateDirectoryDialog: React.FC = () => {
         </Dialog.Content>
         <Dialog.Actions>
           <Button
-            disabled={!text}
+            disabled={!text || loading || exists}
             onPress={async () => {
               hideDialog();
               await FileApi.createFolder(
