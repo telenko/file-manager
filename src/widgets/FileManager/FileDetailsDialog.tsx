@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Button,
@@ -35,8 +35,15 @@ const FileDetailsDialog: React.FC = () => {
   const { t } = useTranslation();
   const [size, setSize] = useState('');
   const [sizeLoading, setSizeLoading] = useState(false);
+  const requestCounter = useRef(0);
 
   useEffect(() => {
+    const currentRequest = ++requestCounter.current;
+    const forCurrentTask = (cb: Function) => {
+      if (currentRequest === requestCounter.current) {
+        cb();
+      }
+    };
     setSize('');
     if (!fileManager?.fileDetails?.path) {
       return;
@@ -44,14 +51,13 @@ const FileDetailsDialog: React.FC = () => {
     (async () => {
       setSizeLoading(true);
       try {
-        setSize(
-          FileApi.formatSize(
-            await FileApi.getItemSize(fileManager?.fileDetails?.path!),
-          ),
+        const rawSize = await FileApi.getItemSize(
+          fileManager?.fileDetails?.path!,
         );
+        forCurrentTask(() => setSize(FileApi.formatSize(rawSize)));
       } catch {
       } finally {
-        setSizeLoading(false);
+        forCurrentTask(() => setSizeLoading(false));
       }
     })();
   }, [fileManager?.fileDetails?.path]);
