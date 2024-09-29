@@ -5,6 +5,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NavigationContainer, NavigationProp } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import FileTreeScreen from '../../screens/FileTreeScreen';
@@ -30,6 +31,39 @@ import { useFsRoots } from './useFsRoots';
 
 const SNACK_DEFAULT_DURATION_MS = 4000;
 
+const useSort = (): ['asc' | 'desc', () => void] => {
+  const SORT_STORAGE_KEY = '__sort_direction__';
+  const getSortDirection = async () => {
+    try {
+      const readValue = await AsyncStorage.getItem(SORT_STORAGE_KEY);
+      return readValue === 'asc' ? 'asc' : 'desc';
+    } catch {
+      return 'asc';
+    }
+  };
+  const setSortDirection = (s: 'asc' | 'desc') => {
+    try {
+      AsyncStorage.setItem(SORT_STORAGE_KEY, s);
+    } catch {}
+  };
+  const [sort, setSort] = useState<'asc' | 'desc'>('asc');
+  const sortRead = useRef(false);
+  useEffect(() => {
+    (async () => {
+      setSort(await getSortDirection());
+      sortRead.current = true;
+    })();
+  }, []);
+  useEffect(() => {
+    if (!sortRead.current) {
+      return;
+    }
+    setSortDirection(sort);
+  }, [sort]);
+  const toggleSort = () => setSort(sort === 'asc' ? 'desc' : 'asc');
+  return [sort, toggleSort];
+};
+
 const Stack = createNativeStackNavigator<FileManagerNavigation>();
 export default function FileManager() {
   const { t } = useTranslation();
@@ -44,7 +78,7 @@ export default function FileManager() {
   const [longOperation, setLongOperation] =
     useState<FileLongOperationType | null>(null);
   const hasLongOperationVisibleRef = useRef(false);
-  const [sort, setSort] = useState<'asc' | 'desc'>('asc');
+  const [sort, toggleSort] = useSort();
   const { refresh: refreshRoots, rootsReady, roots } = useFsRoots();
 
   const createDirectory = useCallback(
@@ -179,7 +213,7 @@ export default function FileManager() {
       sort,
       longOperation,
       setLongOperation,
-      toggleSort: () => setSort(sort === 'asc' ? 'desc' : 'asc'),
+      toggleSort,
     }),
     [
       reloadRequired,
