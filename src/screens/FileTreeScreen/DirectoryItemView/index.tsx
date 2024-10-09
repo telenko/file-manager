@@ -1,9 +1,8 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Image, ImageBackground, StyleSheet, View } from 'react-native';
+import React, { useMemo, useState } from 'react';
+import { Image, StyleSheet, View } from 'react-native';
 import { Checkbox, IconButton, List, Menu } from 'react-native-paper';
 
 import {
-  DirItem,
   FileApi,
   type DirItem as DirectoryItemType,
 } from '../../../services/FileApi';
@@ -11,7 +10,6 @@ import { Icon } from 'react-native-paper';
 import { theme } from '../../../theme';
 import { useTranslation } from 'react-i18next';
 import { useNavigation } from '../../../common/hooks/useNavigation';
-import { Cache } from '../../../services/Cache';
 import {
   getRouteMetadatas,
   useFileManager,
@@ -19,6 +17,7 @@ import {
 import { type FileScreenProps } from '..';
 import { useFileTreeContext } from '../FileTreeContext';
 import { useExceptionHandler } from '../../../common/components/ExceptionHandler';
+import VideoThumbnail from '../../../common/components/VideoThumbnail';
 
 type DirItemProps = {
   item: DirectoryItemType;
@@ -27,53 +26,6 @@ type DirItemProps = {
 const ICON_SIZE = 45;
 const ICON_RADIUS = 4;
 const MENU_ICON_SIZE = 30;
-const PREVIEW_SIZE = ICON_SIZE * 2;
-
-const VideoThumbnail = ({ file }: { file: DirItem }) => {
-  const fallbackThumbnail =
-    'data:image/gif;base64,R0lGODlhAQABAIAAAMLCwgAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==';
-  const [thumbnail, setThumbnail] = useState<string | null>(null);
-  const makeThumbnailAllowed = useRef<boolean>(false);
-  useEffect(() => {
-    (async () => {
-      // @ts-ignore
-      await new Promise(r => setTimeout(r, 600));
-      if (makeThumbnailAllowed.current) {
-        const cachedPreview = Cache.getVideoPreview(file.path, PREVIEW_SIZE);
-        if (cachedPreview) {
-          setThumbnail(cachedPreview);
-        } else {
-          FileApi.makeVideoPreview(file, PREVIEW_SIZE)
-            .then(preview => {
-              setThumbnail(preview);
-              if (preview) {
-                Cache.putVideoPreview(file.path, preview, PREVIEW_SIZE);
-              }
-            })
-            .catch(() => {});
-        }
-      }
-    })();
-    return () => {
-      makeThumbnailAllowed.current = false;
-    };
-  }, []);
-  return (
-    <ImageBackground
-      onLayout={() => (makeThumbnailAllowed.current = true)}
-      source={{ uri: thumbnail ?? fallbackThumbnail }}
-      style={{
-        width: ICON_SIZE,
-        height: ICON_SIZE,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderRadius: ICON_RADIUS,
-        overflow: 'hidden',
-      }}>
-      <Icon size={25} color={'#fff'} source={'play-circle'} />
-    </ImageBackground>
-  );
-};
 
 const DirectoryItemView: React.FC<DirItemProps> = ({ item }) => {
   const fileManager = useFileManager();
@@ -215,7 +167,11 @@ const DirectoryItemView: React.FC<DirItemProps> = ({ item }) => {
             }}
           />
         ) : FileApi.isFileVideo(item) ? (
-          <VideoThumbnail file={item} />
+          <VideoThumbnail
+            file={item}
+            width={ICON_RADIUS}
+            iconRadius={ICON_RADIUS}
+          />
         ) : FileApi.isFileMusical(item) ? (
           <View style={{ borderRadius: ICON_RADIUS }}>
             <Icon

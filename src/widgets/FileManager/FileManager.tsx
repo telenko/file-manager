@@ -214,6 +214,7 @@ export default function FileManager() {
       longOperation,
       setLongOperation,
       toggleSort,
+      layout: 'grid',
     }),
     [
       reloadRequired,

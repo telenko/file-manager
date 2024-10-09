@@ -11,6 +11,7 @@ export type FileLongOperationType = {
 
 export type FileManagerContextType = {
   sort: 'asc' | 'desc';
+  layout: 'list' | 'grid';
   toggleSort: () => void;
   reloadRequired?: boolean;
   setReloadRequired: (v: boolean) => void;
@@ -52,6 +53,7 @@ export const useFileManager = (): FileManagerContextType => {
 
 export const FileManagerContext = React.createContext<FileManagerContextType>({
   sort: 'asc',
+  layout: 'list',
   toggleSort: () => {},
   reloadRequired: false,
   setReloadRequired: () => {},

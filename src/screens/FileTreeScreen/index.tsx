@@ -23,6 +23,8 @@ import { useExceptionHandler } from '../../common/components/ExceptionHandler';
 import DefaultFolderActions from '../../widgets/FileManager/DefaultFolderActions';
 import StorageSelect from './StorageSelect';
 import { ActivityIndicator } from 'react-native-paper';
+import DirectoryGridItemView from './DirectoryGridItemView';
+import SelectorAction from './SelectorAction';
 
 export type FileScreenProps = {
   route: {
@@ -84,7 +86,7 @@ const FileScreen: React.FC<FileScreenProps> = ({
             <ActivityIndicator size={24} />
           </View>
         ) : isMultiSelectActivated ? (
-          <MultiSelectActions
+          <SelectorAction
             dirItems={dirItems}
             navigation={navigator}
             selectedPaths={selectedPaths}
@@ -183,17 +185,25 @@ const FileScreen: React.FC<FileScreenProps> = ({
       new LayoutProvider(
         () => 1, // All items have the same layout type
         (type, dim) => {
-          dim.width = SCREEN_WIDTH;
-          dim.height = 70;
+          if (fileManager.layout === 'list') {
+            dim.width = SCREEN_WIDTH;
+            dim.height = 70;
+          } else {
+            dim.width = SCREEN_WIDTH / 4 - 5;
+            dim.height = 110;
+          }
         },
       ),
-    [SCREEN_WIDTH],
+    [SCREEN_WIDTH, fileManager.layout],
   );
   const rowRenderer = useCallback(
-    (type: any, item: DirItem) => (
-      <DirectoryItemView key={item.path} item={item} />
-    ),
-    [],
+    (type: any, item: DirItem) =>
+      fileManager.layout === 'list' ? (
+        <DirectoryItemView key={item.path} item={item} />
+      ) : (
+        <DirectoryGridItemView key={item.path} item={item} />
+      ),
+    [fileManager.layout],
   );
 
   const isMoveFolderToSame = () => {
@@ -310,6 +320,14 @@ const FileScreen: React.FC<FileScreenProps> = ({
             />
           ) : null}
         </View>
+        {isMultiSelectActivated ? (
+          <MultiSelectActions
+            dirItems={dirItems}
+            navigation={navigator}
+            selectedPaths={selectedPaths}
+            setSelectedPaths={setSelectedPaths}
+          />
+        ) : null}
       </View>
     </FileTreeContext.Provider>
   );

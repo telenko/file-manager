@@ -57,5 +57,7 @@
     "copyIsDone": "Copy is done",
     "moveIsDone": "Move is done",
     "deleteIsDone": "Delete is done",
-    "nameAlreadyExists": "Name already exists"
+    "nameAlreadyExists": "Name already exists",
+
+    "more": "More"
 }
