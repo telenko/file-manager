@@ -17,6 +17,7 @@ import {
   FileLongOperationType,
   FileManagerContext,
   FileManagerContextType,
+  FileManagerLayout,
 } from './FileManagerContext';
 import { FileGuiHelper, getRouteDirectory } from './FileGuiHelper';
 import RenameContentDialog from './RenameContentDialog';
@@ -64,6 +65,38 @@ const useSort = (): ['asc' | 'desc', () => void] => {
   return [sort, toggleSort];
 };
 
+const useLayout = (): [FileManagerLayout, (v: FileManagerLayout) => void] => {
+  const LAYOUT_STORAGE_KEY = '__layout_type__';
+  const getLayoutStore = async () => {
+    try {
+      const readValue = await AsyncStorage.getItem(LAYOUT_STORAGE_KEY);
+      return readValue === 'grid' ? 'grid' : 'list';
+    } catch {
+      return 'list';
+    }
+  };
+  const setLayoutStore = (s: FileManagerLayout) => {
+    try {
+      AsyncStorage.setItem(LAYOUT_STORAGE_KEY, s);
+    } catch {}
+  };
+  const [layout, setLayout] = useState<FileManagerLayout>('list');
+  const layoutRead = useRef(false);
+  useEffect(() => {
+    (async () => {
+      setLayout(await getLayoutStore());
+      layoutRead.current = true;
+    })();
+  }, []);
+  useEffect(() => {
+    if (!layoutRead.current) {
+      return;
+    }
+    setLayoutStore(layout);
+  }, [layout]);
+  return [layout, setLayout];
+};
+
 const Stack = createNativeStackNavigator<FileManagerNavigation>();
 export default function FileManager() {
   const { t } = useTranslation();
@@ -79,6 +112,7 @@ export default function FileManager() {
     useState<FileLongOperationType | null>(null);
   const hasLongOperationVisibleRef = useRef(false);
   const [sort, toggleSort] = useSort();
+  const [layout, setLayout] = useLayout();
   const { refresh: refreshRoots, rootsReady, roots } = useFsRoots();
 
   const createDirectory = useCallback(
@@ -214,7 +248,8 @@ export default function FileManager() {
       longOperation,
       setLongOperation,
       toggleSort,
-      layout: 'grid',
+      layout,
+      setLayout,
     }),
     [
       reloadRequired,
@@ -226,6 +261,7 @@ export default function FileManager() {
       roots,
       rootsReady,
       sort,
+      layout,
     ],
   );
 

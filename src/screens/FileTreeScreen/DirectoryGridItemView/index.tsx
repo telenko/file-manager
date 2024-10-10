@@ -1,12 +1,6 @@
-import React, { useMemo, useState } from 'react';
-import {
-  Button,
-  Image,
-  StyleSheet,
-  useWindowDimensions,
-  View,
-} from 'react-native';
-import { Checkbox, IconButton, List, Menu, Text } from 'react-native-paper';
+import React, { useMemo } from 'react';
+import { Image, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { Checkbox, Text } from 'react-native-paper';
 
 import {
   FileApi,
@@ -30,9 +24,7 @@ type DirItemProps = {
   item: DirectoryItemType;
 };
 
-const ICON_SIZE = 45;
 const ICON_RADIUS = 4;
-const MENU_ICON_SIZE = 30;
 
 const DirectoryGridItemView: React.FC<DirItemProps> = ({ item }) => {
   const fileManager = useFileManager();
@@ -49,8 +41,6 @@ const DirectoryGridItemView: React.FC<DirItemProps> = ({ item }) => {
 
   const multiSelectActivated = fileTreeScreen.selectedPaths.length > 0;
   const isSelected = fileTreeScreen.selectedPaths.includes(item.path);
-
-  // const RIGHT_ICON_OFFSET = -20;
 
   const GRID_WIDTH = width / 4 - 5;
   const GRID_HEIGHT = 110;
@@ -98,6 +88,7 @@ const DirectoryGridItemView: React.FC<DirItemProps> = ({ item }) => {
             borderRadius: ICON_RADIUS,
             justifyContent: 'center',
             alignItems: 'center',
+            marginTop: 5,
           }}>
           <Icon
             size={ICON_SIZE}
@@ -151,7 +142,6 @@ const DirectoryGridItemView: React.FC<DirItemProps> = ({ item }) => {
             justifyContent: 'flex-start',
             alignItems: 'center',
             width: '100%',
-            paddingTop: item.isDirectory() ? 5 : 0,
           }}>
           <Icon
             size={ICON_SIZE}
@@ -200,11 +190,11 @@ const DirectoryGridItemView: React.FC<DirItemProps> = ({ item }) => {
           height: '100%',
           width: '100%',
           borderRadius: 10,
-          // backgroundColor: 'black',
         }}>
         <View
           style={{
-            width: GRID_WIDTH - GRID_GAP_SINGLE * 2,
+            paddingTop: 5,
+            width: GRID_WIDTH - GRID_GAP_SINGLE * 3,
             height: GRID_HEIGHT - GRID_DESCRIPTION_HEIGHT - GRID_GAP_SINGLE * 2,
           }}>
           {content}
@@ -227,7 +217,7 @@ const DirectoryGridItemView: React.FC<DirItemProps> = ({ item }) => {
               left: 0,
               right: 0,
               top: 0,
-              bottom: 18,
+              bottom: 10,
               display: 'flex',
               justifyContent: 'center',
               alignItems: 'center',
@@ -272,9 +262,7 @@ const DirectoryGridItemView: React.FC<DirItemProps> = ({ item }) => {
 };
 
 const styles = StyleSheet.create({
-  item: {
-    paddingLeft: 5,
-  },
+  item: {},
 });
 
 export default React.memo(DirectoryGridItemView);
