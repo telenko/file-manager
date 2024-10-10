@@ -50,9 +50,13 @@ const DirectoryGridItemView: React.FC<DirItemProps> = ({ item }) => {
   const multiSelectActivated = fileTreeScreen.selectedPaths.length > 0;
   const isSelected = fileTreeScreen.selectedPaths.includes(item.path);
 
-  const RIGHT_ICON_OFFSET = -20;
+  // const RIGHT_ICON_OFFSET = -20;
 
-  const ICON_SIZE = width / 4 - 30;
+  const GRID_WIDTH = width / 4 - 5;
+  const GRID_HEIGHT = 110;
+  const GRID_GAP_SINGLE = 3;
+  const GRID_DESCRIPTION_HEIGHT = 20;
+  const ICON_SIZE = GRID_WIDTH - 20;
 
   const content = useMemo(
     () =>
@@ -60,19 +64,28 @@ const DirectoryGridItemView: React.FC<DirItemProps> = ({ item }) => {
         <Image
           source={{ uri: `file://${item.path}` }}
           style={{
-            width: ICON_SIZE + 20 - 2.5,
-            height: ICON_SIZE + 10,
+            width: '100%',
+            height: '100%',
             borderRadius: ICON_RADIUS,
           }}
         />
       ) : FileApi.isFileVideo(item) ? (
-        <VideoThumbnail
-          file={item}
-          width={ICON_SIZE}
-          iconRadius={ICON_RADIUS}
-        />
+        <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+          <VideoThumbnail
+            file={item}
+            width={GRID_WIDTH - GRID_GAP_SINGLE * 2 - 10}
+            iconRadius={ICON_RADIUS}
+          />
+        </View>
       ) : FileApi.isFileMusical(item) ? (
-        <View style={{ borderRadius: ICON_RADIUS }}>
+        <View
+          style={{
+            borderRadius: ICON_RADIUS,
+            width: '100%',
+            height: '100%',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}>
           <Icon
             size={ICON_SIZE}
             source={'file-music'}
@@ -80,7 +93,12 @@ const DirectoryGridItemView: React.FC<DirItemProps> = ({ item }) => {
           />
         </View>
       ) : item.path?.endsWith('.pdf') ? (
-        <View style={{ borderRadius: ICON_RADIUS }}>
+        <View
+          style={{
+            borderRadius: ICON_RADIUS,
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}>
           <Icon
             size={ICON_SIZE}
             source={'file-pdf-box'}
@@ -88,7 +106,12 @@ const DirectoryGridItemView: React.FC<DirItemProps> = ({ item }) => {
           />
         </View>
       ) : /\.docx?$/i.test(item.path ?? '') ? (
-        <View style={{ borderRadius: ICON_RADIUS }}>
+        <View
+          style={{
+            borderRadius: ICON_RADIUS,
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}>
           <Icon
             size={ICON_SIZE}
             source={'file-word'}
@@ -96,7 +119,12 @@ const DirectoryGridItemView: React.FC<DirItemProps> = ({ item }) => {
           />
         </View>
       ) : /\.xlsx?$/i.test(item.path ?? '') ? (
-        <View style={{ borderRadius: ICON_RADIUS }}>
+        <View
+          style={{
+            borderRadius: ICON_RADIUS,
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}>
           <Icon
             size={ICON_SIZE}
             source={'file-excel'}
@@ -104,7 +132,12 @@ const DirectoryGridItemView: React.FC<DirItemProps> = ({ item }) => {
           />
         </View>
       ) : FileApi.isFileArchive(item) ? (
-        <View style={{ borderRadius: ICON_RADIUS }}>
+        <View
+          style={{
+            borderRadius: ICON_RADIUS,
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}>
           <Icon
             size={ICON_SIZE}
             source={'archive-arrow-down'}
@@ -118,6 +151,7 @@ const DirectoryGridItemView: React.FC<DirItemProps> = ({ item }) => {
             justifyContent: 'flex-start',
             alignItems: 'center',
             width: '100%',
+            paddingTop: item.isDirectory() ? 5 : 0,
           }}>
           <Icon
             size={ICON_SIZE}
@@ -130,7 +164,7 @@ const DirectoryGridItemView: React.FC<DirItemProps> = ({ item }) => {
   );
 
   return (
-    <View style={{ height: '100%', width: '100%', padding: 2.5 }}>
+    <View style={{ height: '100%', width: '100%', padding: GRID_GAP_SINGLE }}>
       <TouchableOpacity
         onLongPress={() => {
           if (!operationsAllowed) {
@@ -166,8 +200,13 @@ const DirectoryGridItemView: React.FC<DirItemProps> = ({ item }) => {
           height: '100%',
           width: '100%',
           borderRadius: 10,
+          // backgroundColor: 'black',
         }}>
-        <View style={{ width: ICON_SIZE + 30, height: ICON_SIZE + 10 }}>
+        <View
+          style={{
+            width: GRID_WIDTH - GRID_GAP_SINGLE * 2,
+            height: GRID_HEIGHT - GRID_DESCRIPTION_HEIGHT - GRID_GAP_SINGLE * 2,
+          }}>
           {content}
         </View>
         <View
@@ -175,11 +214,12 @@ const DirectoryGridItemView: React.FC<DirItemProps> = ({ item }) => {
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
+            height: GRID_DESCRIPTION_HEIGHT,
           }}>
           <Text style={{ fontFamily: theme.mediumText }}>{item.name}</Text>
         </View>
       </TouchableOpacity>
-      {multiSelectActivated ? (
+      {multiSelectActivated && isSelected ? (
         <>
           <View
             style={{
@@ -187,45 +227,43 @@ const DirectoryGridItemView: React.FC<DirItemProps> = ({ item }) => {
               left: 0,
               right: 0,
               top: 0,
-              bottom: 10,
-              width: '100%',
-              height: '100%',
+              bottom: 18,
               display: 'flex',
               justifyContent: 'center',
               alignItems: 'center',
             }}>
-            <IconButton
-              size={40}
-              iconColor={'rgba(50,50,250,0.8)'}
+            <View
               style={{
-                shadowColor: '#2e2e2e',
-                shadowOffset: { width: 0, height: 10 },
-                shadowOpacity: 0.3,
-                shadowRadius: 10,
-                elevation: 10,
-              }}
-              onPress={() => {
-                fileTreeScreen.setSelectedPaths(
-                  isSelected
-                    ? fileTreeScreen.selectedPaths.filter(p => p !== item.path)
-                    : [...fileTreeScreen.selectedPaths, item.path],
-                );
-              }}
-              icon={isSelected ? 'checkbox-marked' : 'checkbox-blank-outline'}
-            />
-            {/* <View
-              style={{
-                // position: 'absolute',
-                marginTop: -50,
+                backgroundColor: 'rgba(250,250,250,1)',
+                borderRadius: 10,
+                width: 26,
+                height: 26,
                 display: 'flex',
                 justifyContent: 'center',
                 alignItems: 'center',
-                width: 30,
-                height: 30,
-                backgroundColor: 'white',
-                zIndex: 0,
-              }}
-            /> */}
+              }}>
+              <View
+                style={{
+                  transform: [{ scale: 1.5 }],
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}>
+                <Checkbox
+                  color="rgba(30,210,30,0.9)"
+                  onPress={() => {
+                    fileTreeScreen.setSelectedPaths(
+                      isSelected
+                        ? fileTreeScreen.selectedPaths.filter(
+                            p => p !== item.path,
+                          )
+                        : [...fileTreeScreen.selectedPaths, item.path],
+                    );
+                  }}
+                  status={isSelected ? 'checked' : 'unchecked'}
+                />
+              </View>
+            </View>
           </View>
         </>
       ) : null}
