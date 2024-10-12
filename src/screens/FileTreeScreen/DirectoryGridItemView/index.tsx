@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { Image, StyleSheet, useWindowDimensions, View } from 'react-native';
-import { Checkbox, Text } from 'react-native-paper';
+import { Checkbox, IconButton, Text } from 'react-native-paper';
 
 import {
   FileApi,
@@ -19,6 +19,7 @@ import { useFileTreeContext } from '../FileTreeContext';
 import { useExceptionHandler } from '../../../common/components/ExceptionHandler';
 import VideoThumbnail from '../../../common/components/VideoThumbnail';
 import { TouchableOpacity } from 'react-native-gesture-handler';
+import { calcGridColumns, GRID_HEIGHT } from '../../../common/utils/layout';
 
 type DirItemProps = {
   item: DirectoryItemType;
@@ -42,9 +43,8 @@ const DirectoryGridItemView: React.FC<DirItemProps> = ({ item }) => {
   const multiSelectActivated = fileTreeScreen.selectedPaths.length > 0;
   const isSelected = fileTreeScreen.selectedPaths.includes(item.path);
 
-  const GRID_WIDTH = width / 4 - 5;
-  const GRID_HEIGHT = 110;
-  const GRID_GAP_SINGLE = 3;
+  const GRID_WIDTH = width / calcGridColumns(width) - 5;
+  const GRID_GAP_SINGLE = 2.5;
   const GRID_DESCRIPTION_HEIGHT = 20;
   const ICON_SIZE = GRID_WIDTH - 20;
 
@@ -142,9 +142,10 @@ const DirectoryGridItemView: React.FC<DirItemProps> = ({ item }) => {
             justifyContent: 'flex-start',
             alignItems: 'center',
             width: '100%',
+            marginTop: item.isDirectory() ? 12 : 0,
           }}>
           <Icon
-            size={ICON_SIZE}
+            size={item.isDirectory() ? ICON_SIZE - 10 : ICON_SIZE}
             color={item.isDirectory() ? theme.folderColor : theme.fileColor}
             source={item.isDirectory() ? 'folder' : 'file'}
           />
@@ -154,7 +155,7 @@ const DirectoryGridItemView: React.FC<DirItemProps> = ({ item }) => {
   );
 
   return (
-    <View style={{ height: '100%', width: '100%', padding: GRID_GAP_SINGLE }}>
+    <View style={{ height: '100%', width: '100%', padding: 1 }}>
       <TouchableOpacity
         onLongPress={() => {
           if (!operationsAllowed) {
@@ -165,6 +166,7 @@ const DirectoryGridItemView: React.FC<DirItemProps> = ({ item }) => {
             item.path,
           ]);
         }}
+        // @TODO Andrii ignore scroll gesture
         onPress={() => {
           if (multiSelectActivated && operationsAllowed) {
             fileTreeScreen.setSelectedPaths(
@@ -190,6 +192,13 @@ const DirectoryGridItemView: React.FC<DirItemProps> = ({ item }) => {
           height: '100%',
           width: '100%',
           borderRadius: 10,
+          backgroundColor:
+            multiSelectActivated && isSelected
+              ? 'rgba(180,180,180,0.3)'
+              : 'transparent',
+          justifyContent: 'center',
+          alignItems: 'center',
+          padding: 1.5,
         }}>
         <View
           style={{
@@ -204,57 +213,52 @@ const DirectoryGridItemView: React.FC<DirItemProps> = ({ item }) => {
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
+            width: '100%',
+            overflow: 'hidden',
             height: GRID_DESCRIPTION_HEIGHT,
           }}>
-          <Text style={{ fontFamily: theme.mediumText }}>{item.name}</Text>
+          <Text
+            style={{ fontFamily: theme.mediumText }}
+            numberOfLines={1}
+            ellipsizeMode="middle">
+            {item.name}
+          </Text>
         </View>
       </TouchableOpacity>
       {multiSelectActivated && isSelected ? (
         <>
+          <IconButton
+            style={{
+              position: 'absolute',
+              right: -5,
+              top: -5,
+              width: 25,
+              height: 25,
+              zIndex: 6,
+            }}
+            size={25}
+            icon={'check-circle'}
+            iconColor="rgb(52,116,235)"
+            onPress={() => {
+              fileTreeScreen.setSelectedPaths(
+                isSelected
+                  ? fileTreeScreen.selectedPaths.filter(p => p !== item.path)
+                  : [...fileTreeScreen.selectedPaths, item.path],
+              );
+            }}
+          />
           <View
             style={{
               position: 'absolute',
-              left: 0,
-              right: 0,
-              top: 0,
-              bottom: 10,
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}>
-            <View
-              style={{
-                backgroundColor: 'rgba(250,250,250,1)',
-                borderRadius: 10,
-                width: 26,
-                height: 26,
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}>
-              <View
-                style={{
-                  transform: [{ scale: 1.5 }],
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}>
-                <Checkbox
-                  color="rgba(30,210,30,0.9)"
-                  onPress={() => {
-                    fileTreeScreen.setSelectedPaths(
-                      isSelected
-                        ? fileTreeScreen.selectedPaths.filter(
-                            p => p !== item.path,
-                          )
-                        : [...fileTreeScreen.selectedPaths, item.path],
-                    );
-                  }}
-                  status={isSelected ? 'checked' : 'unchecked'}
-                />
-              </View>
-            </View>
-          </View>
+              right: 3.5,
+              top: 3.5,
+              width: 20,
+              height: 20,
+              borderRadius: 10,
+              backgroundColor: 'white',
+              zIndex: 5,
+            }}
+          />
         </>
       ) : null}
     </View>

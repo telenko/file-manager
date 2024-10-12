@@ -1,9 +1,10 @@
 import React from 'react';
 import { View } from 'react-native';
-import { Checkbox } from 'react-native-paper';
+import { Checkbox, IconButton } from 'react-native-paper';
 import { DirItem } from '../../../services/FileApi';
 import { NavigationProp } from '@react-navigation/native';
 import { FileManagerNavigation } from '../../../common/types/navigation';
+import { useFileManager } from '../../../widgets/FileManager';
 
 const SelectorAction: React.FC<{
   dirItems: DirItem[];
@@ -12,6 +13,7 @@ const SelectorAction: React.FC<{
   setSelectedPaths: (v: string[]) => void;
 }> = ({ dirItems, selectedPaths, setSelectedPaths }) => {
   const allSelected = selectedPaths.length === dirItems.length;
+  const fileManager = useFileManager();
 
   return (
     <View
@@ -19,16 +21,33 @@ const SelectorAction: React.FC<{
         flexDirection: 'row',
         alignItems: 'center',
       }}>
-      <Checkbox
-        onPress={() => {
-          if (allSelected) {
-            setSelectedPaths([]);
-          } else {
-            setSelectedPaths(dirItems.map(dirIt => dirIt.path));
-          }
-        }}
-        status={allSelected ? 'checked' : 'indeterminate'}
-      />
+      {fileManager.layout === 'list' ? (
+        <Checkbox
+          onPress={() => {
+            if (allSelected) {
+              setSelectedPaths([]);
+            } else {
+              setSelectedPaths(dirItems.map(dirIt => dirIt.path));
+            }
+          }}
+          status={allSelected ? 'checked' : 'indeterminate'}
+        />
+      ) : null}
+      {fileManager.layout === 'grid' ? (
+        <IconButton
+          icon="checkbox-multiple-marked-circle"
+          onPress={() => {
+            if (allSelected) {
+              setSelectedPaths([]);
+            } else {
+              setSelectedPaths(dirItems.map(dirIt => dirIt.path));
+            }
+          }}
+          size={27}
+          // @TODO Andrii theme
+          iconColor={allSelected ? 'rgb(52,116,235)' : 'grey'}
+        />
+      ) : null}
     </View>
   );
 };

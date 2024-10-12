@@ -295,7 +295,7 @@ export default function FileManager() {
           <Stack.Screen
             name="FileTree"
             options={{
-              title: t('title'),
+              title: '',
               headerRight: () => <DefaultFolderActions />,
             }}
             // @ts-ignore

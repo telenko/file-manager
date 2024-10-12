@@ -25,6 +25,7 @@ import StorageSelect from './StorageSelect';
 import { ActivityIndicator } from 'react-native-paper';
 import DirectoryGridItemView from './DirectoryGridItemView';
 import SelectorAction from './SelectorAction';
+import { calcGridColumns, GRID_HEIGHT, LIST_HEIGHT } from '../../common/utils/layout';
 
 export type FileScreenProps = {
   route: {
@@ -73,7 +74,7 @@ const FileScreen: React.FC<FileScreenProps> = ({
           break;
         }
         default: {
-          title = t('title');
+          title = isStorageLevel ?  t('title') : '';
           break;
         }
       }
@@ -102,6 +103,7 @@ const FileScreen: React.FC<FileScreenProps> = ({
     selectedPaths,
     dirItems,
     fileManager.longOperation,
+    isStorageLevel,
   ]);
 
   const reloadDir = useCallback(async () => {
@@ -187,10 +189,10 @@ const FileScreen: React.FC<FileScreenProps> = ({
         (type, dim) => {
           if (fileManager.layout === 'list') {
             dim.width = SCREEN_WIDTH;
-            dim.height = 70;
+            dim.height = LIST_HEIGHT;
           } else {
-            dim.width = SCREEN_WIDTH / 4 - 5;
-            dim.height = 110;
+            dim.width = SCREEN_WIDTH / calcGridColumns(SCREEN_WIDTH) - 5;
+            dim.height = GRID_HEIGHT;
           }
         },
       ),
