@@ -1,5 +1,11 @@
-import React, { useMemo } from 'react';
-import { Image, StyleSheet, useWindowDimensions, View } from 'react-native';
+import React, { useMemo, useRef, useState } from 'react';
+import {
+  Image,
+  Pressable,
+  StyleSheet,
+  useWindowDimensions,
+  View,
+} from 'react-native';
 import { IconButton, Text } from 'react-native-paper';
 import {
   FileApi,
@@ -28,6 +34,8 @@ const ICON_RADIUS = 4;
 
 const DirectoryGridItemView: React.FC<DirItemProps> = ({ item }) => {
   const fileManager = useFileManager();
+  const [isScrolling, setScrolling] = useState(false);
+  const startY = useRef<number | null>(null);
   const fileTreeScreen = useFileTreeContext();
   const navigation = useNavigation();
   const { t } = useTranslation();
@@ -155,75 +163,94 @@ const DirectoryGridItemView: React.FC<DirItemProps> = ({ item }) => {
 
   return (
     <View style={{ height: '100%', width: '100%', padding: 1 }}>
-      <TouchableOpacity
-        onLongPress={() => {
-          if (!operationsAllowed) {
-            return;
-          }
-          fileTreeScreen.setSelectedPaths([
-            ...fileTreeScreen.selectedPaths,
-            item.path,
-          ]);
+      {/* Pressable container needed to help with scroll/touch events conflicts on screens without content overflow */}
+      <Pressable
+        onTouchStart={event => {
+          startY.current = event.nativeEvent.pageY;
+          setScrolling(false);
         }}
-        // @TODO Andrii ignore scroll gesture
-        onPress={() => {
-          if (multiSelectActivated && operationsAllowed) {
-            fileTreeScreen.setSelectedPaths(
-              isSelected
-                ? fileTreeScreen.selectedPaths.filter(p => p !== item.path)
-                : [...fileTreeScreen.selectedPaths, item.path],
-            );
-            return;
+        onTouchEnd={event => {
+          const touchEndY = event.nativeEvent.pageY;
+          if (Math.abs(touchEndY - (startY.current || 0)) > 10) {
+            setScrolling(true);
           }
-          if (item.isFile()) {
-            if (operationsAllowed) {
-              if (FileApi.isFileViewable(item)) {
-                fileManager.openPreview(item, navigation, fileManager.sort);
-              } else {
-                FileApi.openFile(item).catch(exceptionHandler.handleError);
-              }
-            }
-          } else {
-            fileManager.openDirectory(item, navigation);
-          }
-        }}
-        style={{
-          height: '100%',
-          width: '100%',
-          borderRadius: 10,
-          backgroundColor:
-            multiSelectActivated && isSelected
-              ? 'rgba(180,180,180,0.3)'
-              : 'transparent',
-          justifyContent: 'center',
-          alignItems: 'center',
-          padding: 1.5,
         }}>
-        <View
+        <TouchableOpacity
+          onLongPress={() => {
+            if (isScrolling) {
+              return;
+            }
+            if (!operationsAllowed) {
+              return;
+            }
+            fileTreeScreen.setSelectedPaths([
+              ...fileTreeScreen.selectedPaths,
+              item.path,
+            ]);
+          }}
+          onPress={() => {
+            if (isScrolling) {
+              return;
+            }
+            if (multiSelectActivated && operationsAllowed) {
+              fileTreeScreen.setSelectedPaths(
+                isSelected
+                  ? fileTreeScreen.selectedPaths.filter(p => p !== item.path)
+                  : [...fileTreeScreen.selectedPaths, item.path],
+              );
+              return;
+            }
+            if (item.isFile()) {
+              if (operationsAllowed) {
+                if (FileApi.isFileViewable(item)) {
+                  fileManager.openPreview(item, navigation, fileManager.sort);
+                } else {
+                  FileApi.openFile(item).catch(exceptionHandler.handleError);
+                }
+              }
+            } else {
+              fileManager.openDirectory(item, navigation);
+            }
+          }}
           style={{
-            paddingTop: 5,
-            width: GRID_WIDTH - GRID_GAP_SINGLE * 3,
-            height: GRID_HEIGHT - GRID_DESCRIPTION_HEIGHT - GRID_GAP_SINGLE * 2,
-          }}>
-          {content}
-        </View>
-        <View
-          style={{
-            display: 'flex',
+            height: '100%',
+            width: '100%',
+            borderRadius: 10,
+            backgroundColor:
+              multiSelectActivated && isSelected
+                ? 'rgba(180,180,180,0.3)'
+                : 'transparent',
             justifyContent: 'center',
             alignItems: 'center',
-            width: '100%',
-            overflow: 'hidden',
-            height: GRID_DESCRIPTION_HEIGHT,
+            padding: 1.5,
           }}>
-          <Text
-            style={{ fontFamily: theme.mediumText }}
-            numberOfLines={1}
-            ellipsizeMode="middle">
-            {item.name}
-          </Text>
-        </View>
-      </TouchableOpacity>
+          <View
+            style={{
+              paddingTop: 5,
+              width: GRID_WIDTH - GRID_GAP_SINGLE * 3,
+              height:
+                GRID_HEIGHT - GRID_DESCRIPTION_HEIGHT - GRID_GAP_SINGLE * 2,
+            }}>
+            {content}
+          </View>
+          <View
+            style={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              width: '100%',
+              overflow: 'hidden',
+              height: GRID_DESCRIPTION_HEIGHT,
+            }}>
+            <Text
+              style={{ fontFamily: theme.mediumText }}
+              numberOfLines={1}
+              ellipsizeMode="middle">
+              {item.name}
+            </Text>
+          </View>
+        </TouchableOpacity>
+      </Pressable>
       {multiSelectActivated && isSelected ? (
         <>
           <IconButton
