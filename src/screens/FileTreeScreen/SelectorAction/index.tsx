@@ -5,6 +5,7 @@ import { DirItem } from '../../../services/FileApi';
 import { NavigationProp } from '@react-navigation/native';
 import { FileManagerNavigation } from '../../../common/types/navigation';
 import { useFileManager } from '../../../widgets/FileManager';
+import { theme } from '../../../theme';
 
 const SelectorAction: React.FC<{
   dirItems: DirItem[];
@@ -33,9 +34,11 @@ const SelectorAction: React.FC<{
         style={{
           marginRight: -2,
         }}
-        size={27}
-        // @TODO Andrii theme
-        iconColor={allSelected ? 'rgb(52,116,235)' : 'grey'}
+        // +2 since icon is bigger
+        size={theme.selectionIconSize + 2}
+        iconColor={
+          allSelected ? theme.selectionColor : theme.selectionNotCompleteColor
+        }
       />
     </View>
   );

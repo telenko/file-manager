@@ -226,19 +226,18 @@ const DirectoryItemView: React.FC<DirItemProps> = ({ item }) => {
         multiSelectActivated
           ? () => (
               <View style={{ marginRight: RIGHT_ICON_OFFSET }}>
-                {/* @TODO Andrii theme */}
                 <IconButton
                   style={{
-                    width: 25,
-                    height: 25,
+                    width: theme.selectionIconSize,
+                    height: theme.selectionIconSize,
                   }}
-                  size={25}
+                  size={theme.selectionIconSize}
                   icon={
                     isSelected
                       ? 'check-circle'
                       : 'checkbox-blank-circle-outline'
                   }
-                  iconColor="rgb(52,116,235)"
+                  iconColor={theme.selectionColor}
                   onPress={() => {
                     fileTreeScreen.setSelectedPaths(
                       isSelected

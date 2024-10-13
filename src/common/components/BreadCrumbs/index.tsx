@@ -74,10 +74,10 @@ const styles = StyleSheet.create({
     paddingBottom: 0,
   },
   inactiveItem: {
-    backgroundColor: theme.selectionColor,
+    backgroundColor: theme.filePathColor,
   },
   activeItem: {
-    backgroundColor: theme.selectionColor,
+    backgroundColor: theme.filePathColor,
   },
 });
 

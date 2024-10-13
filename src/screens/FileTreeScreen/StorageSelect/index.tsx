@@ -27,14 +27,14 @@ const StorageSelect: React.FC = () => {
   return (
     <Menu
       onDismiss={() => setOpen(false)}
-      contentStyle={{ backgroundColor: theme.selectionColor }}
+      contentStyle={{ backgroundColor: theme.filePathColor }}
       anchor={
         <TouchableOpacity
           style={{
             alignSelf: 'flex-start',
             borderRadius: theme.radiusPrimary,
             flexDirection: 'row',
-            backgroundColor: theme.selectionColor,
+            backgroundColor: theme.filePathColor,
             alignItems: 'center',
             paddingVertical: 10,
             paddingHorizontal: 10,
