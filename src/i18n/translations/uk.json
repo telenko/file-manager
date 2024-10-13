@@ -57,5 +57,7 @@
     "copyIsDone": "Копіювання завершено",
     "moveIsDone": "Переміщення завершено",
     "deleteIsDone": "Видалення завершено",
-     "nameAlreadyExists": "Ім'я вже існує"
+     "nameAlreadyExists": "Ім'я вже існує",
+
+     "more": "Більше"
 }

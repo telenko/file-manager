@@ -57,5 +57,7 @@
     "copyIsDone": "Kopyalama tamamlandı",
     "moveIsDone": "Taşıma tamamlandı",
     "deleteIsDone": "Silme tamamlandı",
-    "nameAlreadyExists": "İsim zaten var"
+    "nameAlreadyExists": "İsim zaten var",
+
+    "more": "Daha fazla"
 }

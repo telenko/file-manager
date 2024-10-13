@@ -57,5 +57,7 @@
     "copyIsDone": "Kopiëren voltooid",
     "moveIsDone": "Verplaatsen voltooid",
     "deleteIsDone": "Verwijderen voltooid",
-    "nameAlreadyExists": "Naam bestaat al"
+    "nameAlreadyExists": "Naam bestaat al",
+    
+     "more": "Meer"
 }

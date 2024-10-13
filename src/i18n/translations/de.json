@@ -57,5 +57,7 @@
     "copyIsDone": "Kopieren ist abgeschlossen",
     "moveIsDone": "Verschiebung ist abgeschlossen",
     "deleteIsDone": "Löschung ist abgeschlossen",
-    "nameAlreadyExists": "Name existiert bereits"
+    "nameAlreadyExists": "Name existiert bereits",
+
+    "more": "Mehr"
 }
