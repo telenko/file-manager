@@ -1,7 +1,6 @@
 import React, { useMemo } from 'react';
 import { Image, StyleSheet, useWindowDimensions, View } from 'react-native';
-import { Checkbox, IconButton, Text } from 'react-native-paper';
-
+import { IconButton, Text } from 'react-native-paper';
 import {
   FileApi,
   type DirItem as DirectoryItemType,

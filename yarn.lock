@@ -5143,6 +5143,7 @@ __metadata:
     react-native: 0.74.3
     react-native-fs: 2.20.0
     react-native-gesture-handler: 2.17.1
+    react-native-haptic-feedback: ^2.3.3
     react-native-localize: 3.2.0
     react-native-paper: ^5.12.3
     react-native-paper-snackbar-stack: ^0.2.0
@@ -8484,6 +8485,15 @@ __metadata:
     react: "*"
     react-native: "*"
   checksum: 70da4fc51d92899591aadf03396a8e0b78223fbe71da5b10e76232058c1ef5943d54c1dd8da815d5b6a8b41f259ea9d50457680e2ef7878c88d7396771170ae3
+  languageName: node
+  linkType: hard
+
+"react-native-haptic-feedback@npm:^2.3.3":
+  version: 2.3.3
+  resolution: "react-native-haptic-feedback@npm:2.3.3"
+  peerDependencies:
+    react-native: ">=0.60.0"
+  checksum: 5ff12aaf44fa1cad8ab3d9c58046a11c631c6622955120294060efc51c625203ee4cd7ccb565663c12b27552ebbb7034a386000d9da738b9eea5ff62d58b14c0
   languageName: node
   linkType: hard
 

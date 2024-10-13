@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import { DirItem, FileApi } from '../../services/FileApi';
 import FilePathBreadCrumb from './FilePathBreadCrumb';
 import { useNavigation } from '../../common/hooks/useNavigation';
@@ -25,7 +26,11 @@ import StorageSelect from './StorageSelect';
 import { ActivityIndicator } from 'react-native-paper';
 import DirectoryGridItemView from './DirectoryGridItemView';
 import SelectorAction from './SelectorAction';
-import { calcGridColumns, GRID_HEIGHT, LIST_HEIGHT } from '../../common/utils/layout';
+import {
+  calcGridColumns,
+  GRID_HEIGHT,
+  LIST_HEIGHT,
+} from '../../common/utils/layout';
 
 export type FileScreenProps = {
   route: {
@@ -35,6 +40,14 @@ export type FileScreenProps = {
       fromRoute?: string[];
     };
   };
+};
+
+const hapticFallbackOptions = {
+  enableVibrateFallback: true,
+  ignoreAndroidSystemSettings: false,
+};
+const selectVibrate = () => {
+  ReactNativeHapticFeedback.trigger('impactLight', hapticFallbackOptions);
 };
 
 const FileScreen: React.FC<FileScreenProps> = ({
@@ -74,7 +87,7 @@ const FileScreen: React.FC<FileScreenProps> = ({
           break;
         }
         default: {
-          title = isStorageLevel ?  t('title') : '';
+          title = isStorageLevel ? t('title') : '';
           break;
         }
       }
@@ -91,7 +104,7 @@ const FileScreen: React.FC<FileScreenProps> = ({
             dirItems={dirItems}
             navigation={navigator}
             selectedPaths={selectedPaths}
-            setSelectedPaths={setSelectedPaths}
+            setSelectedPaths={setSelectedPathsExternal}
           />
         ) : (
           <DefaultFolderActions folderHasFiles={hasFiles} />
@@ -134,14 +147,17 @@ const FileScreen: React.FC<FileScreenProps> = ({
     Cache.putDirItems(route ?? FileApi.ROOT_PATH, sortedDirItems);
   }, [sortedDirItems]);
 
+  const setSelectedPathsExternal = useCallback((v: string[]) => {
+    selectVibrate();
+    setSelectedPaths([...new Set(v)]);
+  }, []);
+
   const value = useMemo<FileTreeContextType>(
     () => ({
       route: route ?? FileApi.ROOT_PATH,
       mode: routeMetadatas.mode ?? 'tree',
       selectedPaths,
-      setSelectedPaths: (v: string[]) => {
-        setSelectedPaths([...new Set(v)]);
-      },
+      setSelectedPaths: setSelectedPathsExternal,
     }),
     [route, routeMetadatas.mode, selectedPaths],
   );

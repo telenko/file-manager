@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { Image, StyleSheet, View } from 'react-native';
-import { Checkbox, IconButton, List, Menu } from 'react-native-paper';
+import { IconButton, List, Menu } from 'react-native-paper';
 
 import {
   FileApi,
@@ -226,8 +226,19 @@ const DirectoryItemView: React.FC<DirItemProps> = ({ item }) => {
         multiSelectActivated
           ? () => (
               <View style={{ marginRight: RIGHT_ICON_OFFSET }}>
-                <Checkbox
-                  status={isSelected ? 'checked' : 'unchecked'}
+                {/* @TODO Andrii theme */}
+                <IconButton
+                  style={{
+                    width: 25,
+                    height: 25,
+                  }}
+                  size={25}
+                  icon={
+                    isSelected
+                      ? 'check-circle'
+                      : 'checkbox-blank-circle-outline'
+                  }
+                  iconColor="rgb(52,116,235)"
                   onPress={() => {
                     fileTreeScreen.setSelectedPaths(
                       isSelected

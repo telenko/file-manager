@@ -1,6 +1,6 @@
 import React from 'react';
 import { View } from 'react-native';
-import { Checkbox, IconButton } from 'react-native-paper';
+import { IconButton } from 'react-native-paper';
 import { DirItem } from '../../../services/FileApi';
 import { NavigationProp } from '@react-navigation/native';
 import { FileManagerNavigation } from '../../../common/types/navigation';
@@ -21,33 +21,22 @@ const SelectorAction: React.FC<{
         flexDirection: 'row',
         alignItems: 'center',
       }}>
-      {fileManager.layout === 'list' ? (
-        <Checkbox
-          onPress={() => {
-            if (allSelected) {
-              setSelectedPaths([]);
-            } else {
-              setSelectedPaths(dirItems.map(dirIt => dirIt.path));
-            }
-          }}
-          status={allSelected ? 'checked' : 'indeterminate'}
-        />
-      ) : null}
-      {fileManager.layout === 'grid' ? (
-        <IconButton
-          icon="checkbox-multiple-marked-circle"
-          onPress={() => {
-            if (allSelected) {
-              setSelectedPaths([]);
-            } else {
-              setSelectedPaths(dirItems.map(dirIt => dirIt.path));
-            }
-          }}
-          size={27}
-          // @TODO Andrii theme
-          iconColor={allSelected ? 'rgb(52,116,235)' : 'grey'}
-        />
-      ) : null}
+      <IconButton
+        icon="checkbox-multiple-marked-circle"
+        onPress={() => {
+          if (allSelected) {
+            setSelectedPaths([]);
+          } else {
+            setSelectedPaths(dirItems.map(dirIt => dirIt.path));
+          }
+        }}
+        style={{
+          marginRight: -2,
+        }}
+        size={27}
+        // @TODO Andrii theme
+        iconColor={allSelected ? 'rgb(52,116,235)' : 'grey'}
+      />
     </View>
   );
 };
