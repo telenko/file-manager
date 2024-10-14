@@ -26,4 +26,9 @@ export const theme = {
     HEADER_ICON: 25,
     HEADER_TITLE_FONT: 20,
   },
+  layout: {
+    GRID_WIDTH_BASE: 100,
+    GRID_HEIGHT: 110,
+    LIST_HEIGHT: 70,
+  },
 };
