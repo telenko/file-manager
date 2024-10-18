@@ -1,3 +1,5 @@
+const PRIMARY_COLOR = 'rgb(52,116,235)';
+
 export const theme = {
   folderColor: '#e8b10c',
   fileColor: '#b0aeae',
@@ -13,7 +15,7 @@ export const theme = {
   archiveFileColor: '#dba50f',
   fileMenuColor: '#ababab',
   filePathColor: 'rgb(235, 235, 235)',
-  selectionColor: 'rgb(52,116,235)',
+  selectionColor: PRIMARY_COLOR,
   selectionNotCompleteColor: 'grey',
   selectionIconSize: 25,
   toggleBgColor: 'rgba(150, 150, 250, 0.1)',
@@ -21,6 +23,7 @@ export const theme = {
   toggleBtnHeight: 37,
   radiusPrimary: 10,
   radiusMedium: 4,
+  primaryLoaderSize: 60,
   sizes: {
     NO_DATA_ICON: 40,
     HEADER_ICON: 25,
@@ -30,5 +33,13 @@ export const theme = {
     GRID_WIDTH_BASE: 100,
     GRID_HEIGHT: 110,
     LIST_HEIGHT: 70,
+  },
+  dialogContainer: {
+    borderRadius: 5,
+    backgroundColor: '#fafafa',
+  },
+  inputContainer: {
+    backgroundColor: '#f0f0f0',
+    color: PRIMARY_COLOR,
   },
 };

@@ -42,7 +42,7 @@ const ErrorModal: React.FC<{
   const [reportView, setReportView] = useState(false);
   return (
     <>
-      <Dialog visible onDismiss={onDismiss}>
+      <Dialog visible onDismiss={onDismiss} style={theme.dialogContainer}>
         <Dialog.Title>
           <Text
             style={{
@@ -65,6 +65,7 @@ const ErrorModal: React.FC<{
           {error.code !== ErrorType.FILE_API ? (
             <Button
               mode="contained"
+              textColor={theme.selectionColor}
               onPress={() => {
                 const subject = encodeURIComponent(`Error in File Manager app`);
                 const details = encodeURIComponent(error.stack);

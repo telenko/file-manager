@@ -11,6 +11,7 @@ import { useFileManager } from '../FileManagerContext';
 import { useTranslation } from 'react-i18next';
 import { useBackAction } from '../../../common/hooks/useBackAction';
 import { View } from 'react-native';
+import { theme } from '../../../theme';
 
 const STARTUP_DELAY_MS = 1500;
 
@@ -58,6 +59,7 @@ const LongOperationDialog: React.FC = () => {
   return (
     <Portal>
       <Dialog
+        style={theme.dialogContainer}
         visible={!!dialogActive && isVisibleLongOperation}
         dismissable={false}
         dismissableBackButton={false}>

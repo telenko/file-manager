@@ -1,17 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import {
-  Button,
-  Dialog,
-  MD3Colors,
-  Portal,
-  Text,
-  TextInput,
-} from 'react-native-paper';
+import { Button, Dialog, MD3Colors, Portal, Text } from 'react-native-paper';
 import { useFileManager } from '../FileManagerContext';
 import { FileApi } from '../../../services/FileApi';
 import { useTranslation } from 'react-i18next';
 import { useExceptionHandler } from '../../../common/components/ExceptionHandler';
 import { useItemExists } from '../useItemExists';
+import { theme } from '../../../theme';
+import TextInput from '../../../common/components/TextInput';
 
 const CreateDirectoryDialog: React.FC = () => {
   const fileManager = useFileManager();
@@ -44,7 +39,10 @@ const CreateDirectoryDialog: React.FC = () => {
   };
   return (
     <Portal>
-      <Dialog visible={!!fileManager.newDirPath} onDismiss={hideDialog}>
+      <Dialog
+        visible={!!fileManager.newDirPath}
+        onDismiss={hideDialog}
+        style={theme.dialogContainer}>
         <Dialog.Title>{t('createDirConfirm')}</Dialog.Title>
         <Dialog.Content>
           <TextInput
@@ -62,6 +60,7 @@ const CreateDirectoryDialog: React.FC = () => {
         <Dialog.Actions>
           <Button
             disabled={!text || loading || exists}
+            textColor={theme.selectionColor}
             onPress={async () => {
               hideDialog();
               await FileApi.createFolder(

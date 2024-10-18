@@ -1,17 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import {
-  Button,
-  Dialog,
-  MD3Colors,
-  Portal,
-  Text,
-  TextInput,
-} from 'react-native-paper';
+import { Button, Dialog, MD3Colors, Portal, Text } from 'react-native-paper';
 import { useFileManager } from '../FileManagerContext';
 import { FileApi } from '../../../services/FileApi';
 import { useTranslation } from 'react-i18next';
 import { useExceptionHandler } from '../../../common/components/ExceptionHandler';
 import { useItemExists } from '../useItemExists';
+import { theme } from '../../../theme';
+import TextInput from '../../../common/components/TextInput';
 
 const RenameContentDialog: React.FC = () => {
   const fileManager = useFileManager();
@@ -55,7 +50,10 @@ const RenameContentDialog: React.FC = () => {
   };
   return (
     <Portal>
-      <Dialog visible={!!fileManager.renameDialogItem} onDismiss={hideDialog}>
+      <Dialog
+        visible={!!fileManager.renameDialogItem}
+        onDismiss={hideDialog}
+        style={theme.dialogContainer}>
         <Dialog.Title>{t('renameConfirm')}</Dialog.Title>
         <Dialog.Content>
           {textReady && (
@@ -74,6 +72,7 @@ const RenameContentDialog: React.FC = () => {
         </Dialog.Content>
         <Dialog.Actions>
           <Button
+            textColor={theme.selectionColor}
             disabled={!text || loading || exists || valueUntoched}
             onPress={async () => {
               hideDialog();

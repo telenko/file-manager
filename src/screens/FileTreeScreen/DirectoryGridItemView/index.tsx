@@ -162,7 +162,6 @@ const DirectoryGridItemView: React.FC<DirItemProps> = ({ item }) => {
   );
 
   return (
-    // @TODO Andrii add negative margin 10px for container in grid mode
     <View style={{ height: '100%', width: '100%', padding: 1 }}>
       {/* Pressable container needed to help with scroll/touch events conflicts on screens without content overflow */}
       <Pressable

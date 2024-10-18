@@ -84,7 +84,10 @@ const FileDetailsDialog: React.FC = () => {
 
   return (
     <Portal>
-      <Dialog visible={!!fileManager.fileDetails} onDismiss={hideDialog}>
+      <Dialog
+        visible={!!fileManager.fileDetails}
+        onDismiss={hideDialog}
+        style={theme.dialogContainer}>
         <Dialog.Title>{t('details')}</Dialog.Title>
         <Dialog.Content>
           {details.map(detail => {
@@ -111,7 +114,9 @@ const FileDetailsDialog: React.FC = () => {
           })}
         </Dialog.Content>
         <Dialog.Actions>
-          <Button onPress={hideDialog}>{t('ok')}</Button>
+          <Button onPress={hideDialog} textColor={theme.selectionColor}>
+            {t('ok')}
+          </Button>
         </Dialog.Actions>
       </Dialog>
     </Portal>

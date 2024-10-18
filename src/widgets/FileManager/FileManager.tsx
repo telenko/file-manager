@@ -30,6 +30,8 @@ import { useFsRoots } from './useFsRoots';
 import { useLayout, useSort, useStoreLatestFolder } from './settings';
 import SettingsDialog from './dialogs/SettingsDialog';
 import { useInitialState } from './useInitialState';
+import { theme } from '../../theme';
+import { View } from 'react-native';
 
 const SNACK_DEFAULT_DURATION_MS = 4000;
 
@@ -219,7 +221,20 @@ export default function FileManager() {
   }, []);
 
   if (!rootsReady || !stateReady) {
-    return <ActivityIndicator size={24} />;
+    return (
+      <View
+        style={{
+          width: '100%',
+          height: '100%',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}>
+        <ActivityIndicator
+          size={theme.primaryLoaderSize}
+          color={theme.selectionColor}
+        />
+      </View>
+    );
   }
 
   return (

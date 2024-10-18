@@ -59,5 +59,10 @@
     "deleteIsDone": "Delete is done",
     "nameAlreadyExists": "Name already exists",
 
-    "more": "More"
+    "more": "More",
+
+    "settings": "Settings",
+    "storeLatestFolder": "Remember latest folder",
+    "storeLatestFolderInfo": "If you want, we can remember latest open folder for you. Next time, app will auto pre-open latest used folder",
+    "checkForUpdates": "Check for updates"
 }
