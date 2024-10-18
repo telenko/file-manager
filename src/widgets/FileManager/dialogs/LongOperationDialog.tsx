@@ -7,9 +7,9 @@ import {
   Portal,
   Text,
 } from 'react-native-paper';
-import { useFileManager } from './FileManagerContext';
+import { useFileManager } from '../FileManagerContext';
 import { useTranslation } from 'react-i18next';
-import { useBackAction } from '../../common/hooks/useBackAction';
+import { useBackAction } from '../../../common/hooks/useBackAction';
 import { View } from 'react-native';
 
 const STARTUP_DELAY_MS = 1500;

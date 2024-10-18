@@ -20,11 +20,23 @@ const AppHeader = ({
   return (
     <View style={styles.headerContainer}>
       {back ? (
-        <IconButton onPress={navigation.goBack} icon={'arrow-left'} size={24} />
+        <IconButton
+          style={{ marginRight: -5 }}
+          onPress={navigation.goBack}
+          icon={'arrow-left'}
+          size={24}
+        />
       ) : null}
-      <Text style={[styles.headerTitle, options.headerTitleStyle]}>
-        {title as string}
-      </Text>
+      {options.headerLeft ? (
+        // @ts-ignore
+        <View style={styles.leftContainer}>{options.headerLeft()}</View>
+      ) : null}
+      {title ? (
+        <Text style={[styles.headerTitle, options.headerTitleStyle]}>
+          {title as string}
+        </Text>
+      ) : null}
+
       {options.headerRight ? (
         // @ts-ignore
         <View style={styles.rightContainer}>{options.headerRight()}</View>
@@ -49,9 +61,17 @@ const styles = StyleSheet.create({
     fontFamily: theme.regularText,
     color: theme.fileTitleColor,
     flex: 1,
+    marginLeft: 10,
   },
   rightContainer: {
     padding: 8,
+    paddingRight: 0,
+  },
+  leftContainer: {
+    padding: 8,
+    paddingLeft: 5,
+    marginRight: 10,
+    marginTop: 3,
   },
 });
 

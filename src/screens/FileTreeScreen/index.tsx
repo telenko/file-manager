@@ -21,9 +21,9 @@ import ActionButton from '../../common/components/ActionButton';
 import MultiSelectActions from './MultiSelectActions';
 import { useBackAction } from '../../common/hooks/useBackAction';
 import { useExceptionHandler } from '../../common/components/ExceptionHandler';
-import DefaultFolderActions from '../../widgets/FileManager/DefaultFolderActions';
+import DefaultFolderActions from '../../widgets/FileManager/actions/DefaultFolderActions';
 import StorageSelect from './StorageSelect';
-import { ActivityIndicator } from 'react-native-paper';
+import { ActivityIndicator, Text } from 'react-native-paper';
 import DirectoryGridItemView from './DirectoryGridItemView';
 import SelectorAction from './SelectorAction';
 import {
@@ -31,6 +31,7 @@ import {
   GRID_HEIGHT,
   LIST_HEIGHT,
 } from '../../common/utils/layout';
+import { useStoreLatestFolder } from '../../widgets/FileManager/settings';
 
 export type FileScreenProps = {
   route: {
@@ -68,6 +69,7 @@ const FileScreen: React.FC<FileScreenProps> = ({
   const fileManager = useFileManager();
   const isMultiSelectActivated = selectedPaths.length > 0;
   const isStorageLevel = fileManager.roots.map(r => r.path).includes(route);
+  const { saveLatestFolder } = useStoreLatestFolder();
   const hasFiles = useMemo(
     () => dirItems.some(dirIt => dirIt.isFile()),
     [dirItems],
@@ -87,13 +89,17 @@ const FileScreen: React.FC<FileScreenProps> = ({
           break;
         }
         default: {
-          title = isStorageLevel ? t('title') : '';
+          title = '';
           break;
         }
       }
     }
     navigator.setOptions({
       headerTitle: title,
+      headerLeft:
+        isStorageLevel && !isMultiSelectActivated
+          ? () => <StorageSelect route={route ?? ''} />
+          : undefined,
       headerRight: () =>
         fileManager.longOperation ? (
           <View style={{ marginRight: 10 }}>
@@ -174,6 +180,9 @@ const FileScreen: React.FC<FileScreenProps> = ({
     setSelectedPaths([]);
     reloadDir();
     Cache.clearVideoPreviews();
+    if (route) {
+      saveLatestFolder(route);
+    }
     return () => {
       Cache.clearDirItems();
       setDirLoadingDone(false);
@@ -236,9 +245,12 @@ const FileScreen: React.FC<FileScreenProps> = ({
   return (
     <FileTreeContext.Provider value={value}>
       <View style={styles.container}>
-        <View style={styles.breadCrumbsContainer}>
-          {isStorageLevel ? <StorageSelect /> : <FilePathBreadCrumb />}
-        </View>
+        {!isStorageLevel ? (
+          <View style={styles.breadCrumbsContainer}>
+            <FilePathBreadCrumb />
+          </View>
+        ) : null}
+
         {sortedDirItems.length === 0 ? (
           <ScrollView
             contentContainerStyle={{
@@ -258,6 +270,13 @@ const FileScreen: React.FC<FileScreenProps> = ({
             dataProvider={dataProvider}
             layoutProvider={layoutProvider}
             rowRenderer={rowRenderer}
+            style={
+              fileManager.layout === 'grid'
+                ? {
+                    marginTop: -5,
+                  }
+                : {}
+            }
             optimizeForInsertDeleteAnimations
             refreshControl={
               <RefreshControl refreshing={dirLoading} onRefresh={reloadDir} />

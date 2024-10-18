@@ -7,11 +7,11 @@ import {
   Text,
   TextInput,
 } from 'react-native-paper';
-import { useFileManager } from './FileManagerContext';
-import { FileApi } from '../../services/FileApi';
+import { useFileManager } from '../FileManagerContext';
+import { FileApi } from '../../../services/FileApi';
 import { useTranslation } from 'react-i18next';
-import { useExceptionHandler } from '../../common/components/ExceptionHandler';
-import { useItemExists } from './useItemExists';
+import { useExceptionHandler } from '../../../common/components/ExceptionHandler';
+import { useItemExists } from '../useItemExists';
 
 const CreateDirectoryDialog: React.FC = () => {
   const fileManager = useFileManager();

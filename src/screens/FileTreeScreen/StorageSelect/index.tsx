@@ -1,6 +1,6 @@
 import React from 'react';
 import { useState } from 'react';
-import { useFileTreeContext } from '../FileTreeContext';
+import { FileTreeContextType } from '../FileTreeContext';
 import {
   Icon,
   List,
@@ -12,18 +12,17 @@ import {
 import { FileApi } from '../../../services/FileApi';
 import { useFileManager } from '../../../widgets/FileManager';
 import { useNavigation } from '../../../common/hooks/useNavigation';
-import { TouchableOpacity, View } from 'react-native';
+import { TouchableOpacity, useWindowDimensions, View } from 'react-native';
 import { theme } from '../../../theme';
 
-const StorageSelect: React.FC = () => {
-  const fileScreen = useFileTreeContext();
+const StorageSelect: React.FC<{ route: string }> = ({ route }) => {
   const fileManager = useFileManager();
   const [open, setOpen] = useState(false);
   const navigator = useNavigation();
+  const { width } = useWindowDimensions();
 
   const matchingRoot =
-    fileManager.roots.find(r => fileScreen.route.includes(r.path)) ??
-    fileManager.roots[0];
+    fileManager.roots.find(r => route.includes(r.path)) ?? fileManager.roots[0];
   return (
     <Menu
       onDismiss={() => setOpen(false)}
@@ -36,8 +35,10 @@ const StorageSelect: React.FC = () => {
             flexDirection: 'row',
             backgroundColor: theme.filePathColor,
             alignItems: 'center',
-            paddingVertical: 10,
+            paddingVertical: 5,
             paddingHorizontal: 10,
+            height: 35,
+            maxWidth: width / 2,
           }}
           onPress={() => setOpen(true)}>
           <View style={{ marginRight: 5 }}>

@@ -6,11 +6,11 @@ import {
   Portal,
   Text,
 } from 'react-native-paper';
-import { useFileManager } from './FileManagerContext';
+import { useFileManager } from '../FileManagerContext';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
-import { theme } from '../../theme';
-import { FileApi } from '../../services/FileApi';
+import { theme } from '../../../theme';
+import { FileApi } from '../../../services/FileApi';
 
 const styles = StyleSheet.create({
   text: {

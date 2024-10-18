@@ -5,7 +5,6 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NavigationContainer, NavigationProp } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import FileTreeScreen from '../../screens/FileTreeScreen';
@@ -17,85 +16,22 @@ import {
   FileLongOperationType,
   FileManagerContext,
   FileManagerContextType,
-  FileManagerLayout,
 } from './FileManagerContext';
 import { FileGuiHelper, getRouteDirectory } from './FileGuiHelper';
-import RenameContentDialog from './RenameContentDialog';
-import CreateDirectoryDialog from './CreateDirectoryDialog';
-import FileDetailsDialog from './FileDetailsDialog';
-import DefaultFolderActions from './DefaultFolderActions';
+import RenameContentDialog from './dialogs/RenameContentDialog';
+import CreateDirectoryDialog from './dialogs/CreateDirectoryDialog';
+import FileDetailsDialog from './dialogs/FileDetailsDialog';
+import DefaultFolderActions from './actions/DefaultFolderActions';
 import AppHeader from '../../common/components/AppHeader';
-import LongOperationDialog from './LongOperationDialog';
+import LongOperationDialog from './dialogs/LongOperationDialog';
 import { useSnackbar } from 'react-native-paper-snackbar-stack';
 import { ActivityIndicator } from 'react-native-paper';
 import { useFsRoots } from './useFsRoots';
+import { useLayout, useSort, useStoreLatestFolder } from './settings';
+import SettingsDialog from './dialogs/SettingsDialog';
+import { useInitialState } from './useInitialState';
 
 const SNACK_DEFAULT_DURATION_MS = 4000;
-
-const useSort = (): ['asc' | 'desc', () => void] => {
-  const SORT_STORAGE_KEY = '__sort_direction__';
-  const getSortDirection = async () => {
-    try {
-      const readValue = await AsyncStorage.getItem(SORT_STORAGE_KEY);
-      return readValue === 'asc' ? 'asc' : 'desc';
-    } catch {
-      return 'asc';
-    }
-  };
-  const setSortDirection = (s: 'asc' | 'desc') => {
-    try {
-      AsyncStorage.setItem(SORT_STORAGE_KEY, s);
-    } catch {}
-  };
-  const [sort, setSort] = useState<'asc' | 'desc'>('asc');
-  const sortRead = useRef(false);
-  useEffect(() => {
-    (async () => {
-      setSort(await getSortDirection());
-      sortRead.current = true;
-    })();
-  }, []);
-  useEffect(() => {
-    if (!sortRead.current) {
-      return;
-    }
-    setSortDirection(sort);
-  }, [sort]);
-  const toggleSort = () => setSort(sort === 'asc' ? 'desc' : 'asc');
-  return [sort, toggleSort];
-};
-
-const useLayout = (): [FileManagerLayout, (v: FileManagerLayout) => void] => {
-  const LAYOUT_STORAGE_KEY = '__layout_type__';
-  const getLayoutStore = async () => {
-    try {
-      const readValue = await AsyncStorage.getItem(LAYOUT_STORAGE_KEY);
-      return readValue === 'grid' ? 'grid' : 'list';
-    } catch {
-      return 'list';
-    }
-  };
-  const setLayoutStore = (s: FileManagerLayout) => {
-    try {
-      AsyncStorage.setItem(LAYOUT_STORAGE_KEY, s);
-    } catch {}
-  };
-  const [layout, setLayout] = useState<FileManagerLayout>('list');
-  const layoutRead = useRef(false);
-  useEffect(() => {
-    (async () => {
-      setLayout(await getLayoutStore());
-      layoutRead.current = true;
-    })();
-  }, []);
-  useEffect(() => {
-    if (!layoutRead.current) {
-      return;
-    }
-    setLayoutStore(layout);
-  }, [layout]);
-  return [layout, setLayout];
-};
 
 const Stack = createNativeStackNavigator<FileManagerNavigation>();
 export default function FileManager() {
@@ -105,6 +41,7 @@ export default function FileManager() {
   const [renameDialogActive, setRenameDialogActive] = useState<DirItem | null>(
     null,
   );
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [newDirName, setNewDirName] = useState<string>('');
   const [newDirPath, setNewDirPath] = useState<string | null>(null);
   const [fileDetails, setFileDetails] = useState<DirItem | null>(null);
@@ -113,7 +50,9 @@ export default function FileManager() {
   const hasLongOperationVisibleRef = useRef(false);
   const [sort, toggleSort] = useSort();
   const [layout, setLayout] = useLayout();
+  const { setStoreLatestFolder, storeLatestFolder } = useStoreLatestFolder();
   const { refresh: refreshRoots, rootsReady, roots } = useFsRoots();
+  const { state, ready: stateReady } = useInitialState(roots, rootsReady);
 
   const createDirectory = useCallback(
     (navigation: NavigationProp<FileManagerNavigation>) => {
@@ -250,6 +189,10 @@ export default function FileManager() {
       toggleSort,
       layout,
       setLayout,
+      settingsOpen,
+      setSettingsOpen,
+      storeLatestFolder,
+      setStoreLatestFolder,
     }),
     [
       reloadRequired,
@@ -262,6 +205,8 @@ export default function FileManager() {
       rootsReady,
       sort,
       layout,
+      settingsOpen,
+      storeLatestFolder,
     ],
   );
 
@@ -273,7 +218,7 @@ export default function FileManager() {
     refreshRoots();
   }, []);
 
-  if (!rootsReady) {
+  if (!rootsReady || !stateReady) {
     return <ActivityIndicator size={24} />;
   }
 
@@ -282,7 +227,8 @@ export default function FileManager() {
       <RenameContentDialog />
       <CreateDirectoryDialog />
       <FileDetailsDialog />
-      <NavigationContainer>
+      <SettingsDialog />
+      <NavigationContainer initialState={state}>
         <LongOperationDialog />
         <Stack.Navigator
           screenOptions={{
@@ -300,10 +246,10 @@ export default function FileManager() {
             }}
             // @ts-ignore
             component={FileTreeScreen}
-            initialParams={{
-              // @ts-ignore
-              route: FileApi.ROOT_PATH,
-            }}
+            // initialParams={{
+            //   // @ts-ignore
+            //   route: FileApi.ROOT_PATH,
+            // }}
           />
           <Stack.Screen
             name="ImageViewer"

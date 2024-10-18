@@ -14,6 +14,8 @@ export type FileManagerLayout = 'list' | 'grid';
 export type FileManagerContextType = {
   sort: 'asc' | 'desc';
   layout: FileManagerLayout;
+  storeLatestFolder: boolean;
+  setStoreLatestFolder: (v: boolean) => void;
   setLayout: (v: FileManagerLayout) => void;
   toggleSort: () => void;
   reloadRequired?: boolean;
@@ -28,6 +30,8 @@ export type FileManagerContextType = {
   createDirectory: (navigator: NavigationProp<FileManagerNavigation>) => void;
   newDirName?: string;
   newDirPath?: string | null;
+  settingsOpen: boolean;
+  setSettingsOpen: (v: boolean) => void;
   setNewDirName: (v: string) => void;
   setNewDirPath: (v: string | null) => void;
 
@@ -57,6 +61,8 @@ export const useFileManager = (): FileManagerContextType => {
 export const FileManagerContext = React.createContext<FileManagerContextType>({
   sort: 'asc',
   layout: 'list',
+  storeLatestFolder: false,
+  setStoreLatestFolder: () => {},
   setLayout: () => {},
   toggleSort: () => {},
   reloadRequired: false,
@@ -65,6 +71,8 @@ export const FileManagerContext = React.createContext<FileManagerContextType>({
   rootsReady: false,
 
   renameContent: () => {},
+  settingsOpen: false,
+  setSettingsOpen: () => {},
   setRenameDialogActive: () => {},
   createDirectory: () => {},
   setNewDirName: () => {},

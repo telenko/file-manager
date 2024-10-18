@@ -1,8 +1,8 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { ToggleButton } from 'react-native-paper';
-import { useFileManager } from './FileManagerContext';
-import { theme } from '../../theme';
+import { useFileManager } from '../FileManagerContext';
+import { theme } from '../../../theme';
 
 const LayoutButton = () => {
   const fileManager = useFileManager();

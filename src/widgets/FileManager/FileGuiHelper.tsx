@@ -8,7 +8,7 @@ import { getGlobalExceptionHandler } from '../../common/components/ExceptionHand
 export const getRouteMetadatas = (
   navigator: NavigationProp<FileManagerNavigation>,
 ): any => {
-  const { routes, index } = navigator.getState() ?? {};
+  const { routes = [], index = 0 } = navigator.getState() ?? {};
   const currentRoute = routes[index];
   const { route, ...routeMetadatas } = currentRoute?.params ?? {};
   return routeMetadatas;
@@ -24,7 +24,10 @@ export const getRouteDirectory = (
 };
 
 export const FileGuiHelper = {
-  deleteContent: (files: DirItem[], onDeleteStart?: () => void): Promise<boolean> => {
+  deleteContent: (
+    files: DirItem[],
+    onDeleteStart?: () => void,
+  ): Promise<boolean> => {
     let resolved = false;
     return new Promise((resolve, reject) => {
       Alert.alert(
