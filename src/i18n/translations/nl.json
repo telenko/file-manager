@@ -59,5 +59,10 @@
     "deleteIsDone": "Verwijderen voltooid",
     "nameAlreadyExists": "Naam bestaat al",
     
-     "more": "Meer"
+     "more": "Meer",
+
+     "settings": "Instellingen",
+    "storeLatestFolder": "Onthoud laatste map",
+    "storeLatestFolderInfo": "Als je wilt, kunnen we de laatste map die je hebt geopend onthouden. De volgende keer dat je de app gebruikt, wordt die map automatisch opnieuw geopend.",
+    "checkForUpdates": "Controleer op updates"
 }

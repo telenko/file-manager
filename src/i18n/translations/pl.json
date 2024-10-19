@@ -59,5 +59,10 @@
     "deleteIsDone": "Usuwanie zakończone",
     "nameAlreadyExists": "Nazwa już istnieje",
 
-     "more": "Więcej"
+     "more": "Więcej",
+
+     "settings": "Ustawienia",
+    "storeLatestFolder": "Zapamiętaj ostatni folder",
+    "storeLatestFolderInfo": "Jeśli chcesz, możemy zapamiętać ostatni otwarty folder. Przy następnym uruchomieniu aplikacji folder zostanie automatycznie otwarty.",
+    "checkForUpdates": "Sprawdź aktualizacje"
 }

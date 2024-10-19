@@ -59,5 +59,10 @@
     "deleteIsDone": "Exclusão concluída",
     "nameAlreadyExists": "O nome já existe",
 
-    "more": "Mais"
+    "more": "Mais",
+
+    "settings": "Configurações",
+    "storeLatestFolder": "Lembrar da última pasta",
+    "storeLatestFolderInfo": "Se desejar, podemos lembrar da última pasta que você abriu. Na próxima vez que usar o aplicativo, essa pasta será aberta automaticamente.",
+    "checkForUpdates": "Verificar atualizações"
 }

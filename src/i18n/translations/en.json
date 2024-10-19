@@ -63,6 +63,6 @@
 
     "settings": "Settings",
     "storeLatestFolder": "Remember latest folder",
-    "storeLatestFolderInfo": "If you want, we can remember latest open folder for you. Next time, app will auto pre-open latest used folder",
+    "storeLatestFolderInfo": "If you wish, we can remember the last folder you opened. The next time you use the app, it will automatically reopen that folder for you.",
     "checkForUpdates": "Check for updates"
 }

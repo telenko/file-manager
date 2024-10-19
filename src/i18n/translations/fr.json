@@ -59,5 +59,10 @@
     "deleteIsDone": "Suppression terminée",
     "nameAlreadyExists": "Le nom existe déjà",
 
-    "more": "Plus"
+    "more": "Plus",
+
+    "settings": "Paramètres",
+    "storeLatestFolder": "Se souvenir du dernier dossier",
+    "storeLatestFolderInfo": "Si vous le souhaitez, nous pouvons mémoriser le dernier dossier que vous avez ouvert. La prochaine fois que vous utilisez l'application, ce dossier s'ouvrira automatiquement.",
+    "checkForUpdates": "Vérifier les mises à jour"
 }

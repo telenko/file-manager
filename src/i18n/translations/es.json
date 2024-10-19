@@ -60,5 +60,10 @@
     "deleteIsDone": "Eliminación completada",
     "nameAlreadyExists": "El nombre ya existe",
 
-    "more": "Más"
+    "more": "Más",
+
+    "settings": "Configuración",
+    "storeLatestFolder": "Recordar última carpeta",
+    "storeLatestFolderInfo": "Si lo deseas, podemos recordar la última carpeta que abriste. La próxima vez que uses la app, se abrirá automáticamente esa carpeta.",
+    "checkForUpdates": "Buscar actualizaciones"
 }

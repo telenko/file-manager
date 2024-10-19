@@ -59,5 +59,10 @@
     "deleteIsDone": "Silme tamamlandı",
     "nameAlreadyExists": "İsim zaten var",
 
-    "more": "Daha fazla"
+    "more": "Daha fazla",
+
+    "settings": "Ayarlar",
+    "storeLatestFolder": "Son klasörü hatırla",
+    "storeLatestFolderInfo": "İsterseniz, en son açtığınız klasörü hatırlayabiliriz. Uygulamayı bir sonraki kullanışınızda, o klasör otomatik olarak açılacaktır.",
+    "checkForUpdates": "Güncellemeleri kontrol et"
 }
