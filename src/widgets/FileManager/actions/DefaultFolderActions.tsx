@@ -5,13 +5,16 @@ import NewFolderIcon from './NewFolderIcon';
 import LayoutButton from './LayoutButton';
 import SettingsButton from './SettingsButton';
 
-const DefaultFolderActions = (props: { folderHasFiles?: boolean }) => {
+const DefaultFolderActions = (props: {
+  folderHasFiles?: boolean;
+  isOperational?: boolean;
+}) => {
   return (
     <View style={{ flexDirection: 'row' }}>
       {!!props.folderHasFiles ? <SortButton /> : null}
       <LayoutButton />
       <NewFolderIcon />
-      <SettingsButton />
+      {!props.isOperational ? <SettingsButton /> : null}
     </View>
   );
 };

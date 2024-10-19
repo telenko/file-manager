@@ -27,14 +27,14 @@ const AppHeader = ({
           size={24}
         />
       ) : null}
-      {options.headerLeft ? (
-        // @ts-ignore
-        <View style={styles.leftContainer}>{options.headerLeft()}</View>
-      ) : null}
       {title ? (
         <Text style={[styles.headerTitle, options.headerTitleStyle]}>
           {title as string}
         </Text>
+      ) : null}
+      {options.headerLeft ? (
+        // @ts-ignore
+        <View style={styles.leftContainer}>{options.headerLeft()}</View>
       ) : null}
 
       {options.headerRight ? (
@@ -56,6 +56,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 5,
     marginBottom: 3,
   },
+  // @TODO Andrii think on copy/move title
   headerTitle: {
     fontSize: theme.sizes.HEADER_TITLE_FONT,
     fontFamily: theme.regularText,

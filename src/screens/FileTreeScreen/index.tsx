@@ -32,6 +32,7 @@ import {
   LIST_HEIGHT,
 } from '../../common/utils/layout';
 import { useStoreLatestFolder } from '../../widgets/FileManager/settings';
+import { useFocusEffect } from '@react-navigation/native';
 
 export type FileScreenProps = {
   route: {
@@ -74,6 +75,7 @@ const FileScreen: React.FC<FileScreenProps> = ({
     () => dirItems.some(dirIt => dirIt.isFile()),
     [dirItems],
   );
+  const isOperational = ['copy', 'move'].includes(routeMetadatas.mode || '');
   useEffect(() => {
     let title = '';
     if (isMultiSelectActivated) {
@@ -97,7 +99,7 @@ const FileScreen: React.FC<FileScreenProps> = ({
     navigator.setOptions({
       headerTitle: title,
       headerLeft:
-        isStorageLevel && !isMultiSelectActivated
+        isStorageLevel && !isMultiSelectActivated && !isOperational
           ? () => <StorageSelect route={route ?? ''} />
           : undefined,
       headerRight: () =>
@@ -113,7 +115,10 @@ const FileScreen: React.FC<FileScreenProps> = ({
             setSelectedPaths={setSelectedPathsExternal}
           />
         ) : (
-          <DefaultFolderActions folderHasFiles={hasFiles} />
+          <DefaultFolderActions
+            folderHasFiles={hasFiles}
+            isOperational={isOperational}
+          />
         ),
     });
   }, [
@@ -180,9 +185,6 @@ const FileScreen: React.FC<FileScreenProps> = ({
     setSelectedPaths([]);
     reloadDir();
     Cache.clearVideoPreviews();
-    if (route) {
-      saveLatestFolder(route);
-    }
     return () => {
       Cache.clearDirItems();
       setDirLoadingDone(false);
@@ -190,6 +192,14 @@ const FileScreen: React.FC<FileScreenProps> = ({
       setSelectedPaths([]);
     };
   }, [route, reloadDir]);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (route && !isOperational) {
+        saveLatestFolder(route);
+      }
+    }, []),
+  );
 
   const backHandle = useCallback(() => {
     if (selectedPaths.length > 0) {
@@ -248,6 +258,11 @@ const FileScreen: React.FC<FileScreenProps> = ({
         {!isStorageLevel ? (
           <View style={styles.breadCrumbsContainer}>
             <FilePathBreadCrumb />
+          </View>
+        ) : null}
+        {isOperational && !isMultiSelectActivated && isStorageLevel ? (
+          <View style={{ marginLeft: 10 }}>
+            <StorageSelect route={route || ''} />
           </View>
         ) : null}
 

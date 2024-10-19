@@ -1,7 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { FileManagerLayout } from '../FileManagerContext';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { FileApi } from '../../../services/FileApi';
 
 export const useSort = (): ['asc' | 'desc', () => void] => {
   const SORT_STORAGE_KEY = '__sort_direction__';
@@ -117,9 +116,7 @@ export const useStoreLatestFolder = () => {
     try {
       const readValue = await AsyncStorage.getItem(STORE_FOLDER_PATH_KEY);
       if (typeof readValue === 'string') {
-        if (await FileApi.exists(readValue)) {
-          return readValue;
-        }
+        return readValue;
       }
       return '';
     } catch {

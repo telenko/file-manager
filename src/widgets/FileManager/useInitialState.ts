@@ -30,7 +30,16 @@ const makeStateFromPath = async (
     }
     const [, relativePath] = path.split(matchingRoot.path);
     if (!relativePath) {
-      return getDefaultState();
+      return {
+        routes: [
+          {
+            name: 'FileTree',
+            params: {
+              route: matchingRoot.path,
+            },
+          },
+        ],
+      };
     }
     const dirs = relativePath.split('/').filter(p => !!p);
     let aggregatedPath = matchingRoot.path;
@@ -56,6 +65,7 @@ const makeStateFromPath = async (
       routes,
     };
   } catch (e) {
+    console.error(e);
     return getDefaultState();
   }
 };
