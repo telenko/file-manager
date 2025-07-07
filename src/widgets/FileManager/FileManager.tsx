@@ -32,6 +32,7 @@ import SettingsDialog from './dialogs/SettingsDialog';
 import { useInitialState } from './useInitialState';
 import { theme } from '../../theme';
 import { View } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const SNACK_DEFAULT_DURATION_MS = 4000;
 
@@ -39,6 +40,7 @@ const Stack = createNativeStackNavigator<FileManagerNavigation>();
 export default function FileManager() {
   const { t } = useTranslation();
   const { enqueueSnackbar } = useSnackbar();
+  const insets = useSafeAreaInsets();
   const [reloadRequired, setReloadRequired] = useState(false);
   const [renameDialogActive, setRenameDialogActive] = useState<DirItem | null>(
     null,
@@ -250,7 +252,10 @@ export default function FileManager() {
             header: props => <AppHeader {...props} />,
             contentStyle: {
               backgroundColor: '#fff',
-              marginTop: -10,
+              marginTop: insets.top,
+              marginLeft: insets.left,
+              marginRight: insets.right,
+              marginBottom: insets.bottom 
             },
           }}>
           <Stack.Screen

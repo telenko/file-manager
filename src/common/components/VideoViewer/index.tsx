@@ -1,35 +1,36 @@
 import React, { useEffect, useState } from 'react';
 // @ts-ignore
-import Video from 'react-native-video-controls';
+// import Video from 'react-native-video-controls';
+import Video, { ViewType } from 'react-native-video'
 import { DirItem, FileApi } from '../../../services/FileApi';
 import { ImageBackground, View } from 'react-native';
 import { IconButton, Portal } from 'react-native-paper';
 import { Cache } from '../../../services/Cache';
-class CustomizedVideo extends Video {
-  renderTopControls() {
-    return null;
-  }
-  renderBottomControls() {
-    // @ts-ignore
-    if (this.props.paused) {
-      return null;
-    }
-    return (
-      <Portal>
-        <View
-          style={{
-            position: 'absolute',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            backgroundColor: 'rgba(120,120,120,0.5)',
-          }}>
-          {super.renderBottomControls()}
-        </View>
-      </Portal>
-    );
-  }
-}
+// class CustomizedVideo extends Video {
+//   renderTopControls() {
+//     return null;
+//   }
+//   renderBottomControls() {
+//     // @ts-ignore
+//     if (this.props.paused) {
+//       return null;
+//     }
+//     return (
+//       <Portal>
+//         <View
+//           style={{
+//             position: 'absolute',
+//             bottom: 0,
+//             left: 0,
+//             right: 0,
+//             backgroundColor: 'rgba(120,120,120,0.5)',
+//           }}>
+//           {super.renderBottomControls()}
+//         </View>
+//       </Portal>
+//     );
+//   }
+// }
 
 const VideoViewer: React.FC<{
   file: Partial<DirItem>;
@@ -105,26 +106,49 @@ const VideoViewer: React.FC<{
     </View>
   );
 
+  return <View style={{
+            flex: 1,
+            width: '100%',
+            height: '100%',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}>
+            <Video controls
+              source={{ uri: `file://${file.path}` }}
+              style={{ width: '100%', aspectRatio: 16 / 9 }}
+              resizeMode='contain'
+              poster={{
+                source: { uri: preview ?? undefined },
+                resizeMode: "contain",
+              }}
+            />
+          </View>
+
   return (
     <>
       {isCurrentViewable ? (
         <>
           {/* @ts-ignore */}
-          <CustomizedVideo
-            disableFullscreen
-            disableBack
-            disableVolume
-            onPause={() => setPaused(true)}
-            onPlay={() => {
-              setPaused(false);
-            }}
-            showHours
+          <Video
+            // disableFullscreen
+            // disableBack
+            // disableVolume
+            controls
+            // onPause={() => setPaused(true)}
+            // onPlay={() => {
+            //   setPaused(false);
+            // }}
+            // showHours
             paused={paused}
             source={{ uri: `file://${file.path}` }}
-            videoStyle={{ backgroundColor: '#fff' }}
-            containerStyle={{ backgroundColor: '#fff' }}
-            style={{ width: '100%', height: '100%' }}
-            resizeMode="contain"
+            // videoStyle={{ backgroundColor: '#fff' }}
+            // containerStyle={{ backgroundColor: '#fff' }}
+            // style={{ width: '100%', height: '100%' }}
+            resizeMode='contain'
+            poster={{
+              source: { uri: preview ?? undefined },
+              resizeMode: "contain",
+            }}
           />
           {wasPlayed ? (
             paused ? (

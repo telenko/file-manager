@@ -5,10 +5,10 @@ import { BackHandler } from 'react-native';
 export const useBackAction = (callback: () => boolean) => {
   useFocusEffect(
     useCallback(() => {
-      BackHandler.addEventListener('hardwareBackPress', callback);
+      const subscription = BackHandler.addEventListener('hardwareBackPress', callback);
 
       return () =>
-        BackHandler.removeEventListener('hardwareBackPress', callback);
+        subscription.remove()
     }, [callback]),
   );
 };
