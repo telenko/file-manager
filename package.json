@@ -37,7 +37,6 @@
     "react-native-share": "10.2.1",
     "react-native-vector-icons": "10.1.0",
     "react-native-video": "6.16.0",
-    "react-native-video-controls": "^2.8.1",
     "recyclerlistview": "4.2.3"
   },
   "devDependencies": {
