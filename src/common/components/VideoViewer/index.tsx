@@ -13,6 +13,14 @@ const VideoViewer: React.FC<{
   const [preview, setPreview] = useState<string | null>('');
   const [videoSize, setVideoSize] = useState({ width: 0, height: 0 });
   const { width, height } = useWindowDimensions();
+  const isCurrentViewable = activeFile?.path === file.path;
+  const [paused, setPaused] = useState(true);
+
+  useEffect(() => {
+    if (!isCurrentViewable) {
+      setPaused(true);
+    }
+  }, [isCurrentViewable]);
 
   useEffect(() => {
     if (!file.path) {
@@ -64,7 +72,11 @@ const VideoViewer: React.FC<{
         source: { uri: preview ?? undefined },
         resizeMode: "contain",
       }}
-      paused
+      paused={paused}
+      onPlaybackRateChange={(e) => {
+        const isPlaying = e.playbackRate > 0;
+        setPaused(!isPlaying);
+      }}
     />
   </View>
 
