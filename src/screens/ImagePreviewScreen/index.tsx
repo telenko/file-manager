@@ -88,6 +88,7 @@ const ImagePreviewScreen: React.FC<ImageViewerScreenProps> = ({
         : {},
     });
   }, [showActions, isLandscape]);
+
   useEffect(() => {
     return () => {
       navigation.setOptions({

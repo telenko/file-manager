@@ -33,6 +33,12 @@ export default function SimpleGallery<T>({
       ? items.findIndex(i => getItemKey(i) === selectedItemKey)
       : 0,
   );
+  useEffect(() => {
+    sharedIndex.value = selectedItemKey
+      ? items.findIndex(i => getItemKey(i) === selectedItemKey)
+      : 0;
+    setIdx(sharedIndex.value);
+  }, [items, selectedItemKey]);
   const [idx, setIdx] = useState(sharedIndex.value);
   const translateX = useSharedValue(0);
   const isSwiping = useSharedValue(false);
