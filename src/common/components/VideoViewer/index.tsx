@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import Video from 'react-native-video'
+import Video, { ViewType } from 'react-native-video';
 import { DirItem, FileApi } from '../../../services/FileApi';
 import { useWindowDimensions, View } from 'react-native';
 import { Cache } from '../../../services/Cache';
@@ -33,7 +33,7 @@ const VideoViewer: React.FC<{
       // @ts-ignore
       FileApi.makeVideoPreview(file)
         .then(setPreview)
-        .catch(() => { });
+        .catch(() => {});
     }
   }, [file?.path]);
 
@@ -49,37 +49,48 @@ const VideoViewer: React.FC<{
     style.width = hasRatio ? '100%' : 0;
   }
 
-  return <View style={{
-    flex: 1,
-    width: '100%',
-    height: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
-  }}>
-    {!hasRatio ? <LoadingIndicator size={100} /> : null}
-    <Video
-      controls
-      source={{ uri: `file://${file.path}` }}
-      style={style}
-      resizeMode='contain'
-      onLoad={(data) => {
-        const { width, height } = data.naturalSize;
-        if (width && height) {
-          setVideoSize({ width, height });
-        }
-      }}
-      poster={{
-        source: { uri: preview ?? undefined },
-        resizeMode: "contain",
-      }}
-      paused={paused}
-      onPlaybackRateChange={(e) => {
-        const isPlaying = e.playbackRate > 0;
-        setPaused(!isPlaying);
-      }}
-    />
-  </View>
-
+  return (
+    <View
+      style={{
+        flex: 1,
+        width: '100%',
+        height: '100%',
+        justifyContent: 'center',
+        alignItems: 'center',
+      }}>
+      {!hasRatio ? <LoadingIndicator size={100} /> : null}
+      <Video
+        controls
+        source={{
+          uri: `file://${file.path}`,
+          bufferConfig: {
+            minBufferMs: 15000,
+            maxBufferMs: 30000,
+            bufferForPlaybackMs: 2500,
+            bufferForPlaybackAfterRebufferMs: 5000,
+          },
+        }}
+        style={style}
+        resizeMode="contain"
+        viewType={ViewType.SURFACE}
+        onLoad={data => {
+          const { width, height } = data.naturalSize;
+          if (width && height) {
+            setVideoSize({ width, height });
+          }
+        }}
+        poster={{
+          source: { uri: preview ?? undefined },
+          resizeMode: 'contain',
+        }}
+        paused={paused}
+        onPlaybackRateChange={e => {
+          const isPlaying = e.playbackRate > 0;
+          setPaused(!isPlaying);
+        }}
+      />
+    </View>
+  );
 };
 
 export default VideoViewer;

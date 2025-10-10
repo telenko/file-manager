@@ -1,5 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import {
+  Dimensions,
+  Pressable,
+  StyleSheet,
+  useWindowDimensions,
+} from 'react-native';
 import { DirItem, FileApi } from '../../services/FileApi';
 import { Cache } from '../../services/Cache';
 import Gallery from '../../common/components/Gallery';
@@ -10,6 +15,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFileManager } from '../../widgets/FileManager';
 import VideoViewer from '../../common/components/VideoViewer';
 import ActionButton from '../../common/components/ActionButton';
+import AppHeader from '../../common/components/AppHeader';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
+import { theme } from '../../theme';
 
 export type ImageViewerScreenProps = {
   route: { params: { route: string; sort: 'asc' | 'desc' } };
@@ -36,13 +48,81 @@ const ImagePreviewScreen: React.FC<ImageViewerScreenProps> = ({
     return null;
   }
   const navigation = useNavigation();
-  const [zooming, setZooming] = useState(false);
   const [file, setFile] = useState<DirItem | null>(null);
   const [imagesInFolderSorted, setImagesInFolderSorted] = useState<DirItem[]>(
     [],
   );
+  const { width, height } = useWindowDimensions();
+  const [isLandscape, setIsLandscape] = useState(width > height);
+  useEffect(() => {
+    const sub = Dimensions.addEventListener('change', ({ window }) => {
+      // LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+      setIsLandscape(window.width > window.height);
+    });
+    return () => sub?.remove();
+  }, []);
+  const [showActions, setShowActions] = useState(true);
+  useEffect(() => {
+    if (isLandscape) {
+      setShowActions(false);
+    } else {
+      setShowActions(true);
+    }
+  }, [isLandscape]);
+
+  useEffect(() => {
+    navigation.setOptions({
+      header: (props: any) => (
+        <Animated.View style={[{ flex: 1 }, animatedHeaderStyle]}>
+          <AppHeader
+            {...props}
+            style={[isLandscape ? styles.headerAbsolute : null]}
+            headerBackColor={isLandscape ? theme.negativeColor : undefined}
+          />
+        </Animated.View>
+      ),
+      headerTitleStyle: isLandscape
+        ? {
+            color: theme.negativeColor,
+          }
+        : {},
+    });
+  }, [showActions, isLandscape]);
+  useEffect(() => {
+    return () => {
+      navigation.setOptions({
+        header: (props: any) => <AppHeader {...props} />,
+        headerTitleStyle: null,
+      });
+    };
+  }, []);
   const { t } = useTranslation();
   const fileManager = useFileManager();
+  const opacity = useSharedValue(1);
+
+  useEffect(() => {
+    opacity.value = withTiming(showActions ? 1 : 0, { duration: 200 });
+  }, [showActions]);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+    transform: [
+      {
+        translateY: withTiming(showActions ? 0 : isLandscape ? 80 : 50, {
+          duration: 250,
+        }),
+      },
+    ],
+  }));
+
+  const animatedHeaderStyle = useAnimatedStyle(() => {
+    const translateY = withTiming(showActions ? 0 : -80, { duration: 250 });
+
+    return {
+      opacity: withTiming(showActions ? 1 : 0, { duration: 250 }),
+      transform: [{ translateY }],
+    };
+  });
 
   useEffect(() => {
     const timeLocalized = file?.mtime
@@ -140,48 +220,54 @@ const ImagePreviewScreen: React.FC<ImageViewerScreenProps> = ({
 
   return (
     <SafeAreaView style={[styles.container, { flex: 1 }]}>
-      <View style={{ flex: 1 }}>
+      <Pressable
+        style={{ flex: 1 }}
+        onPress={() => {
+          if (isLandscape) {
+            setShowActions(p => !p);
+          }
+        }}>
         {imagesCarousel.length > 0 ? (
           <Gallery
             items={imagesCarousel}
             getItemKey={it => it.path}
             renderItem={image => (
-              <ItemPreview
-                file={image}
-                onActive={setZooming}
-                activeFile={file ?? undefined}
-              />
+              <ItemPreview file={image} activeFile={file ?? undefined} />
             )}
             selectedItemKey={route}
             onItemOpen={setFile}
-            disableScrolling={zooming}
           />
         ) : (
           <ItemPreview
-            onActive={setZooming}
             file={{
               path: route,
             }}
           />
         )}
-      </View>
-      <View
-        style={{
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-        }}>
-        {actions.map(action => {
-          return (
-            <ActionButton
-              key={action.text}
-              icon={action.icon}
-              onPress={action.onPress}
-              text={action.text}
-            />
-          );
-        })}
-      </View>
+      </Pressable>
+      {showActions ? (
+        <Animated.View
+          style={[
+            styles.overlayStatic,
+            isLandscape ? styles.overlayAbsolute : {},
+            animatedStyle,
+          ]}>
+          {actions.map(action => {
+            return (
+              <ActionButton
+                key={action.text}
+                icon={action.icon}
+                onPress={action.onPress}
+                text={action.text}
+                iconColor={isLandscape ? theme.negativeColor : undefined}
+                textStyle={
+                  isLandscape ? { color: theme.negativeColor } : undefined
+                }
+              />
+            );
+          })}
+        </Animated.View>
+      ) : null}
     </SafeAreaView>
   );
 };
@@ -189,6 +275,27 @@ const ImagePreviewScreen: React.FC<ImageViewerScreenProps> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  overlayStatic: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  overlayAbsolute: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    color: 'white',
+    backgroundColor: 'rgba(0,0,0,0.5)', // напівпрозорий фон для контрасту
+  },
+  headerAbsolute: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    color: 'white',
+    backgroundColor: 'rgba(0,0,0,0.5)', // напівпрозорий фон для контрасту
   },
 });
 

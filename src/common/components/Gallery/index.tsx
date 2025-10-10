@@ -1,107 +1,183 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Dimensions, View, VirtualizedList } from 'react-native';
-import { useAnimatedRef } from 'react-native-reanimated';
+import React, { useEffect, useState } from 'react';
+import { View, StyleSheet, Dimensions } from 'react-native';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  runOnJS,
+  interpolate,
+  Extrapolation,
+} from 'react-native-reanimated';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 
-function Gallery<T>({
-  getItemKey,
+type GalleryProps<T> = {
+  items: T[];
+  getItemKey: (item: T) => string;
+  renderItem: (item: T) => React.ReactNode;
+  selectedItemKey?: string;
+  onItemOpen?: (item: T) => void;
+};
+
+export default function SimpleGallery<T>({
   items,
+  getItemKey,
   renderItem,
   selectedItemKey,
   onItemOpen,
-  disableScrolling = false,
-}: {
-  items: T[];
-  renderItem: (v: T) => React.ReactNode;
-  getItemKey: (v: T) => string;
-  selectedItemKey: string;
-  onItemOpen?: (item: T) => void;
-  disableScrolling?: boolean;
-}) {
-  const [{ width }, setDimensions] = useState(Dimensions.get('window'));
-  const curIdx = useRef(0);
-  const scrollViewRef = useAnimatedRef();
+}: GalleryProps<T>) {
+  const screen = Dimensions.get('window');
 
-  const itemsRef = useRef(items);
+  // === SHARED VALUES ===
+  const sharedIndex = useSharedValue(
+    selectedItemKey
+      ? items.findIndex(i => getItemKey(i) === selectedItemKey)
+      : 0,
+  );
+  const [idx, setIdx] = useState(sharedIndex.value);
+  const translateX = useSharedValue(0);
+  const isSwiping = useSharedValue(false);
+  const itemsLengthShared = useSharedValue(items.length);
 
   useEffect(() => {
-    itemsRef.current = items;
+    itemsLengthShared.value = items.length;
   }, [items]);
-
+  const [isSwipingLoc, setSwiping] = useState(false);
   useEffect(() => {
-    const nextIndex = items.findIndex(it => getItemKey(it) === selectedItemKey);
-    curIdx.current = nextIndex;
+    onItemOpen?.(items[idx]);
+  }, [idx]);
+  const triggerRerender = () => {
     setTimeout(() => {
-      // @ts-ignore
-      scrollViewRef.current.scrollToIndex({
-        index: Math.max(nextIndex, 0),
-        animated: false,
-      });
+      setIdx(sharedIndex.value);
+      translateX.value = 0;
+      isSwiping.value = false;
+      setSwiping(false);
     }, 0);
-  }, [items, selectedItemKey]);
+  };
 
-  useEffect(() => {
-    const onChange = ({ window }: any) => {
-      setDimensions(window);
-      setTimeout(() => {
-        // @ts-ignore
-        scrollViewRef.current?.scrollToOffset({
-          offset: curIdx.current * window.width,
-          animated: false,
+  const clampIndex = (index: number) =>
+    Math.min(Math.max(index, 0), items.length - 1);
+
+  const swipeTo = (dir: 'left' | 'right') => {
+    const nextIndex =
+      dir === 'left'
+        ? clampIndex(sharedIndex.value + 1)
+        : clampIndex(sharedIndex.value - 1);
+
+    const target = dir === 'left' ? -screen.width : screen.width;
+    isSwiping.value = true;
+
+    translateX.value = withTiming(target, { duration: 100 }, () => {
+      sharedIndex.value = nextIndex;
+      runOnJS(triggerRerender)();
+    });
+  };
+  const THRESHOLD = 50;
+  const panGesture = Gesture.Pan()
+    .onBegin(() => {})
+    .onUpdate(e => {
+      if (!isSwiping.value && Math.abs(e.translationX) > THRESHOLD) {
+        isSwiping.value = true;
+        runOnJS(setSwiping)(true);
+        const dir = e.translationX > 0 ? 'right' : 'left';
+      }
+
+      if (isSwiping.value) {
+        translateX.value = e.translationX;
+      }
+    })
+    .onEnd(e => {
+      const reset = () => {
+        translateX.value = withTiming(0, { duration: 150 }, () => {
+          isSwiping.value = false;
+          runOnJS(setSwiping)(false);
         });
-      }, 0);
+      };
+      if (e.translationX < 0 && Math.abs(e.translationX) > THRESHOLD) {
+        if ((sharedIndex.value ?? 0) < itemsLengthShared.value - 1) {
+          runOnJS(swipeTo)('left');
+        } else {
+          reset();
+        }
+      } else if (e.translationX > 0 && Math.abs(e.translationX) > THRESHOLD) {
+        if (sharedIndex.value > 0) {
+          runOnJS(swipeTo)('right');
+        } else {
+          reset();
+        }
+      } else {
+        reset();
+      }
+    });
+
+  // === Animated Styles ===
+  const currentStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: translateX.value }],
+  }));
+
+  const prevStyle = useAnimatedStyle(() => {
+    const translate = translateX.value - screen.width;
+    const opacity = interpolate(
+      translateX.value,
+      [0, screen.width],
+      [0.2, 1],
+      Extrapolation.CLAMP,
+    );
+    return {
+      transform: [{ translateX: translate }],
+      opacity,
     };
-    const subscription = Dimensions.addEventListener('change', onChange);
-    return () => subscription?.remove();
-  }, []);
+  });
+
+  const nextStyle = useAnimatedStyle(() => {
+    const translate = translateX.value + screen.width;
+    const opacity = interpolate(
+      translateX.value,
+      [-screen.width, 0],
+      [1, 0.2],
+      Extrapolation.CLAMP,
+    );
+    return {
+      transform: [{ translateX: translate }],
+      opacity,
+    };
+  });
+
+  // === Items to render ===
+  const index = idx;
+  const prevItem = index > 0 ? items[index - 1] : null;
+  const currentItem = items[index];
+  const nextItem = index < items.length - 1 ? items[index + 1] : null;
 
   return (
-    <VirtualizedList
-      horizontal
-      key={width}
-      // @ts-ignore
-      ref={scrollViewRef}
-      viewabilityConfig={{
-        itemVisiblePercentThreshold: 50,
-      }}
-      scrollEnabled={!disableScrolling}
-      pagingEnabled
-      windowSize={3}
-      initialNumToRender={3}
-      maxToRenderPerBatch={3}
-      scrollEventThrottle={16}
-      decelerationRate={'fast'}
-      disableIntervalMomentum
-      showsHorizontalScrollIndicator={false}
-      showsVerticalScrollIndicator={false}
-      getItem={(_, index) => items[index]}
-      getItemCount={() => items.length}
-      keyExtractor={getItemKey}
-      snapToInterval={width}
-      data={items}
-      getItemLayout={(_, index) => ({
-        length: width,
-        offset: width * index,
-        index,
-      })}
-      onViewableItemsChanged={info => {
-        const newIdx =
-          info.viewableItems.filter(i => i.isViewable)?.[0]?.index ?? 0;
-        setTimeout(() => {
-          curIdx.current = newIdx;
-        }, 100);
-        onItemOpen?.(itemsRef.current[newIdx]);
-      }}
-      // @ts-ignore
-      renderItem={info => {
-        // @ts-ignore
-        return (
-          <View style={{ width, overflow: 'hidden' }}>
-            {renderItem(info.item)}
-          </View>
-        );
-      }}
-    />
+    <GestureDetector gesture={panGesture}>
+      <View style={styles.container}>
+        {isSwipingLoc && prevItem && (
+          <Animated.View
+            style={[styles.item, prevStyle]}
+            key={getItemKey(prevItem)}>
+            {renderItem(prevItem)}
+          </Animated.View>
+        )}
+
+        <Animated.View
+          style={[styles.item, currentStyle]}
+          key={getItemKey(currentItem)}>
+          {renderItem(currentItem)}
+        </Animated.View>
+
+        {isSwipingLoc && nextItem && (
+          <Animated.View
+            style={[styles.item, nextStyle]}
+            key={getItemKey(nextItem)}>
+            {renderItem(nextItem)}
+          </Animated.View>
+        )}
+      </View>
+    </GestureDetector>
   );
 }
 
-export default Gallery;
+const styles = StyleSheet.create({
+  container: { flex: 1, overflow: 'hidden', backgroundColor: '#000' },
+  item: { position: 'absolute', width: '100%', height: '100%' },
+});

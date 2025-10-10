@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, StyleProp, ViewStyle } from 'react-native';
 import { theme } from '../../../theme';
 import { IconButton } from 'react-native-paper';
 import { NativeStackHeaderProps } from '@react-navigation/native-stack';
@@ -9,7 +9,12 @@ const AppHeader = ({
   route,
   options,
   back,
-}: NativeStackHeaderProps) => {
+  style,
+  headerBackColor,
+}: NativeStackHeaderProps & {
+  style?: StyleProp<ViewStyle>;
+  headerBackColor?: string;
+}) => {
   const title =
     options.headerTitle !== undefined
       ? options.headerTitle
@@ -18,10 +23,11 @@ const AppHeader = ({
       : route.name;
 
   return (
-    <View style={styles.headerContainer}>
+    <View style={[styles.headerContainer, style]}>
       {back ? (
         <IconButton
           style={{ marginRight: -5 }}
+          iconColor={headerBackColor}
           onPress={navigation.goBack}
           icon={'arrow-left'}
           size={24}

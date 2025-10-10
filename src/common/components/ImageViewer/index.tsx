@@ -23,7 +23,7 @@ const ImageViewer: React.FC<{
         minScale={0.5}
         maxScale={5}
         doubleTapScale={3}
-        minPanPointers={1}
+        // minPanPointers={1}
         isSingleTapEnabled
         isDoubleTapEnabled
         isPanEnabled={zooming}
