@@ -48,6 +48,7 @@ const ImagePreviewScreen: React.FC<ImageViewerScreenProps> = ({
     return null;
   }
   const navigation = useNavigation();
+  const [zooming, setZooming] = useState(false);
   const [file, setFile] = useState<DirItem | null>(null);
   const [imagesInFolderSorted, setImagesInFolderSorted] = useState<DirItem[]>(
     [],
@@ -237,9 +238,11 @@ const ImagePreviewScreen: React.FC<ImageViewerScreenProps> = ({
             )}
             selectedItemKey={route}
             onItemOpen={setFile}
+            disableScrolling={zooming}
           />
         ) : (
           <ItemPreview
+            onActive={setZooming}
             file={{
               path: route,
             }}

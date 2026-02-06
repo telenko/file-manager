@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Image,
   Pressable,
@@ -160,6 +160,23 @@ const DirectoryGridItemView: React.FC<DirItemProps> = ({ item }) => {
       ),
     [item],
   );
+
+  const [isReady, setReady] = useState(false);
+
+  useEffect(() => {
+    setTimeout(() => setReady(true), 150);
+  }, []);
+
+  if (!isReady) {
+    return (
+      <View
+        style={{
+          width: GRID_WIDTH - GRID_GAP_SINGLE * 3,
+          height: GRID_HEIGHT - GRID_DESCRIPTION_HEIGHT - GRID_GAP_SINGLE * 2,
+          backgroundColor: 'grey',
+        }}></View>
+    );
+  }
 
   return (
     <View style={{ height: '100%', width: '100%', padding: 1 }}>

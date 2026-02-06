@@ -16,6 +16,7 @@ type GalleryProps<T> = {
   renderItem: (item: T) => React.ReactNode;
   selectedItemKey?: string;
   onItemOpen?: (item: T) => void;
+  disableScrolling?: boolean;
 };
 
 export default function SimpleGallery<T>({
@@ -24,6 +25,7 @@ export default function SimpleGallery<T>({
   renderItem,
   selectedItemKey,
   onItemOpen,
+  disableScrolling = false,
 }: GalleryProps<T>) {
   const screen = Dimensions.get('window');
 
@@ -79,6 +81,10 @@ export default function SimpleGallery<T>({
   };
   const THRESHOLD = 50;
   const panGesture = Gesture.Pan()
+    .enabled(!disableScrolling)
+    .maxPointers(1) // ✌️ = no gallery
+    .activeOffsetX([-25, 25]) // ignore micro moves
+    .failOffsetY([-20, 20])
     .onBegin(() => {})
     .onUpdate(e => {
       if (!isSwiping.value && Math.abs(e.translationX) > THRESHOLD) {
