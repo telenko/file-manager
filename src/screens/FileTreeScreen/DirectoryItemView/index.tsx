@@ -138,7 +138,7 @@ const DirectoryItemView: React.FC<DirItemProps> = ({ item }) => {
   const multiSelectActivated = fileTreeScreen.selectedPaths.length > 0;
   const isSelected = fileTreeScreen.selectedPaths.includes(item.path);
 
-  const RIGHT_ICON_OFFSET = -20;
+  const RIGHT_ICON_OFFSET = -10;
 
   return (
     <List.Item
@@ -319,3 +319,16 @@ const styles = StyleSheet.create({
 });
 
 export default React.memo(DirectoryItemView);
+
+export const SkeletonItemView = React.memo(() => {
+  return (
+    <View
+      style={{
+        width: '100%',
+        height: 60,
+        backgroundColor: 'grey',
+        opacity: 0.5,
+        borderRadius: 4,
+      }}></View>
+  );
+});

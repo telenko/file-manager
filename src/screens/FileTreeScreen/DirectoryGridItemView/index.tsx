@@ -1,11 +1,5 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import {
-  Image,
-  Pressable,
-  StyleSheet,
-  useWindowDimensions,
-  View,
-} from 'react-native';
+import React, { useMemo, useRef, useState } from 'react';
+import { Image, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { IconButton, Text } from 'react-native-paper';
 import {
   FileApi,
@@ -23,8 +17,80 @@ import { type FileScreenProps } from '..';
 import { useFileTreeContext } from '../FileTreeContext';
 import { useExceptionHandler } from '../../../common/components/ExceptionHandler';
 import VideoThumbnail from '../../../common/components/VideoThumbnail';
-import { TouchableOpacity } from 'react-native-gesture-handler';
 import { calcGridColumns, GRID_HEIGHT } from '../../../common/utils/layout';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import Animated, {
+  runOnJS,
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withTiming,
+} from 'react-native-reanimated';
+import dayjs from 'dayjs';
+
+export const ItemGestureWrapper = ({
+  children,
+  onPress,
+  onLongPress,
+  style,
+}: any) => {
+  // 0 → normal, 1 → highlighted
+  const highlight = useSharedValue(0);
+
+  const flash = () => {
+    setTimeout(() => {
+      highlight.value = withTiming(0, { duration: 120 });
+    }, 100);
+  };
+
+  const tapGesture = Gesture.Tap()
+    .maxDistance(8)
+    .onEnd((_e, success) => {
+      if (success) {
+        highlight.value = withTiming(1, { duration: 80 });
+        runOnJS(flash)();
+        runOnJS(onPress)();
+      }
+    });
+
+  const longPressGesture = Gesture.LongPress()
+    .minDuration(350)
+    .onStart(() => {
+      highlight.value = withTiming(1, { duration: 80 });
+      runOnJS(flash)();
+      runOnJS(onLongPress)();
+    });
+
+  const highlightStyle = useAnimatedStyle(() => ({
+    opacity: highlight.value,
+  }));
+
+  return (
+    <GestureDetector gesture={Gesture.Exclusive(longPressGesture, tapGesture)}>
+      <Animated.View style={[stylesGest.container, style]}>
+        {children}
+
+        {/* overlay highlight */}
+        <Animated.View
+          pointerEvents="none"
+          style={[stylesGest.highlightOverlay, highlightStyle]}
+        />
+      </Animated.View>
+    </GestureDetector>
+  );
+};
+
+const stylesGest = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  highlightOverlay: {
+    // opacity: 1,
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.08)', // 👈 можна змінити колір
+    borderRadius: 10,
+  },
+});
 
 type DirItemProps = {
   item: DirectoryItemType;
@@ -32,7 +98,13 @@ type DirItemProps = {
 
 const ICON_RADIUS = 4;
 
-const DirectoryGridItemView: React.FC<DirItemProps> = ({ item }) => {
+const GRID_GAP_SINGLE = 2.5;
+const GRID_DESCRIPTION_HEIGHT = 20;
+
+const DirectoryGridItemView: React.FC<DirItemProps> = ({
+  item,
+  // isUserDragging,
+}) => {
   const fileManager = useFileManager();
   const [isScrolling, setScrolling] = useState(false);
   const startY = useRef<number | null>(null);
@@ -41,7 +113,8 @@ const DirectoryGridItemView: React.FC<DirItemProps> = ({ item }) => {
   const { t } = useTranslation();
   const exceptionHandler = useExceptionHandler();
   const { width, height } = useWindowDimensions();
-
+  const GRID_WIDTH = width / calcGridColumns(width) - 5;
+  const ICON_SIZE = GRID_WIDTH - 20;
   const mode: FileScreenProps['route']['params']['mode'] =
     getRouteMetadatas(navigation)?.mode;
 
@@ -49,11 +122,6 @@ const DirectoryGridItemView: React.FC<DirItemProps> = ({ item }) => {
 
   const multiSelectActivated = fileTreeScreen.selectedPaths.length > 0;
   const isSelected = fileTreeScreen.selectedPaths.includes(item.path);
-
-  const GRID_WIDTH = width / calcGridColumns(width) - 5;
-  const GRID_GAP_SINGLE = 2.5;
-  const GRID_DESCRIPTION_HEIGHT = 20;
-  const ICON_SIZE = GRID_WIDTH - 20;
 
   const content = useMemo(
     () =>
@@ -142,6 +210,31 @@ const DirectoryGridItemView: React.FC<DirItemProps> = ({ item }) => {
             color={theme.archiveFileColor}
           />
         </View>
+      ) : item.isDirectory() ? (
+        <View
+          style={{
+            borderRadius: ICON_RADIUS,
+            justifyContent: 'flex-start',
+            alignItems: 'center',
+            width: '100%',
+            marginTop: 12,
+          }}>
+          <Icon
+            size={ICON_SIZE - 10}
+            color={theme.folderColor}
+            source={'folder'}
+          />
+          {item.mtime ? (
+            <Text
+              style={{
+                marginTop: -7,
+                fontSize: 11,
+                color: 'rgba(120,120,200,0.8)',
+              }}>
+              {dayjs(item.mtime).format('DD MMM YYYY')}
+            </Text>
+          ) : null}
+        </View>
       ) : (
         <View
           style={{
@@ -149,125 +242,90 @@ const DirectoryGridItemView: React.FC<DirItemProps> = ({ item }) => {
             justifyContent: 'flex-start',
             alignItems: 'center',
             width: '100%',
-            marginTop: item.isDirectory() ? 12 : 0,
+            marginTop: 0,
           }}>
-          <Icon
-            size={item.isDirectory() ? ICON_SIZE - 10 : ICON_SIZE}
-            color={item.isDirectory() ? theme.folderColor : theme.fileColor}
-            source={item.isDirectory() ? 'folder' : 'file'}
-          />
+          <Icon size={ICON_SIZE} color={theme.fileColor} source={'file'} />
         </View>
       ),
     [item],
   );
 
-  const [isReady, setReady] = useState(false);
-
-  useEffect(() => {
-    setTimeout(() => setReady(true), 150);
-  }, []);
-
-  if (!isReady) {
-    return (
-      <View
-        style={{
-          width: GRID_WIDTH - GRID_GAP_SINGLE * 3,
-          height: GRID_HEIGHT - GRID_DESCRIPTION_HEIGHT - GRID_GAP_SINGLE * 2,
-          backgroundColor: 'grey',
-        }}></View>
-    );
-  }
-
   return (
     <View style={{ height: '100%', width: '100%', padding: 1 }}>
-      {/* Pressable container needed to help with scroll/touch events conflicts on screens without content overflow */}
-      <Pressable
-        onTouchStart={event => {
-          startY.current = event.nativeEvent.pageY;
-          setScrolling(false);
-        }}
-        onTouchEnd={event => {
-          const touchEndY = event.nativeEvent.pageY;
-          if (Math.abs(touchEndY - (startY.current || 0)) > 10) {
-            setScrolling(true);
+      <ItemGestureWrapper
+        onLongPress={() => {
+          if (isScrolling) {
+            return;
           }
-        }}>
-        <TouchableOpacity
-          onLongPress={() => {
-            if (isScrolling) {
-              return;
-            }
-            if (!operationsAllowed) {
-              return;
-            }
-            fileTreeScreen.setSelectedPaths([
-              ...fileTreeScreen.selectedPaths,
-              item.path,
-            ]);
-          }}
-          onPress={() => {
-            if (isScrolling) {
-              return;
-            }
-            if (multiSelectActivated && operationsAllowed) {
-              fileTreeScreen.setSelectedPaths(
-                isSelected
-                  ? fileTreeScreen.selectedPaths.filter(p => p !== item.path)
-                  : [...fileTreeScreen.selectedPaths, item.path],
-              );
-              return;
-            }
-            if (item.isFile()) {
-              if (operationsAllowed) {
-                if (FileApi.isFileViewable(item)) {
-                  fileManager.openPreview(item, navigation, fileManager.sort);
-                } else {
-                  FileApi.openFile(item).catch(exceptionHandler.handleError);
-                }
+          if (!operationsAllowed) {
+            return;
+          }
+          fileTreeScreen.setSelectedPaths([
+            ...fileTreeScreen.selectedPaths,
+            item.path,
+          ]);
+        }}
+        onPress={() => {
+          if (isScrolling) {
+            return;
+          }
+          if (multiSelectActivated && operationsAllowed) {
+            fileTreeScreen.setSelectedPaths(
+              isSelected
+                ? fileTreeScreen.selectedPaths.filter(p => p !== item.path)
+                : [...fileTreeScreen.selectedPaths, item.path],
+            );
+            return;
+          }
+          if (item.isFile()) {
+            if (operationsAllowed) {
+              if (FileApi.isFileViewable(item)) {
+                fileManager.openPreview(item, navigation, fileManager.sort);
+              } else {
+                FileApi.openFile(item).catch(exceptionHandler.handleError);
               }
-            } else {
-              fileManager.openDirectory(item, navigation);
             }
-          }}
+          } else {
+            fileManager.openDirectory(item, navigation);
+          }
+        }}
+        style={{
+          height: '100%',
+          width: '100%',
+          borderRadius: 10,
+          backgroundColor:
+            multiSelectActivated && isSelected
+              ? 'rgba(180,180,180,0.3)'
+              : 'transparent',
+          justifyContent: 'center',
+          alignItems: 'center',
+          padding: 1.5,
+        }}>
+        <View
           style={{
-            height: '100%',
-            width: '100%',
-            borderRadius: 10,
-            backgroundColor:
-              multiSelectActivated && isSelected
-                ? 'rgba(180,180,180,0.3)'
-                : 'transparent',
+            paddingTop: 5,
+            width: GRID_WIDTH - GRID_GAP_SINGLE * 3,
+            height: GRID_HEIGHT - GRID_DESCRIPTION_HEIGHT - GRID_GAP_SINGLE * 2,
+          }}>
+          {content}
+        </View>
+        <View
+          style={{
+            display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
-            padding: 1.5,
+            width: '100%',
+            overflow: 'hidden',
+            height: GRID_DESCRIPTION_HEIGHT,
           }}>
-          <View
-            style={{
-              paddingTop: 5,
-              width: GRID_WIDTH - GRID_GAP_SINGLE * 3,
-              height:
-                GRID_HEIGHT - GRID_DESCRIPTION_HEIGHT - GRID_GAP_SINGLE * 2,
-            }}>
-            {content}
-          </View>
-          <View
-            style={{
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              width: '100%',
-              overflow: 'hidden',
-              height: GRID_DESCRIPTION_HEIGHT,
-            }}>
-            <Text
-              style={{ fontFamily: theme.mediumText }}
-              numberOfLines={1}
-              ellipsizeMode="middle">
-              {item.name}
-            </Text>
-          </View>
-        </TouchableOpacity>
-      </Pressable>
+          <Text
+            style={{ fontFamily: theme.mediumText }}
+            numberOfLines={1}
+            ellipsizeMode="middle">
+            {item.name}
+          </Text>
+        </View>
+      </ItemGestureWrapper>
       {multiSelectActivated && isSelected ? (
         <>
           <IconButton
@@ -313,3 +371,18 @@ const styles = StyleSheet.create({
 });
 
 export default React.memo(DirectoryGridItemView);
+
+export const SkeletonGridItemView = React.memo(() => {
+  const { width, height } = useWindowDimensions();
+  const GRID_WIDTH = width / calcGridColumns(width) - 5;
+  return (
+    <View
+      style={{
+        width: GRID_WIDTH - GRID_GAP_SINGLE * 3,
+        height: GRID_HEIGHT - GRID_DESCRIPTION_HEIGHT - GRID_GAP_SINGLE * 2,
+        backgroundColor: 'grey',
+        opacity: 0.5,
+        borderRadius: 4,
+      }}></View>
+  );
+});

@@ -1,5 +1,5 @@
-import React, { forwardRef, useState } from 'react';
-import { StyleSheet } from 'react-native';
+import React, { forwardRef, useRef, useState } from 'react';
+import { StyleSheet, View } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -11,6 +11,7 @@ import Animated, {
   withDelay,
 } from 'react-native-reanimated';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import { Icon } from 'react-native-paper';
 
 const SCROLL_WAIT_TIME = 50;
 
@@ -20,6 +21,7 @@ export interface ScrolledDateIndicatorRef {
 
 interface Props {
   dateStartMs: SharedValue<number>;
+  clamped: SharedValue<number>;
   dateEndMs: SharedValue<number>;
   isUserDragging: SharedValue<number>;
   scrollY: SharedValue<number>;
@@ -47,16 +49,12 @@ export const ScrolledDateIndicator = forwardRef<
       contentHeight,
       layoutHeight,
       isUserDragging,
+      clamped,
     },
     ref,
   ) => {
     const containerHeight = useSharedValue(1);
-
-    const progress = useDerivedValue(() => {
-      const maxScroll = contentHeight.value - layoutHeight.value;
-      if (maxScroll <= 0) return 0;
-      return scrollY.value / maxScroll;
-    });
+    const containerTop = useSharedValue(0);
     const MONTHS = [
       'Jan',
       'Feb',
@@ -84,19 +82,20 @@ export const ScrolledDateIndicator = forwardRef<
       runOnJS(setText)(`${month} ${year}`);
       return `${month} ${year}`;
     });
-
-    const targetOffsetY = useSharedValue(0);
     // === GESTURE ===
     const panGesture = Gesture.Pan()
       .onBegin(() => {
         isUserDragging.value = 1;
       })
       .onUpdate(e => {
-        const clamped = Math.max(0, Math.min(1, e.y / containerHeight.value));
-
-        const maxScroll = contentHeight.value - layoutHeight.value;
-        scrollY.value = clamped * maxScroll; // ✅ correct mappin
-        targetOffsetY.value = clamped;
+        const calcY = e.absoluteY - containerTop.value;
+        const resolvedY = Math.min(Math.max(calcY, 0), containerHeight.value);
+        scrollY.value = resolvedY;
+        Math.min(Math.max(resolvedY, 30), containerHeight.value - 20);
+        clamped.value = Math.max(
+          0,
+          Math.min(1, resolvedY / containerHeight.value),
+        );
       })
       .onEnd(() => {
         isUserDragging.value = withDelay(400, withTiming(0));
@@ -104,27 +103,40 @@ export const ScrolledDateIndicator = forwardRef<
 
     // === INDICATOR POSITION ===
     const indicatorStyle = useAnimatedStyle(() => {
-      const top = progress.value * (containerHeight.value - 48);
-
       return {
-        transform: [{ translateY: top }],
-        width: withTiming(
-          isUserDragging.value ? THUMB_EXPANDED_WIDTH : THUMB_THIN_WIDTH,
-          { duration: 180 },
-        ),
+        transform: [
+          {
+            translateY:
+              Math.min(
+                Math.max(scrollY.value, 30),
+                containerHeight.value - 20,
+              ) - 24,
+          },
+        ], // center on finger
+        opacity: withTiming(isUserDragging.value === 1 ? 1 : 0.5, {
+          duration: 180,
+        }),
       };
     });
 
     const lastSent = useSharedValue(0);
+    const whiteListClamped = [0, 1];
+    const lastSentProgress = useSharedValue(0);
 
     useAnimatedReaction(
-      () => targetOffsetY.value,
+      () => clamped.value,
       clamped => {
         const now = Date.now();
 
-        if (now - lastSent.value > SCROLL_WAIT_TIME) {
+        if (
+          (whiteListClamped.includes(clamped) &&
+            clamped !== lastSentProgress.value) ||
+          now - lastSent.value > SCROLL_WAIT_TIME
+        ) {
           // ~30 FPS
           lastSent.value = now;
+          lastSentProgress.value = clamped;
+          // @ts-ignore
           runOnJS(onScroll)(clamped);
         }
       },
@@ -136,7 +148,11 @@ export const ScrolledDateIndicator = forwardRef<
         duration: 150,
       }),
       transform: [
-        { translateY: progress.value * (containerHeight.value + 10 - 48) },
+        {
+          translateY:
+            Math.min(Math.max(scrollY.value, 30), containerHeight.value - 20) -
+            14,
+        },
         {
           scale: withTiming(isUserDragging.value === 1 ? 1 : 0.8, {
             duration: 150,
@@ -145,21 +161,32 @@ export const ScrolledDateIndicator = forwardRef<
       ],
     }));
 
-    return (
-      <GestureDetector gesture={panGesture}>
-        <Animated.View
-          style={styles.container}
-          onLayout={e => {
-            containerHeight.value = e.nativeEvent.layout.height;
-          }}>
-          <Animated.View style={[styles.dateBubble, bubbleStyle]}>
-            <Animated.Text style={styles.dateText}>{text}</Animated.Text>
-          </Animated.View>
+    const containerRef = useRef<Animated.View>(null);
 
-          <Animated.View
-            style={[styles.indicator, indicatorStyle]}></Animated.View>
+    return (
+      <Animated.View
+        ref={containerRef}
+        style={styles.container}
+        onLayout={e => {
+          containerHeight.value = e.nativeEvent.layout.height;
+          containerRef.current?.measureInWindow((x, y, width, height) => {
+            containerTop.value = y;
+          });
+        }}>
+        <Animated.View style={[styles.dateBubble, bubbleStyle]}>
+          <Animated.Text style={styles.dateText}>{text}</Animated.Text>
         </Animated.View>
-      </GestureDetector>
+
+        <GestureDetector gesture={panGesture}>
+          <Animated.View style={[styles.indicator, indicatorStyle]}>
+            <Icon
+              source="drag-vertical"
+              size={25}
+              color="rgba(255,255,255,0.9)"
+            />
+          </Animated.View>
+        </GestureDetector>
+      </Animated.View>
     );
   },
 );
@@ -167,18 +194,20 @@ export const ScrolledDateIndicator = forwardRef<
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // backgroundColor: 'red',
     width: HIT_SLOP_WIDTH,
     alignItems: 'flex-end', // 👈 keeps visual thumb on the edge
     justifyContent: 'flex-start',
-    // marginBottom: -100,
   },
   indicator: {
     position: 'absolute',
     right: 5,
     height: 48,
+    width: THUMB_EXPANDED_WIDTH,
     borderRadius: 24,
     backgroundColor: '#999',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   dateBubble: {
     position: 'absolute',
