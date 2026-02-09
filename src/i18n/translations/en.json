@@ -1,7 +1,9 @@
 {
     "title": "File Manager",
     "deviceRoot": "Storage",
-    "permissionRequired": "We need permission to access storage",
+    "grantPermission": "Grant permission",
+    "permissionRequired": "Storage permission required",
+    "permissionRequiredDescription": "We need access to your storage to manage files on your device.",
     "openWithTitle": "Open File With",
     "imageViewer": "Image preview",
     "copyInto": "Copy into...",

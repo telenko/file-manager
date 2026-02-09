@@ -1,7 +1,9 @@
 {
     "title": "Dosya Yöneticisi",
     "deviceRoot": "Depolama",
-    "permissionRequired": "Depolamaya erişim izni gerekiyor",
+    "grantPermission": "İzni Ver",
+    "permissionRequired": "Depolama izni gerekli",
+    "permissionRequiredDescription": "Cihazınızda dosyaları yönetmek için depolama alanınıza erişim ihtiyacımız var.",
     "openWithTitle": "Dosyayı Aç",
     "imageViewer": "Resim önizlemesi",
     "copyInto": "Şuraya kopyala...",

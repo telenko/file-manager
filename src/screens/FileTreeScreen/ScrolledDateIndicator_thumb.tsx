@@ -1,5 +1,5 @@
-import React, { forwardRef, useRef, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import React, { forwardRef, useMemo, useRef, useState } from 'react';
+import { StyleSheet } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -12,6 +12,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { Icon } from 'react-native-paper';
+import dayjs from 'dayjs';
 
 const SCROLL_WAIT_TIME = 50;
 
@@ -55,39 +56,27 @@ export const ScrolledDateIndicator = forwardRef<
   ) => {
     const containerHeight = useSharedValue(1);
     const containerTop = useSharedValue(0);
-    const MONTHS = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
 
-    const [text, setText] = useState('');
+    const [timestamp, setTimestamp] = useState<number | null>(null);
+    const timeBubbleText = useMemo(() => {
+      if (!timestamp) return '';
+      return dayjs(timestamp).format('MMM YYYY');
+    }, [timestamp]);
     // === DATE CALCULATION ===
     useDerivedValue(() => {
       const timestamp = dateStartMs.value; // 👈 shared value
-      if (!timestamp) return '';
-
-      const d = new Date(timestamp);
-      const month = MONTHS[d.getMonth()];
-      const year = d.getFullYear();
-      runOnJS(setText)(`${month} ${year}`);
-      return `${month} ${year}`;
+      if (!timestamp) {
+        return;
+      }
+      runOnJS(setTimestamp)(timestamp);
+      return timestamp;
     });
     // === GESTURE ===
     const panGesture = Gesture.Pan()
-      .onBegin(() => {
-        isUserDragging.value = 1;
-      })
       .onUpdate(e => {
+        if (isUserDragging.value !== 1) {
+          isUserDragging.value = 1;
+        }
         const calcY = e.absoluteY - containerTop.value;
         const resolvedY = Math.min(Math.max(calcY, 0), containerHeight.value);
         scrollY.value = resolvedY;
@@ -144,9 +133,12 @@ export const ScrolledDateIndicator = forwardRef<
 
     // === DATE BUBBLE ===
     const bubbleStyle = useAnimatedStyle(() => ({
-      opacity: withTiming(isUserDragging.value === 1 ? 1 : 0, {
-        duration: 150,
-      }),
+      opacity: withTiming(
+        isUserDragging.value === 1 && dateStartMs.value ? 1 : 0,
+        {
+          duration: 150,
+        },
+      ),
       transform: [
         {
           translateY:
@@ -163,18 +155,35 @@ export const ScrolledDateIndicator = forwardRef<
 
     const containerRef = useRef<Animated.View>(null);
 
+    const isContainerReady = useSharedValue(false);
+
+    const prepareContainer = () => {
+      containerRef.current?.measureInWindow((x, y, width, height) => {
+        containerTop.value = y;
+        isContainerReady.value = true;
+      });
+    };
+
+    const containerStyles = useAnimatedStyle(() => ({
+      opacity: isContainerReady.value ? 1 : 0,
+    }));
+
     return (
       <Animated.View
-        ref={containerRef}
-        style={styles.container}
+        ref={ref => {
+          // @ts-ignore
+          containerRef.current = ref;
+          prepareContainer();
+        }}
+        style={[styles.container, containerStyles]}
         onLayout={e => {
           containerHeight.value = e.nativeEvent.layout.height;
-          containerRef.current?.measureInWindow((x, y, width, height) => {
-            containerTop.value = y;
-          });
+          prepareContainer();
         }}>
         <Animated.View style={[styles.dateBubble, bubbleStyle]}>
-          <Animated.Text style={styles.dateText}>{text}</Animated.Text>
+          <Animated.Text style={styles.dateText}>
+            {timeBubbleText}
+          </Animated.Text>
         </Animated.View>
 
         <GestureDetector gesture={panGesture}>

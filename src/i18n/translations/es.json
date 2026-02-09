@@ -1,7 +1,9 @@
 {
     "title": "Administrador de archivos",
     "deviceRoot": "Almacenamiento",
-    "permissionRequired": "Necesitamos permiso para acceder al almacenamiento",
+    "grantPermission": "Conceder permiso",
+    "permissionRequired": "Permiso de almacenamiento requerido",
+    "permissionRequiredDescription": "Necesitamos acceso a su almacenamiento para gestionar archivos en su dispositivo.",
     "openWithTitle": "Abrir archivo con",
     "imageViewer": "Vista previa de la imagen",
     "copyInto": "Copiar en...",

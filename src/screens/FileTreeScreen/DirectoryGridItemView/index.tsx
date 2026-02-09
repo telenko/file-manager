@@ -224,16 +224,6 @@ const DirectoryGridItemView: React.FC<DirItemProps> = ({
             color={theme.folderColor}
             source={'folder'}
           />
-          {item.mtime ? (
-            <Text
-              style={{
-                marginTop: -7,
-                fontSize: 11,
-                color: 'rgba(120,120,200,0.8)',
-              }}>
-              {dayjs(item.mtime).format('DD MMM YYYY')}
-            </Text>
-          ) : null}
         </View>
       ) : (
         <View

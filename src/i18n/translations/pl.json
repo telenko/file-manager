@@ -1,7 +1,9 @@
 {
     "title": "Menedżer Plików",
     "deviceRoot": "Pamięć",
-    "permissionRequired": "Potrzebujemy uprawnień do dostępu do pamięci",
+    "grantPermission": "Przyznaj uprawnienie",
+    "permissionRequired": "Wymagane uprawnienie do pamięci",
+    "permissionRequiredDescription": "Potrzebujemy dostępu do Twojej pamięci, aby zarządzać plikami na Twoim urządzeniu.",
     "openWithTitle": "Otwórz plik za pomocą",
     "imageViewer": "Podgląd obrazu",
     "copyInto": "Kopiuj do...",

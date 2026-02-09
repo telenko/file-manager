@@ -1,7 +1,9 @@
 {
     "title": "Gestionnaire de fichiers",
     "deviceRoot": "Stockage",
-    "permissionRequired": "Nous avons besoin de l'autorisation d'accéder au stockage",
+    "grantPermission": "Accorder la permission",
+    "permissionRequired": "Permission de stockage requise",
+    "permissionRequiredDescription": "Nous avons besoin d'accéder à votre stockage pour gérer les fichiers sur votre appareil.",
     "openWithTitle": "Ouvrir le fichier avec",
     "imageViewer": "Aperçu de l'image",
     "copyInto": "Copier dans...",

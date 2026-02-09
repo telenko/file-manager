@@ -299,7 +299,7 @@ const FileScreen: React.FC<FileScreenProps> = ({
     () => clamped.value,
     clamped => {
       if (isUserDragging.value === 1) {
-        const index = Math.floor(timestamps.length * clamped);
+        const index = Math.floor((timestamps.length - 1) * clamped);
         // find first existing timestamp starting from index
         let item: number | undefined = undefined;
         for (let i = index; i < timestamps.length; i++) {

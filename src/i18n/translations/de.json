@@ -1,7 +1,9 @@
 {
     "title": "Dateimanager",
     "deviceRoot": "Speicher",
-    "permissionRequired": "Wir benötigen Berechtigungen, um auf den Speicher zuzugreifen",
+    "grantPermission": "Berechtigung erteilen",
+    "permissionRequired": "Berechtigung zum Zugriff auf den Speicher erforderlich",
+    "permissionRequiredDescription": "Wir benötigen Zugriff auf Ihren Speicher, um Dateien auf Ihrem Gerät zu verwalten.",
     "openWithTitle": "Datei öffnen mit",
     "imageViewer": "Bildvorschau",
     "copyInto": "Kopieren nach...",

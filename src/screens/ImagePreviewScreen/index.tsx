@@ -231,6 +231,7 @@ const ImagePreviewScreen: React.FC<ImageViewerScreenProps> = ({
         }}>
         {imagesCarousel.length > 0 ? (
           <Gallery
+            key={route}
             items={imagesCarousel}
             getItemKey={it => it.path}
             renderItem={image => (

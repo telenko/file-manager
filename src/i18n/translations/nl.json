@@ -1,7 +1,9 @@
 {
     "title": "Bestandsbeheerder",
     "deviceRoot": "Opslag",
-    "permissionRequired": "We hebben toestemming nodig om toegang te krijgen tot opslag",
+    "grantPermission": "Berechtiging erteilen",
+    "permissionRequired": "Toestemming voor opslag vereist",
+    "permissionRequiredDescription": "We hebben toegang tot uw opslag nodig om bestanden op uw apparaat te beheren.",
     "openWithTitle": "Open bestand met",
     "imageViewer": "Afbeelding bekijken",
     "copyInto": "Kopiëren naar...",

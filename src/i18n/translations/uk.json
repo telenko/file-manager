@@ -1,7 +1,9 @@
 {
     "title": "Менеджер файлів",
     "deviceRoot": "Сховище",
-    "permissionRequired": "Нам треба доступ до сховища",
+    "grantPermission": "Надати дозвіл",
+    "permissionRequired": "Потрібен дозвіл на доступ до сховища",
+    "permissionRequiredDescription": "Ми потребуємо доступу до вашого сховища, щоб керувати файлами на вашому пристрої.",
     "openWithTitle": "Відкрити за допомогою",
     "imageViewer": "Перегляд зображення",
     "copyInto": "Копіювати до...",

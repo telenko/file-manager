@@ -14,6 +14,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import ExceptionHandler from './src/common/components/ExceptionHandler';
 import { SnackbarProvider } from 'react-native-paper-snackbar-stack';
+import NoPermissionScreen from './src/common/components/NoPermissionScreen';
 
 const MAX_SNACK = 2;
 
@@ -89,10 +90,13 @@ const App = () => {
                 <FileManager />
               </SnackbarProvider>
             </ExceptionHandler>
-          ) : null}
-          {!permissionGranted ? (
-            <Button onPress={askPermission}>{t('permissionRequired')}</Button>
-          ) : null}
+          ) : (
+            <NoPermissionScreen
+              onGrantPermission={askPermission}
+              title={t('permissionRequired')}
+              description={t('permissionRequiredDescription')}
+            />
+          )}
         </FontsProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>

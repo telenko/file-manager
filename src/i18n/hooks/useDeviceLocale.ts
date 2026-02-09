@@ -1,6 +1,8 @@
 import * as RNLocalize from 'react-native-localize';
 import i18n from '../i18n';
 import { useEffect } from 'react';
+import '../preparedayJs';
+import dayjs from 'dayjs';
 
 export const useDeviceLocale = () => {
   useEffect(() => {
@@ -13,10 +15,14 @@ export const useDeviceLocale = () => {
     console.debug('Detected locale...', language);
     console.debug('Detected country...', country);
 
+    let targetLanguageCode = language;
+
     if ((country === 'UA' && locale === 'ru') || language === 'ua') {
-      i18n.changeLanguage('uk');
-    } else {
-      i18n.changeLanguage(language);
+      targetLanguageCode = 'uk';
     }
+
+    i18n.changeLanguage(targetLanguageCode);
+    dayjs.locale(targetLanguageCode);
+
   }, []);
 };

@@ -1,7 +1,9 @@
 {
     "title": "Gestore File",
     "deviceRoot": "Memoria",
-    "permissionRequired": "Abbiamo bisogno dell'autorizzazione per accedere alla memoria",
+    "grantPermission": "Concedi permesso",
+    "permissionRequired": "Permesso di archiviazione richiesto",
+    "permissionRequiredDescription": "Abbiamo bisogno dell'accesso alla memoria per gestire i file sul tuo dispositivo.",
     "openWithTitle": "Apri il file con",
     "imageViewer": "Anteprima immagine",
     "copyInto": "Copia in...",
