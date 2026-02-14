@@ -93,8 +93,6 @@ const App = () => {
           ) : (
             <NoPermissionScreen
               onGrantPermission={askPermission}
-              title={t('permissionRequired')}
-              description={t('permissionRequiredDescription')}
             />
           )}
         </FontsProvider>

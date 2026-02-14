@@ -370,7 +370,7 @@ export const SkeletonGridItemView = React.memo(() => {
       style={{
         width: GRID_WIDTH - GRID_GAP_SINGLE * 3,
         height: GRID_HEIGHT - GRID_DESCRIPTION_HEIGHT - GRID_GAP_SINGLE * 2,
-        backgroundColor: 'grey',
+        backgroundColor: 'rgba(180,180,180,0.9)',
         opacity: 0.5,
         borderRadius: 4,
       }}></View>

@@ -326,7 +326,7 @@ export const SkeletonItemView = React.memo(() => {
       style={{
         width: '100%',
         height: 60,
-        backgroundColor: 'grey',
+        backgroundColor: 'rgba(180,180,180,0.9)',
         opacity: 0.5,
         borderRadius: 4,
       }}></View>

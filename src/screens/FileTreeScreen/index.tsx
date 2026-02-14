@@ -1,23 +1,11 @@
-import React, {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import { DirItem, FileApi } from '../../services/FileApi';
 import FilePathBreadCrumb from './FilePathBreadCrumb';
 import { useNavigation } from '../../common/hooks/useNavigation';
 import { View, StyleSheet, useWindowDimensions } from 'react-native';
 import { FileTreeContext, FileTreeContextType } from './FileTreeContext';
-import DirectoryItemView, { SkeletonItemView } from './DirectoryItemView';
-import {
-  DataProvider,
-  LayoutProvider,
-  RecyclerListView,
-} from 'recyclerlistview';
+import { DataProvider, LayoutProvider } from 'recyclerlistview';
 import { Cache } from '../../services/Cache';
 import { useTranslation } from 'react-i18next';
 import { navigateFromSelectable } from '../../common/utils/navigator';
@@ -39,16 +27,12 @@ import {
 } from '../../common/utils/layout';
 import { useStoreLatestFolder } from '../../widgets/FileManager/settings';
 import { useFocusEffect } from '@react-navigation/native';
-import { ScrolledDateIndicator } from './ScrolledDateIndicator_thumb';
-import Animated, {
-  useAnimatedReaction,
-  useAnimatedScrollHandler,
-  useSharedValue,
-} from 'react-native-reanimated';
 import { ItemWithSkeleton } from './ItemWithSkeleton';
+import {
+  ScrollableRecyclerListView,
+  ScrollIndicatorProvider,
+} from '../../common/components/ScrollIndicator';
 
-const AnimatedRecyclerListView =
-  Animated.createAnimatedComponent(RecyclerListView);
 export type FileScreenProps = {
   route: {
     params: {
@@ -249,13 +233,10 @@ const FileScreen: React.FC<FileScreenProps> = ({
     [SCREEN_WIDTH, fileManager.layout],
   );
 
-  const isUserDragging = useSharedValue(0);
-
   const rowRenderer = useCallback(
     (type: any, item: DirItem) => (
       <ItemWithSkeleton
         key={item.path}
-        isUserDragging={isUserDragging}
         item={item}
         layout={fileManager.layout}
       />
@@ -272,21 +253,6 @@ const FileScreen: React.FC<FileScreenProps> = ({
     });
   };
 
-  const ref = useRef<RecyclerListView<any, any> | null>(null);
-
-  const scrollToOffsetPercentage = (offsetPercentage: number) => {
-    const flashListHeight = ref.current?.getContentDimension().height ?? 1;
-    const offset = offsetPercentage * flashListHeight;
-    ref.current?.scrollToOffset(0, offset, true);
-  };
-
-  const sliderRef = useRef<any>(null);
-
-  const scrollY = useSharedValue(0);
-  const contentHeight = useSharedValue(1);
-  const layoutHeight = useSharedValue(1);
-  const dateMs = useSharedValue(0);
-  const clamped = useSharedValue(0);
   const timestamps = useMemo(
     () =>
       sortedDirItems.map(item =>
@@ -294,44 +260,6 @@ const FileScreen: React.FC<FileScreenProps> = ({
       ),
     [sortedDirItems],
   );
-
-  useAnimatedReaction(
-    () => clamped.value,
-    clamped => {
-      if (isUserDragging.value === 1) {
-        const index = Math.floor((timestamps.length - 1) * clamped);
-        // find first existing timestamp starting from index
-        let item: number | undefined = undefined;
-        for (let i = index; i < timestamps.length; i++) {
-          const t = timestamps[i];
-          if (t !== undefined) {
-            item = t;
-            break;
-          }
-        }
-        dateMs.value = item ?? 0;
-      }
-    },
-    [timestamps],
-  );
-  const scrollHandler = useAnimatedScrollHandler({
-    onScroll: e => {
-      if (isUserDragging.value === 1) {
-        return;
-      }
-
-      scrollY.value =
-        (e.contentOffset.y / e.contentSize.height) * e.layoutMeasurement.height;
-      contentHeight.value = e.contentSize.height;
-      layoutHeight.value = e.layoutMeasurement.height;
-    },
-  });
-
-  const [indicatorVisible, setIndicatorVisible] = useState(false);
-
-  useLayoutEffect(() => {
-    setIndicatorVisible(false);
-  }, [sortedDirItems]);
 
   return (
     <FileTreeContext.Provider value={value}>
@@ -362,63 +290,30 @@ const FileScreen: React.FC<FileScreenProps> = ({
           </ScrollView>
         ) : (
           <>
-            <AnimatedRecyclerListView
-              canChangeSize
-              ref={ref}
-              dataProvider={dataProvider}
-              layoutProvider={layoutProvider}
-              rowRenderer={rowRenderer}
-              onVisibleIndicesChanged={indices => {
-                const visibleCount = indices.length;
-                const totalCount = sortedDirItems.length;
-
-                const shouldShow = totalCount >= visibleCount * 3;
-
-                setIndicatorVisible(shouldShow);
-              }}
-              scrollViewProps={{
-                showsVerticalScrollIndicator: false,
-                showsHorizontalScrollIndicator: false,
-                onLayout: (e: any) => {
-                  layoutHeight.value = e.nativeEvent.layout.height;
-                },
-                onContentSizeChange: (_: any, h: number) => {
-                  contentHeight.value = h;
-                },
-              }}
-              style={[
-                fileManager.layout === 'grid'
-                  ? {
-                      marginTop: -5,
-                    }
-                  : {},
-              ]}
-              optimizeForInsertDeleteAnimations
-              refreshControl={
-                <RefreshControl refreshing={dirLoading} onRefresh={reloadDir} />
-              }
-              // @ts-ignore
-              onScroll={scrollHandler}
-              scrollEventThrottle={16}
-            />
-            {indicatorVisible ? (
-              <View
+            <ScrollIndicatorProvider>
+              <ScrollableRecyclerListView
+                canChangeSize
+                dataProvider={dataProvider}
+                layoutProvider={layoutProvider}
+                rowRenderer={rowRenderer}
                 style={[
-                  { position: 'absolute', top: 40, right: 0, bottom: 30 },
-                ]}>
-                <ScrolledDateIndicator
-                  ref={sliderRef}
-                  scrollY={scrollY}
-                  contentHeight={contentHeight}
-                  layoutHeight={layoutHeight}
-                  dateStartMs={dateMs}
-                  dateEndMs={dateMs}
-                  onScroll={scrollToOffsetPercentage}
-                  isUserDragging={isUserDragging}
-                  clamped={clamped}
-                />
-              </View>
-            ) : null}
+                  fileManager.layout === 'grid'
+                    ? {
+                        marginTop: -5,
+                      }
+                    : {},
+                ]}
+                optimizeForInsertDeleteAnimations
+                // @ts-ignore
+                refreshControl={
+                  <RefreshControl
+                    refreshing={dirLoading}
+                    onRefresh={reloadDir}
+                  />
+                }
+                timestamps={timestamps}
+              />
+            </ScrollIndicatorProvider>
           </>
         )}
         <View

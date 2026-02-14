@@ -5,16 +5,12 @@ import { useTranslation } from 'react-i18next';
 
 type Props = {
   onGrantPermission: () => void;
-  title: string;
-  description: string;
 };
 
-const NoPermissionScreen: React.FC<Props> = ({
-  onGrantPermission,
-  title,
-  description,
-}) => {
+const NoPermissionScreen: React.FC<Props> = ({ onGrantPermission }) => {
   const { t } = useTranslation();
+  const title = t('permissionRequired');
+  const description = t('permissionRequiredDescription');
   return (
     <View style={styles.container}>
       <Icon source="folder-lock" size={96} />
