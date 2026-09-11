@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import { DirItem, FileApi } from '../../services/FileApi';
 import FilePathBreadCrumb from './FilePathBreadCrumb';
@@ -28,10 +28,7 @@ import {
 import { useStoreLatestFolder } from '../../widgets/FileManager/settings';
 import { useFocusEffect } from '@react-navigation/native';
 import { ItemWithSkeleton } from './ItemWithSkeleton';
-import {
-  ScrollableRecyclerListView,
-  ScrollIndicatorProvider,
-} from '../../common/components/ScrollIndicator';
+import FileTreeList, { FileTreeListRef } from './FileTreeList';
 
 export type FileScreenProps = {
   route: {
@@ -157,9 +154,13 @@ const FileScreen: React.FC<FileScreenProps> = ({
     Cache.putDirItems(route ?? FileApi.ROOT_PATH, sortedDirItems);
   }, [sortedDirItems]);
 
+  const fileTreeListRef = useRef<FileTreeListRef>(null);
+
   const setSelectedPathsExternal = useCallback((v: string[]) => {
     selectVibrate();
-    setSelectedPaths([...new Set(v)]);
+    const paths = [...new Set(v)];
+    setSelectedPaths(paths);
+    fileTreeListRef.current?.updateSelection(paths);
   }, []);
 
   const value = useMemo<FileTreeContextType>(
@@ -261,6 +262,16 @@ const FileScreen: React.FC<FileScreenProps> = ({
     [sortedDirItems],
   );
 
+  const listStyle = useMemo(
+    () =>
+      fileManager.layout === 'grid'
+        ? {
+            marginTop: -5,
+          }
+        : undefined,
+    [fileManager.layout],
+  );
+
   return (
     <FileTreeContext.Provider value={value}>
       <View style={styles.container}>
@@ -269,7 +280,7 @@ const FileScreen: React.FC<FileScreenProps> = ({
             <FilePathBreadCrumb />
           </View>
         ) : null}
-        {isOperational && !isMultiSelectActivated && isStorageLevel ? (
+        {isOperational && isStorageLevel ? (
           <View style={{ marginLeft: 10 }}>
             <StorageSelect route={route || ''} />
           </View>
@@ -289,32 +300,17 @@ const FileScreen: React.FC<FileScreenProps> = ({
             {dirLoadingDone ? <EmptyData message={t('noDataHere')} /> : null}
           </ScrollView>
         ) : (
-          <>
-            <ScrollIndicatorProvider>
-              <ScrollableRecyclerListView
-                canChangeSize
-                dataProvider={dataProvider}
-                layoutProvider={layoutProvider}
-                rowRenderer={rowRenderer}
-                style={[
-                  fileManager.layout === 'grid'
-                    ? {
-                        marginTop: -5,
-                      }
-                    : {},
-                ]}
-                optimizeForInsertDeleteAnimations
-                // @ts-ignore
-                refreshControl={
-                  <RefreshControl
-                    refreshing={dirLoading}
-                    onRefresh={reloadDir}
-                  />
-                }
-                timestamps={timestamps}
-              />
-            </ScrollIndicatorProvider>
-          </>
+          <FileTreeList
+            ref={fileTreeListRef}
+            scrollKey={route ?? FileApi.ROOT_PATH}
+            dataProvider={dataProvider}
+            layoutProvider={layoutProvider}
+            rowRenderer={rowRenderer}
+            listStyle={listStyle}
+            dirLoading={dirLoading}
+            reloadDir={reloadDir}
+            timestamps={timestamps}
+          />
         )}
         <View
           style={{

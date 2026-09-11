@@ -13,6 +13,8 @@
     "copy": "Копіювати",
     "move": "Перемістити",
     "share": "Поділитися",
+    "shareQuickSend": "Швидке надсилання",
+    "shareHighQualitySend": "Надсилання у високій якості",
     "delete": "Видалити",
     "deleteConfirm": "Видалити цей елемент?",
     "deleteConfirmPlural": "Видалити {{n}} елементів?",

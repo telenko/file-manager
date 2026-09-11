@@ -13,6 +13,8 @@
     "copy": "Kopyala",
     "move": "Taşı",
     "share": "Paylaş",
+    "shareQuickSend": "Hızlı gönder",
+    "shareHighQualitySend": "Yüksek kaliteli gönder",
     "delete": "Sil",
     "deleteConfirm": "Bu öğeyi sil?",
     "deleteConfirmPlural": "{{n}} öğeyi sil?",

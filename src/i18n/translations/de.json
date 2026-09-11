@@ -13,6 +13,8 @@
     "copy": "Kopieren",
     "move": "Verschieben",
     "share": "Teilen",
+    "shareQuickSend": "Schnell senden",
+    "shareHighQualitySend": "Hochwertig senden",
     "delete": "Löschen",
     "deleteConfirm": "Dieses Element löschen?",
     "deleteConfirmPlural": "{{n}} Elemente löschen?",
@@ -40,7 +42,6 @@
     "select": "Auswählen",
     "report": "Fehler melden",
     "sdCardRoot": "SD-Karte {{name}}",
-
     "errorOccured": "Ein Fehler ist aufgetreten :(",
     "readDirFailed": "Verzeichnis kann nicht gelesen werden. Bitte stellen Sie sicher, dass die App Berechtigungen zum Lesen dieses Ordners hat",
     "fileMetadataFailed": "Verarbeitung der Datei fehlgeschlagen. Stellen Sie sicher, dass die App Berechtigungen zum Lesen Ihres Dateisystems hat",
@@ -51,7 +52,6 @@
     "deleteFailed": "Löschen fehlgeschlagen. Stellen Sie sicher, dass die App Berechtigungen zum Schreiben in Ihr Dateisystem hat",
     "failedToOpenPath": "Datei konnte nicht geöffnet werden. Bitte stellen Sie sicher, dass Sie Anwendungen installiert haben, um diesen Dateityp zu öffnen",
     "notEnoughSpace": "Nicht genug Speicherplatz",
-
     "hide": "Verstecken",
     "copyInProgress": "Bitte warten. Kopiervorgang läuft",
     "moveInProgress": "Bitte warten. Verschiebung läuft",
@@ -60,9 +60,7 @@
     "moveIsDone": "Verschiebung ist abgeschlossen",
     "deleteIsDone": "Löschung ist abgeschlossen",
     "nameAlreadyExists": "Name existiert bereits",
-
     "more": "Mehr",
-
     "settings": "Einstellungen",
     "storeLatestFolder": "Letzten Ordner merken",
     "storeLatestFolderInfo": "Wenn Sie möchten, können wir uns den zuletzt geöffneten Ordner merken. Beim nächsten Öffnen der App wird dieser Ordner automatisch wieder geöffnet.",

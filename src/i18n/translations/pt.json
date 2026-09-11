@@ -13,6 +13,8 @@
     "copy": "Copiar",
     "move": "Mover",
     "share": "Compartilhar",
+    "shareQuickSend": "Envio rápido",
+    "shareHighQualitySend": "Envio em alta qualidade",
     "delete": "Excluir",
     "deleteConfirm": "Excluir este item?",
     "deleteConfirmPlural": "Excluir {{n}} itens?",

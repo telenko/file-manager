@@ -13,6 +13,8 @@
     "copy": "Copy",
     "move": "Move",
     "share": "Share",
+    "shareQuickSend": "Quick send",
+    "shareHighQualitySend": "High quality send",
     "delete": "Delete",
     "deleteConfirm": "Delete this item?",
     "deleteConfirmPlural": "Delete {{n}} items?",

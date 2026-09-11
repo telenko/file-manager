@@ -110,6 +110,10 @@ export const ScrolledDateIndicator = forwardRef<
   useAnimatedReaction(
     () => clamped.value,
     clamped => {
+      if (isUserDragging.value !== 1) {
+        return;
+      }
+
       const now = Date.now();
 
       if (

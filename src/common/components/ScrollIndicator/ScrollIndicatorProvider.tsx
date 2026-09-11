@@ -1,4 +1,4 @@
-import React, { createContext, PropsWithChildren } from 'react';
+import React, { createContext, PropsWithChildren, useMemo } from 'react';
 import { SharedValue, useSharedValue } from 'react-native-reanimated';
 
 type ScrollIndicatorContextType = {
@@ -22,17 +22,22 @@ export const ScrollIndicatorProvider: React.FC<PropsWithChildren<any>> = ({
   const layoutHeight = useSharedValue(1);
   const dateMs = useSharedValue(0);
   const clamped = useSharedValue(0);
+  const isUserDragging = useSharedValue(0);
+
+  const value = useMemo(
+    () => ({
+      dateMs,
+      clamped,
+      isUserDragging,
+      scrollY,
+      contentHeight,
+      layoutHeight,
+    }),
+    [clamped, contentHeight, dateMs, isUserDragging, layoutHeight, scrollY],
+  );
 
   return (
-    <ScrollIndicatorContext.Provider
-      value={{
-        dateMs,
-        clamped,
-        isUserDragging: useSharedValue(0),
-        scrollY,
-        contentHeight,
-        layoutHeight,
-      }}>
+    <ScrollIndicatorContext.Provider value={value}>
       {children}
     </ScrollIndicatorContext.Provider>
   );

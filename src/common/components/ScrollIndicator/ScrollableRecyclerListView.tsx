@@ -1,5 +1,13 @@
-import React, { useCallback, useLayoutEffect } from 'react';
+import React, {
+  forwardRef,
+  useCallback,
+  useImperativeHandle,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+} from 'react';
 import Animated, {
+  runOnJS,
   useAnimatedReaction,
   useAnimatedScrollHandler,
 } from 'react-native-reanimated';
@@ -11,103 +19,182 @@ import { ScrolledDateIndicator } from './ScrolledDateIndicator_thumb';
 const AnimatedRecyclerListView =
   Animated.createAnimatedComponent(RecyclerListView);
 
-export const ScrollableRecyclerListView = ({
-  timestamps,
-  minIndicatorFactor = 3,
-  ...props
-}: React.ComponentProps<typeof RecyclerListView> & {
-  timestamps: (number | undefined)[];
-  minIndicatorFactor?: number;
-}) => {
-  const ref = React.useRef<RecyclerListView<any, any>>(null);
-  const [indicatorVisible, setIndicatorVisible] = React.useState(false);
-  const {
-    layoutHeight,
-    contentHeight,
-    scrollY,
-    isUserDragging,
-    clamped,
-    dateMs,
-  } = useScrollIndicator();
+export type ScrollableRecyclerListViewRef = {
+  forceRerender: () => void;
+  scrollToOffset: RecyclerListView<any, any>['scrollToOffset'];
+};
 
-  const scrollHandler = useAnimatedScrollHandler({
-    onScroll: e => {
-      if (isUserDragging.value === 1) {
+export const ScrollableRecyclerListView = forwardRef<
+  ScrollableRecyclerListViewRef,
+  React.ComponentProps<typeof RecyclerListView> & {
+    timestamps: (number | undefined)[];
+    minIndicatorFactor?: number;
+    scrollKey?: string;
+  }
+>(
+  (
+    {
+      timestamps,
+      minIndicatorFactor = 3,
+      scrollKey,
+      ...props
+    },
+    forwardedRef,
+  ) => {
+    const ref = useRef<RecyclerListView<any, any>>(null);
+    const [indicatorVisible, setIndicatorVisible] = React.useState(false);
+    const scrollOffsetRef = useRef(0);
+    const ignoreScrollResetRef = useRef(false);
+    const {
+      layoutHeight,
+      contentHeight,
+      scrollY,
+      isUserDragging,
+      clamped,
+      dateMs,
+    } = useScrollIndicator();
+
+    useImperativeHandle(
+      forwardedRef,
+      () => ({
+        forceRerender: () => ref.current?.forceRerender(),
+        scrollToOffset: (...args) => ref.current?.scrollToOffset(...args),
+      }),
+      [],
+    );
+
+    const saveScrollOffset = useCallback((offset: number) => {
+      if (ignoreScrollResetRef.current && offset === 0) {
+        return;
+      }
+      scrollOffsetRef.current = offset;
+    }, []);
+
+    const restoreScrollOffset = useCallback(() => {
+      const offset = scrollOffsetRef.current;
+      if (offset <= 0) {
         return;
       }
 
-      scrollY.value =
-        (e.contentOffset.y / e.contentSize.height) * e.layoutMeasurement.height;
-      contentHeight.value = e.contentSize.height;
-      layoutHeight.value = e.layoutMeasurement.height;
-    },
-  });
+      ignoreScrollResetRef.current = true;
+      ref.current?.scrollToOffset(0, offset, false);
+      requestAnimationFrame(() => {
+        ignoreScrollResetRef.current = false;
+      });
+    }, []);
 
-  useLayoutEffect(() => {
-    setIndicatorVisible(false);
-  }, [timestamps]);
+    useLayoutEffect(() => {
+      scrollOffsetRef.current = 0;
+    }, [scrollKey]);
 
-  useAnimatedReaction(
-    () => clamped.value,
-    clamped => {
-      if (isUserDragging.value === 1) {
-        const index = Math.floor((timestamps.length - 1) * clamped);
-        // find first existing timestamp starting from index
-        let item: number | undefined = undefined;
-        for (let i = index; i < timestamps.length; i++) {
-          const t = timestamps[i];
-          if (t !== undefined) {
-            item = t;
-            break;
-          }
+    const scrollHandler = useAnimatedScrollHandler({
+      onScroll: e => {
+        if (isUserDragging.value === 1) {
+          return;
         }
-        dateMs.value = item ?? 0;
-      }
-    },
-    [timestamps],
-  );
 
-  const scrollToOffsetPercentage = useCallback((offsetPercentage: number) => {
-    const flashListHeight = ref?.current?.getContentDimension().height ?? 1;
-    const offset = offsetPercentage * flashListHeight;
-    ref?.current?.scrollToOffset(0, offset, true);
-  }, []);
+        runOnJS(saveScrollOffset)(e.contentOffset.y);
+        scrollY.value =
+          (e.contentOffset.y / e.contentSize.height) *
+          e.layoutMeasurement.height;
+        contentHeight.value = e.contentSize.height;
+        layoutHeight.value = e.layoutMeasurement.height;
+      },
+    });
 
-  return (
-    <View style={{ position: 'relative', flex: 1 }}>
-      <AnimatedRecyclerListView
-        {...props}
-        onVisibleIndicesChanged={(indices, b, c) => {
-          const visibleCount = indices.length;
-          const totalCount = timestamps.length;
-          const shouldShow = totalCount >= visibleCount * minIndicatorFactor;
-          setIndicatorVisible(shouldShow);
-          props.onVisibleIndicesChanged?.(indices, b, c);
-        }}
-        scrollViewProps={{
-          ...props.scrollViewProps,
-          showsVerticalScrollIndicator: false,
-          showsHorizontalScrollIndicator: false,
-          onLayout: (e: any) => {
-            layoutHeight.value = e.nativeEvent.layout.height;
-            // @ts-ignore
-            props.scrollViewProps?.onLayout?.(e);
-          },
-          onContentSizeChange: (_: any, h: number) => {
-            contentHeight.value = h;
-            // @ts-ignore
-            props.scrollViewProps?.onContentSizeChange?.(_, h);
-          },
-        }}
+    useLayoutEffect(() => {
+      setIndicatorVisible(false);
+    }, [timestamps]);
+
+    useAnimatedReaction(
+      () => clamped.value,
+      clamped => {
+        if (isUserDragging.value === 1) {
+          const index = Math.floor((timestamps.length - 1) * clamped);
+          let item: number | undefined = undefined;
+          for (let i = index; i < timestamps.length; i++) {
+            const t = timestamps[i];
+            if (t !== undefined) {
+              item = t;
+              break;
+            }
+          }
+          dateMs.value = item ?? 0;
+        }
+      },
+      [timestamps],
+    );
+
+    const scrollToOffsetPercentage = useCallback((offsetPercentage: number) => {
+      const flashListHeight = ref?.current?.getContentDimension().height ?? 1;
+      const offset = offsetPercentage * flashListHeight;
+      scrollOffsetRef.current = offset;
+      ref?.current?.scrollToOffset(0, offset, true);
+    }, []);
+
+    const handleScrollViewLayout = useCallback(
+      (e: any) => {
+        layoutHeight.value = e.nativeEvent.layout.height;
         // @ts-ignore
-        onScroll={scrollHandler}
+        props.scrollViewProps?.onLayout?.(e);
+        requestAnimationFrame(restoreScrollOffset);
+      },
+      [layoutHeight, props.scrollViewProps, restoreScrollOffset],
+    );
+
+    const handleContentSizeChange = useCallback(
+      (_: any, h: number) => {
+        contentHeight.value = h;
         // @ts-ignore
-        ref={ref}
-        scrollEventThrottle={16}
-      />
-      {indicatorVisible ? (
-        <ScrolledDateIndicator onScroll={scrollToOffsetPercentage} />
-      ) : null}
-    </View>
-  );
-};
+        props.scrollViewProps?.onContentSizeChange?.(_, h);
+        requestAnimationFrame(restoreScrollOffset);
+      },
+      [contentHeight, props.scrollViewProps, restoreScrollOffset],
+    );
+
+    const handleVisibleIndicesChanged = useCallback(
+      (indices: number[], ...rest: any[]) => {
+        const visibleCount = indices.length;
+        const totalCount = timestamps.length;
+        const shouldShow = totalCount >= visibleCount * minIndicatorFactor;
+        setIndicatorVisible(current => (current === shouldShow ? current : shouldShow));
+        // @ts-ignore
+        props.onVisibleIndicesChanged?.(indices, ...rest);
+      },
+      [minIndicatorFactor, timestamps.length, props.onVisibleIndicesChanged],
+    );
+
+    const scrollViewProps = useMemo(
+      () => ({
+        ...props.scrollViewProps,
+        showsVerticalScrollIndicator: false,
+        showsHorizontalScrollIndicator: false,
+        onLayout: handleScrollViewLayout,
+        onContentSizeChange: handleContentSizeChange,
+      }),
+      [
+        handleContentSizeChange,
+        handleScrollViewLayout,
+        props.scrollViewProps,
+      ],
+    );
+
+    return (
+      <View style={{ position: 'relative', flex: 1 }}>
+        <AnimatedRecyclerListView
+          {...props}
+          onVisibleIndicesChanged={handleVisibleIndicesChanged}
+          scrollViewProps={scrollViewProps}
+          // @ts-ignore
+          onScroll={scrollHandler}
+          // @ts-ignore
+          ref={ref}
+          scrollEventThrottle={16}
+        />
+        {indicatorVisible ? (
+          <ScrolledDateIndicator onScroll={scrollToOffsetPercentage} />
+        ) : null}
+      </View>
+    );
+  },
+);
