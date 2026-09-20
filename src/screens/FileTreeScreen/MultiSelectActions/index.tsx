@@ -8,6 +8,9 @@ import { FileManagerNavigation } from '../../../common/types/navigation';
 import ActionButton from '../../../common/components/ActionButton';
 import { useTranslation } from 'react-i18next';
 import { useExceptionHandler } from '../../../common/components/ExceptionHandler';
+import { NativeModules } from 'react-native';
+
+const { EmbeddingsModule } = NativeModules;
 
 const ICON_STYLE = {
   marginRight: 0,
@@ -34,6 +37,19 @@ const MultiSelectActions: React.FC<{
     }
     const item = dirItemsForOperations[0];
     return [
+      {
+        title: 'index (Experimental)',
+        icon: 'information-outline',
+        key: 'index',
+        enabled: item.isDirectory(),
+        onPress: () => {
+          EmbeddingsModule.indexFolder(item.path, false)
+            .then((r: any) => {
+              console.log('Indexing result:', r);
+            })
+            .catch((e: any) => console.error('Indexing error:', e));
+        },
+      },
       {
         title: t('openWith'),
         icon: 'open-in-app',

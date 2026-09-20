@@ -14,6 +14,7 @@ import com.telenko.filemanager.viewer.LocalFileViewerPackage
 import com.telenko.filemanager.thumbnail.ThumbnailPackage
 import com.telenko.filemanager.storage.StorageMetaReaderPackage
 import com.telenko.filemanager.picker.PickerActivityPackage
+import com.telenko.filemanager.embeddings.EmbeddingsPackage
  
 class MainApplication : Application(), ReactApplication {
  
@@ -28,6 +29,7 @@ class MainApplication : Application(), ReactApplication {
               add(ThumbnailPackage());
               add(StorageMetaReaderPackage());
               add(PickerActivityPackage());
+              add(EmbeddingsPackage());
             }
  
         override fun getJSMainModuleName(): String = "index"

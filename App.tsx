@@ -1,10 +1,11 @@
 import React, { PropsWithChildren, useEffect, useState } from 'react';
-import { Platform } from 'react-native';
+import { Platform, View, Text, Button, TextInput } from 'react-native';
 import FileManager from './src/widgets/FileManager/FileManager';
 import { useDeviceLocale } from './src/i18n/hooks/useDeviceLocale';
 import {
-  Button,
+  // Button,
   configureFonts,
+  IconButton,
   MD3LightTheme,
   PaperProvider,
 } from 'react-native-paper';
@@ -15,6 +16,10 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import ExceptionHandler from './src/common/components/ExceptionHandler';
 import { SnackbarProvider } from 'react-native-paper-snackbar-stack';
 import NoPermissionScreen from './src/common/components/NoPermissionScreen';
+
+import { NativeModules } from 'react-native';
+
+const { EmbeddingsModule } = NativeModules;
 
 const MAX_SNACK = 2;
 
@@ -73,6 +78,15 @@ const App = () => {
   const askPermission = () =>
     FileApi.askForStoragePermission()
       .then(() => setPermissionGranted(true))
+      .then(() => {
+        EmbeddingsModule.initModel()
+          .then(() => {
+            console.log('Model initialized successfully');
+          })
+          .catch((error: any) => {
+            console.error('Error initializing model:', error);
+          });
+      })
       .catch(e => {
         // do nothing here...
       });

@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import { DirItem, FileApi } from '../../services/FileApi';
 import FilePathBreadCrumb from './FilePathBreadCrumb';
@@ -18,7 +24,7 @@ import { useBackAction } from '../../common/hooks/useBackAction';
 import { useExceptionHandler } from '../../common/components/ExceptionHandler';
 import DefaultFolderActions from '../../widgets/FileManager/actions/DefaultFolderActions';
 import StorageSelect from './StorageSelect';
-import { ActivityIndicator } from 'react-native-paper';
+import { ActivityIndicator, Button, TextInput } from 'react-native-paper';
 import SelectorAction from './SelectorAction';
 import {
   calcGridColumns,
@@ -29,6 +35,9 @@ import { useStoreLatestFolder } from '../../widgets/FileManager/settings';
 import { useFocusEffect } from '@react-navigation/native';
 import { ItemWithSkeleton } from './ItemWithSkeleton';
 import FileTreeList, { FileTreeListRef } from './FileTreeList';
+import { NativeModules } from 'react-native';
+
+const { EmbeddingsModule } = NativeModules;
 
 export type FileScreenProps = {
   route: {
@@ -211,11 +220,18 @@ const FileScreen: React.FC<FileScreenProps> = ({
   useBackAction(backHandle);
 
   const exceptionHandler = useExceptionHandler();
+  const [searchText, setSearchText] = useState('');
+  const [searchDirItems, setSearchDirItems] = useState<DirItem[]>([]);
 
   // virtualized memoized contents
   const dataProvider = useMemo(
-    () => new DataProvider((r1, r2) => r1 !== r2).cloneWithRows(sortedDirItems),
-    [sortedDirItems],
+    () =>
+      new DataProvider((r1, r2) => r1 !== r2).cloneWithRows(
+        !!searchText.trim() && searchDirItems?.length > 0
+          ? searchDirItems
+          : sortedDirItems,
+      ),
+    [sortedDirItems, searchDirItems, searchText],
   );
   const layoutProvider = useMemo(
     () =>
@@ -272,6 +288,10 @@ const FileScreen: React.FC<FileScreenProps> = ({
     [fileManager.layout],
   );
 
+  useEffect(() => {
+    setSearchDirItems([]);
+  }, [searchText]);
+
   return (
     <FileTreeContext.Provider value={value}>
       <View style={styles.container}>
@@ -286,6 +306,45 @@ const FileScreen: React.FC<FileScreenProps> = ({
           </View>
         ) : null}
 
+        <View
+          style={{
+            flexDirection: 'row',
+            width: '100%',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginBottom: 10,
+          }}>
+          <TextInput
+            label="Search..."
+            value={searchText}
+            onChangeText={setSearchText}
+            style={{ flex: 1, marginRight: 10 }}
+          />
+          <Button
+            mode="contained"
+            onPress={() => {
+              if (searchText.trim() === '') {
+                return;
+              }
+              EmbeddingsModule.searchFiles(searchText, route, 50)
+                .then((results: any) => {
+                  console.log('Search results:', results);
+                  setSearchDirItems(
+                    results
+                      .sort((a: any, b: any) => b.score - a.score)
+                      .map((result: any) => ({
+                        path: result.filePath,
+                        name: result.fileName,
+                        isFile: () => true,
+                        mtime: new Date().getTime(), // Placeholder, adjust as needed,
+                      })),
+                  );
+                })
+                .catch((e: any) => console.error('Search error:', e));
+            }}>
+            Search
+          </Button>
+        </View>
         {sortedDirItems.length === 0 ? (
           <ScrollView
             contentContainerStyle={{
