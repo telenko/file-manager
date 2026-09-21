@@ -8,7 +8,7 @@ import java.nio.LongBuffer
 class TextEmbeddingIndexer(
     private val ortEnv: OrtEnvironment,
     private val textSession: OrtSession?,
-    private val tokenizer: ClipTokenizer // ваш клас токенізатора
+    private val tokenizer: AndroidTokenizer // ваш клас токенізатора
 ) {
 
     /**

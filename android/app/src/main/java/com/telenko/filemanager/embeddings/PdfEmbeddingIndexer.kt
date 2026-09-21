@@ -7,12 +7,19 @@ import android.graphics.pdf.PdfRenderer
 import android.os.ParcelFileDescriptor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import com.tom_roush.pdfbox.pdmodel.PDDocument
+import com.tom_roush.pdfbox.text.PDFTextStripper
 import java.io.File
+import android.content.Context
+import android.util.Log
+
+private const val TAG = "PdfEmbeddingIndexer" 
 
 class PdfEmbeddingIndexer(
     private val imageIndexer: ImageEmbeddingIndexer,
     private val textIndexer: TextEmbeddingIndexer?,
-    private val visualSession: OrtSession?
+    private val visualSession: OrtSession?,
+    private val context: Context
 ) : MediaEmbeddingIndexer {
 
     override val mediaType: MediaType = MediaType.PDF
@@ -77,11 +84,16 @@ class PdfEmbeddingIndexer(
                 if (textIndexer != null) {
                     val pageText = extractTextFromPage(file, pageIndex)
                     
-                    // 2. Обмежуємо текст максимум до 500 символів
-                    val trimmedText = pageText.trim().take(MAX_TEXT_LENGTH)
+                    val trimmedText = pageText.trim()
+                    // Рахуємо кількість слів (розбиваємо за пробілами та переносами)
+                    val wordCount = if (trimmedText.isBlank()) 0 else trimmedText.split("\\s+".toRegex()).size
 
-                    if (trimmedText.isNotBlank()) {
-                        val textVector = textIndexer.getTextEmbedding(trimmedText)
+                    // Перевіряємо поріг мінімальної кількості слів
+                    if (wordCount >= MIN_WORD_COUNT) {
+                        val limitedText = trimmedText.take(MAX_TEXT_LENGTH)
+                        Log.d(TAG, "Extracted valid text from page $pageIndex ($wordCount words): $limitedText")
+
+                        val textVector = textIndexer.getTextEmbedding(limitedText)
                         if (textVector.isNotEmpty()) {
                             embeddings.add(
                                 ExtractedEmbedding(
@@ -94,6 +106,8 @@ class PdfEmbeddingIndexer(
                                 )
                             )
                         }
+                    } else {
+                        Log.d(TAG, "Skipping page $pageIndex: Text too short ($wordCount words, min $MIN_WORD_COUNT required)")
                     }
                 }
             }
@@ -106,28 +120,17 @@ class PdfEmbeddingIndexer(
     }
 
     private fun extractTextFromPage(file: File, pageIndex: Int): String {
-        var pdfiumCore: com.shockwave.pdfium.PdfiumCore? = null
-        var pdfDocument: com.shockwave.pdfium.PdfDocument? = null
-        
         return try {
-            pdfiumCore = com.shockwave.pdfium.PdfiumCore(context)
-            val pfd = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
-            pdfDocument = pdfiumCore.newDocument(pfd)
-
-            pdfiumCore.openPage(pdfDocument, pageIndex)
-            
-            // Витягуємо текст зі сторінки
-            val text = pdfiumCore.extractText(pdfDocument, pageIndex)
-            
-            text ?: ""
+            PDDocument.load(file).use { document ->
+                val stripper = PDFTextStripper().apply {
+                    // Вказуємо конкретну сторінку (PDFBox використовує 1-based нумерацію)
+                    startPage = pageIndex + 1
+                    endPage = pageIndex + 1
+                }
+                stripper.getText(document) ?: ""
+            }
         } catch (e: Exception) {
             ""
-        } finally {
-            try {
-                if (pdfDocument != null && pdfiumCore != null) {
-                    pdfiumCore.closeDocument(pdfDocument)
-                }
-            } catch (_: Exception) {}
         }
     }
 
@@ -145,5 +148,6 @@ class PdfEmbeddingIndexer(
 
     companion object {
         private const val MAX_TEXT_LENGTH = 500
+        private const val MIN_WORD_COUNT = 15 // Мінімальна кількість слів для створення текстового ембеддингу
     }
 }

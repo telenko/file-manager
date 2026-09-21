@@ -4,6 +4,9 @@ import android.content.Context
 import io.objectbox.Box
 import io.objectbox.query.QueryBuilder
 import kotlin.math.sqrt
+import android.util.Log
+
+private const val TAG = "VectorSearchManager" 
 
 class VectorSearchManager(context: Context) {
 
@@ -69,6 +72,9 @@ class VectorSearchManager(context: Context) {
                 frameTimeMs = entity.frameTimeMs
             )
         }
+
+        val maxScoredResult = scoredResults.maxByOrNull { it.score }
+        Log.d(TAG, "Max scored result: ${maxScoredResult ?: "No results"}")
 
         return scoredResults
             .groupBy { it.filePath }

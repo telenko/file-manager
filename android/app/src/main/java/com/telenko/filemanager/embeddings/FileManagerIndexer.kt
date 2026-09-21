@@ -21,12 +21,13 @@ class FileManagerIndexer(
     val imageIndexer = ImageEmbeddingIndexer(ortEnv, visualSession)
     val videoIndexer = VideoEmbeddingIndexer(imageIndexer, visualSession)
     var textEmbeddingIndexer = TextEmbeddingIndexer(ortEnv, textSession, textTokenizer)
-    val pdfIndexer = PdfEmbeddingIndexer(imageIndexer, textEmbeddingIndexer, visualSession)
+    val pdfIndexer = PdfEmbeddingIndexer(imageIndexer, textEmbeddingIndexer, visualSession, context)
 
     private val indexers: List<MediaEmbeddingIndexer> = listOf(
         imageIndexer,
         videoIndexer,
-        pdfIndexer
+        // @TODO Andrii for now pdf indexer has weird behavior for image visual processing
+        // pdfIndexer
     )
 
     /**

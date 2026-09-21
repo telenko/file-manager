@@ -83,6 +83,11 @@ android {
     }
 }
 
+// repositories {
+//     google()
+//     mavenCentral()
+// }
+
 dependencies {
     // The version of react-native is set by the React Native Gradle Plugin
     // For animated GIF support
@@ -94,8 +99,7 @@ dependencies {
     implementation 'com.microsoft.onnxruntime:onnxruntime-android:1.19.0'
     implementation 'ai.djl.huggingface:tokenizers:0.33.0'
     implementation 'ai.djl.android:tokenizer-native:0.33.0'
-    // implementation 'com.tom-roush:pdfbox-android:2.0.27.0'
-    implementation 'com.github.barteksc:pdfium-android:1.9.0'
+    implementation 'com.tom-roush:pdfbox-android:2.0.27.0'
 
     if (hermesEnabled.toBoolean()) {
         implementation("com.facebook.react:hermes-android")
@@ -103,5 +107,19 @@ dependencies {
         implementation jscFlavor
     }
 }
+
+// configurations.all {
+//     resolutionStrategy {
+//         // Замінюємо застарілу бібліотеку support-media-compat на сучасну androidx.media
+//         force 'androidx.media:media:1.7.0'
+//         force 'androidx.core:core:1.16.0'
+//     }
+    
+//     // Повністю виключаємо конфліктні групи старих Support бібліотек
+//     exclude group: 'com.android.support', module: 'support-v4'
+//     exclude group: 'com.android.support', module: 'support-compat'
+//     exclude group: 'com.android.support', module: 'support-media-compat'
+//     exclude group: 'com.android.support', module: 'support-core-utils'
+// }
 
 apply from: file("../../node_modules/react-native-vector-icons/fonts.gradle")

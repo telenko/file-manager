@@ -8,11 +8,18 @@ import ai.onnxruntime.OnnxTensor
 import java.nio.FloatBuffer
 import java.nio.LongBuffer
 import kotlinx.coroutines.*
+import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
 
 private const val TAG = "EMBEDDINGS_MODULE"
 private val moduleScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
 class EmbeddingsModule(private val reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
+
+    init {
+        // Ініціалізуємо PDFBox один раз для Android Context
+        PDFBoxResourceLoader.init(reactContext)
+    }
+
 
     private var ortEnv: OrtEnvironment = OrtEnvironment.getEnvironment()
     private var visualSession: OrtSession? = null
