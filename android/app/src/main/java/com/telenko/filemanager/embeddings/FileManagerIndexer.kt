@@ -3,9 +3,15 @@ package com.telenko.filemanager.embeddings
 import ai.onnxruntime.OrtEnvironment
 import ai.onnxruntime.OrtSession
 import android.content.Context
+import io.objectbox.Box
+import io.objectbox.query.QueryBuilder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
+import android.util.Log
+
+
+private const val TAG = "FileManagerIndexer"
 
 class FileManagerIndexer(
     context: Context,
@@ -15,20 +21,43 @@ class FileManagerIndexer(
     textTokenizer: AndroidTokenizer,
 ) {
     // 1. Ініціалізуємо менеджер збереження та пошуку у БД (ObjectBox)
-    val vectorSearchManager = VectorSearchManager(context)
+    private val box: Box<FileEmbeddingEntity> = ObjectBoxStore.get(context).boxFor(FileEmbeddingEntity::class.java)
+    private val snapshotBox: Box<FileTextSnapshotEntity> = ObjectBoxStore.get(context).boxFor(FileTextSnapshotEntity::class.java)
 
     // 2. Ініціалізуємо всі спеціалізовані індексатори
     val imageIndexer = ImageEmbeddingIndexer(ortEnv, visualSession)
     val videoIndexer = VideoEmbeddingIndexer(imageIndexer, visualSession)
     var textEmbeddingIndexer = TextEmbeddingIndexer(ortEnv, textSession, textTokenizer)
-    val pdfIndexer = PdfEmbeddingIndexer(imageIndexer, textEmbeddingIndexer, visualSession, context)
+    val pdfIndexer = PdfEmbeddingIndexer(context)
 
     private val indexers: List<MediaEmbeddingIndexer> = listOf(
         imageIndexer,
         videoIndexer,
-        // @TODO Andrii for now pdf indexer has weird behavior for image visual processing
-        // pdfIndexer
+        pdfIndexer
     )
+
+    private fun removeFileCache(filePath: String) {
+        // 1. Видаляємо всі ембеддинги файлу прямо в БД (без завантаження у пам'ять)
+        box.query()
+            .equal(FileEmbeddingEntity_.filePath, filePath, QueryBuilder.StringOrder.CASE_SENSITIVE)
+            .build()
+            .remove()
+
+        // 2. Видаляємо всі текстові знімки (snapshots)
+        snapshotBox.query()
+            .equal(FileTextSnapshotEntity_.filePath, filePath, QueryBuilder.StringOrder.CASE_SENSITIVE)
+            .build()
+            .remove()
+    }
+
+    private fun storeFileCache(embeddings: List<FileEmbeddingEntity>, snapshots: List<FileTextSnapshotEntity>) {
+        if (embeddings.isNotEmpty()) {
+            box.put(embeddings)
+        }
+        if (snapshots.isNotEmpty()) {
+            snapshotBox.put(snapshots)
+        }
+    }
 
     /**
      * 3. Метод для індексації одного файлу.
@@ -36,23 +65,13 @@ class FileManagerIndexer(
      */
     suspend fun indexFile(filePath: String): Boolean = withContext(Dispatchers.IO) {
         val file = File(filePath)
+        removeFileCache(filePath)
         if (!file.exists() || !file.isFile) return@withContext false
-
         // Знаходимо індексатор, який підтримує цей тип файлу
         val indexer = indexers.firstOrNull { it.supports(filePath) } ?: return@withContext false
-
         try {
-            val extractedEmbeddings = indexer.indexFile(filePath)
-
-            // Зберігаємо кожен отриманий вектор у VectorSearchManager
-            for (extracted in extractedEmbeddings) {
-                vectorSearchManager.upsertEmbedding(
-                    filePath = file.absolutePath,
-                    fileName = file.name,
-                    vector = extracted.vector,
-                    metadata = extracted.metadata
-                )
-            }
+            val (embeddings, snapshots) = indexer.indexFile(filePath)
+            storeFileCache(embeddings, snapshots) 
             true
         } catch (e: Exception) {
             e.printStackTrace()
@@ -80,8 +99,8 @@ class FileManagerIndexer(
         var successfullyIndexedCount = 0
 
         filesToIndex.forEachIndexed { index, file ->
-            val success = indexFile(file.absolutePath)
-            if (success) {
+            val isSuccess = indexFile(file.absolutePath)
+            if (isSuccess) {
                 successfullyIndexedCount++
             }
             onProgress?.invoke(index + 1, filesToIndex.size)

@@ -18,7 +18,7 @@ class VideoEmbeddingIndexer(
         return ext in SUPPORTED_EXTENSIONS
     }
 
-    override suspend fun indexFile(filePath: String): List<ExtractedEmbedding> = withContext(Dispatchers.IO) {
+    override suspend fun indexFile(filePath: String): ExtractionResult = withContext(Dispatchers.IO) {
         val session = visualSession 
             ?: throw IllegalStateException("Візуальна модель не ініціалізована!")
 
@@ -27,8 +27,9 @@ class VideoEmbeddingIndexer(
             throw IllegalArgumentException("Відео файл не знайдено: $filePath")
         }
 
-        val embeddings = mutableListOf<ExtractedEmbedding>()
+        val embeddings = mutableListOf<FileEmbeddingEntity>()
         val retriever = MediaMetadataRetriever()
+        val fileName = file.name
 
         try {
             retriever.setDataSource(file.absolutePath)
@@ -53,12 +54,13 @@ class VideoEmbeddingIndexer(
                         val vector = imageIndexer.extractEmbeddingFromBitmap(bitmap, session)
 
                         embeddings.add(
-                            ExtractedEmbedding(
-                                vector = vector,
-                                metadata = EmbeddingMetadata(
-                                    mediaType = mediaType,
-                                    frameTimeMs = timeMs
-                                )
+                            FileEmbeddingEntity(
+                                filePath = filePath,
+                                fileName = fileName,
+                                embedding = vector,
+                                mediaType = MediaType.VIDEO.name,
+                                embeddingType = EmbeddingType.IMAGE.name,
+                                frameTimeMs = timeMs
                             )
                         )
                     } finally {
@@ -70,7 +72,10 @@ class VideoEmbeddingIndexer(
             retriever.release()
         }
 
-        embeddings
+        ExtractionResult(
+            embeddings = embeddings,
+            snapshots = emptyList()
+        )
     }
 
     /**

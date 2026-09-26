@@ -8,18 +8,12 @@ class AndroidTokenizer(context: Context, assetFileName: String = "tokenizer_text
     private val tokenizer: HuggingFaceTokenizer
 
     init {
-        // Копіюємо файл із assets у безпечний внутрішній кеш додатку
         val file = File(context.cacheDir, assetFileName)
-        
         if (!file.exists()) {
             context.assets.open(assetFileName).use { inputStream ->
-                file.outputStream().use { outputStream ->
-                    inputStream.copyTo(outputStream)
-                }
+                file.outputStream().use { outputStream -> inputStream.copyTo(outputStream) }
             }
         }
-
-        // Завантажуємо HuggingFace токенізатор з локального кешу
         tokenizer = HuggingFaceTokenizer.newInstance(file.toPath())
     }
 
@@ -29,13 +23,24 @@ class AndroidTokenizer(context: Context, assetFileName: String = "tokenizer_text
         val rawIds = encoding.ids
         val rawMask = encoding.attentionMask
 
-        val inputIds = LongArray(maxLength) { 0L }
+        // ID токена EOS/PAD для стандартного CLIP = 49407. 
+        // Якщо у вашій моделі це 0 чи інше значення, вкажіть його.
+        val eosTokenId = 49407L 
+
+        val inputIds = LongArray(maxLength) { eosTokenId }
         val attentionMask = LongArray(maxLength) { 0L }
 
         val length = minOf(rawIds.size, maxLength)
+        
         for (i in 0 until length) {
             inputIds[i] = rawIds[i]
             attentionMask[i] = rawMask[i]
+        }
+
+        // Якщо токенізатор не додав EOS токен у кінець витягнутого тексту, додаємо його вручну
+        if (length < maxLength && length > 0 && inputIds[length - 1] != eosTokenId) {
+            inputIds[length] = eosTokenId
+            attentionMask[length] = 1L
         }
 
         return Pair(inputIds, attentionMask)

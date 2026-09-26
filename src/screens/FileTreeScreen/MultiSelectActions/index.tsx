@@ -1,7 +1,14 @@
 import React, { useMemo, useState } from 'react';
 import { useFileManager } from '../../../widgets/FileManager';
-import { View } from 'react-native';
-import { Menu } from 'react-native-paper';
+import { View, Alert } from 'react-native';
+import {
+  Button,
+  Dialog,
+  Menu,
+  Portal,
+  Text,
+  TextInput,
+} from 'react-native-paper';
 import { DirItem, FileApi } from '../../../services/FileApi';
 import { NavigationProp } from '@react-navigation/native';
 import { FileManagerNavigation } from '../../../common/types/navigation';
@@ -11,6 +18,29 @@ import { useExceptionHandler } from '../../../common/components/ExceptionHandler
 import { NativeModules } from 'react-native';
 
 const { EmbeddingsModule } = NativeModules;
+
+async function testSimilarity(filePath: string, queryText: string) {
+  try {
+    // 1. Отримуємо масив результатів з вашого модуля
+    const results = await EmbeddingsModule.calculateSimilarity(
+      filePath,
+      queryText,
+    );
+
+    if (!results || results.length === 0) {
+      Alert.alert('Результат', 'Ембеддинги не знайдені.');
+      return;
+    }
+
+    // 2. Беремо, наприклад, найкращий (перший) скор
+    // const topScore = results[0].score.toFixed(4);
+
+    // 3. Виводимо нативний Alert
+    return results;
+  } catch (error: any) {
+    Alert.alert('Помилка', error.message);
+  }
+}
 
 const ICON_STYLE = {
   marginRight: 0,
@@ -31,6 +61,15 @@ const MultiSelectActions: React.FC<{
   const [menuOpen, setMenuOpen] = useState(false);
   const exceptionHandler = useExceptionHandler();
 
+  const [visibleEmbeddingsDialog, setVisibleEmbeddingsDialog] = useState(false);
+  const showEmbeddingsDialog = () => setVisibleEmbeddingsDialog(true);
+  const hideEmbeddingsDialog = () => setVisibleEmbeddingsDialog(false);
+
+  const [queryText, setQueryText] = useState<string>('');
+
+  const [embeddingItem, setEmbeddingItem] = useState<DirItem | null>(null);
+  const [score, setScore] = useState<any>(null);
+
   const menuItems = useMemo(() => {
     if (dirItemsForOperations.length !== 1) {
       return [];
@@ -48,6 +87,17 @@ const MultiSelectActions: React.FC<{
               console.log('Indexing result:', r);
             })
             .catch((e: any) => console.error('Indexing error:', e));
+        },
+      },
+      {
+        title: 'test embeddings (Experimental)',
+        icon: 'information-outline',
+        key: 'testEmbeddings',
+        enabled: item.isFile(),
+        onPress: () => {
+          setScore(null);
+          setEmbeddingItem(item);
+          showEmbeddingsDialog();
         },
       },
       {
@@ -161,6 +211,32 @@ const MultiSelectActions: React.FC<{
           />
         ))}
       </Menu>
+      <Portal>
+        <Dialog
+          visible={visibleEmbeddingsDialog}
+          onDismiss={hideEmbeddingsDialog}>
+          <Dialog.Title>Calculate Similarity</Dialog.Title>
+          <Dialog.Content>
+            <TextInput
+              label="Query Text"
+              value={queryText}
+              onChangeText={setQueryText}
+            />
+            <Text style={{ marginTop: 10 }}>
+              {score !== null
+                ? `Similarity Results: ${JSON.stringify(score)}`
+                : 'Enter a query and press Calculate.'}
+            </Text>
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Button onPress={hideEmbeddingsDialog}>Done</Button>
+            <Button onPress={async () => {
+              const results = await testSimilarity(embeddingItem?.path || '', queryText);
+              setScore(results);
+            }}>Calculate</Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
     </View>
   );
 };

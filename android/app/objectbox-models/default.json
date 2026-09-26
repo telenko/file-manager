@@ -5,7 +5,7 @@
   "entities": [
     {
       "id": "2:6976214103391802474",
-      "lastPropertyId": "9:5750245086073294424",
+      "lastPropertyId": "10:8346089213624150726",
       "name": "FileEmbeddingEntity",
       "properties": [
         {
@@ -55,10 +55,46 @@
         }
       ],
       "relations": []
+    },
+    {
+      "id": "3:4478851551586251735",
+      "lastPropertyId": "5:6418136173536455316",
+      "name": "FileTextSnapshotEntity",
+      "properties": [
+        {
+          "id": "1:240210371263023748",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:8664218102679843636",
+          "name": "filePath",
+          "indexId": "5:1982365850848533079",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "3:6703040215524199336",
+          "name": "fileName",
+          "type": 9
+        },
+        {
+          "id": "4:3781556426051395905",
+          "name": "pageIndex",
+          "type": 5
+        },
+        {
+          "id": "5:6418136173536455316",
+          "name": "text",
+          "type": 9
+        }
+      ],
+      "relations": []
     }
   ],
-  "lastEntityId": "2:6976214103391802474",
-  "lastIndexId": "4:291421383248000590",
+  "lastEntityId": "3:4478851551586251735",
+  "lastIndexId": "5:1982365850848533079",
   "lastRelationId": "0:0",
   "lastSequenceId": "0:0",
   "modelVersion": 5,
@@ -78,7 +114,8 @@
     4694273570301093528,
     8912112058290210952,
     6641512481826601565,
-    1216997070349331395
+    1216997070349331395,
+    8346089213624150726
   ],
   "retiredRelationUids": [],
   "version": 1

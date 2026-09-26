@@ -4,10 +4,6 @@ import {
   Pressable,
   StyleSheet,
   useWindowDimensions,
-  View,
-  Text,
-  Button,
-  TextInput,
 } from 'react-native';
 import { DirItem, FileApi } from '../../services/FileApi';
 import { Cache } from '../../services/Cache';
@@ -27,10 +23,6 @@ import Animated, {
 } from 'react-native-reanimated';
 import { theme } from '../../theme';
 
-import { NativeModules } from 'react-native';
-
-const { EmbeddingsModule } = NativeModules;
-
 export type ImageViewerScreenProps = {
   route: { params: { route: string; sort: 'asc' | 'desc' } };
 };
@@ -40,51 +32,11 @@ const ItemPreview: React.FC<{
   onActive?: (zooming: boolean) => void;
   activeFile?: DirItem;
 }> = props => {
-  const [text, onChangeText] = useState('природа');
-  const [similarity, setSimilarity] = useState<number | null>(null);
   // @ts-ignore
   if (FileApi.isFileVideo(props.file)) {
     return <VideoViewer {...props} />;
   }
-  return (
-    <View style={{paddingTop: 60, backgroundColor: 'white'}}>
-      <TextInput
-        onChangeText={onChangeText}
-        value={text}
-        placeholder="Enter text..."
-        style={{
-          height: 40,
-          borderColor: 'gray',
-          borderWidth: 1,
-          color: 'black'
-        }}
-      />
-      <Button
-        title="Press me"
-        color="#f194ff"
-        onPress={() => {
-          if (!props.file?.path) {
-            return;
-          }
-          console.log('Button pressed');
-          console.time('getVisualEmbedding');
-
-          console.log("Comparing image at path:", props.file?.path, "with text:", text);
-          EmbeddingsModule.compareImageAndText(props.file?.path, text)
-            .then((similarity: any) => {
-              setSimilarity(similarity);
-              console.log('Similarity score:', similarity);
-              console.timeEnd('getVisualEmbedding');
-            })
-            .catch((error: any) => {
-              console.error('Error getting visual embedding:', error);
-            });
-        }}
-      />
-      <Text>Similarity: {similarity !== null ? similarity : 'N/A'}</Text>
-      <ImageViewer {...props} />
-    </View>
-  );
+  return <ImageViewer {...props} />;
 };
 
 const ImagePreviewScreen: React.FC<ImageViewerScreenProps> = ({

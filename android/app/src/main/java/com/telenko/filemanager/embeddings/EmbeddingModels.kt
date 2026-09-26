@@ -6,21 +6,9 @@ enum class MediaType {
     VIDEO
 }
 
-/**
- * Модель результату генерації ембеддінгу.
- * Оскільки один файл (наприклад, відео або PDF) може містити декілька ембеддінгів 
- * (кадри/сторінки), генератор повертає список результатів.
- */
-data class ExtractedEmbedding(
-    val vector: FloatArray,
-    val metadata: EmbeddingMetadata
-)
-
-data class EmbeddingMetadata(
-    val mediaType: MediaType = MediaType.IMAGE,
-    val embeddingType: EmbeddingType = EmbeddingType.IMAGE, // Додали поле
-    val pageIndex: Int = 0,
-    val frameTimeMs: Long = 0L
+data class ExtractionResult(
+    val embeddings: List<FileEmbeddingEntity>,
+    val snapshots: List<FileTextSnapshotEntity>
 )
 
 data class SearchResult(
@@ -28,12 +16,21 @@ data class SearchResult(
     val fileName: String,
     val score: Float,
     val mediaType: String,
-    val embeddingType: String = EmbeddingType.IMAGE.name, // Додали поле
+    val embeddingType: String = EmbeddingType.IMAGE.name,
     val pageIndex: Int = 0,
     val frameTimeMs: Long = 0L
 )
 
 enum class EmbeddingType {
     IMAGE, // Вектор згенеровано візуальною моделлю (Vision/CLIP Image)
-    TEXT   // Вектор згенеровано текстовою моделлю (CLIP Text або Text Embedder)
+    NONE
+}
+
+/**
+ * Контекст пошуку для розділення векторних просторів
+ */
+enum class SearchContext {
+    VISUAL,
+    TEXT,
+    ALL
 }

@@ -36,6 +36,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { ItemWithSkeleton } from './ItemWithSkeleton';
 import FileTreeList, { FileTreeListRef } from './FileTreeList';
 import { NativeModules } from 'react-native';
+import { SearchContextSelect } from './SearchContextSelect';
 
 const { EmbeddingsModule } = NativeModules;
 
@@ -222,6 +223,7 @@ const FileScreen: React.FC<FileScreenProps> = ({
   const exceptionHandler = useExceptionHandler();
   const [searchText, setSearchText] = useState('');
   const [searchDirItems, setSearchDirItems] = useState<DirItem[]>([]);
+  const [searchContext, setSearchContext] = useState<'VISUAL' | 'TEXT' | 'ALL'>('VISUAL');
 
   // virtualized memoized contents
   const dataProvider = useMemo(
@@ -318,15 +320,16 @@ const FileScreen: React.FC<FileScreenProps> = ({
             label="Search..."
             value={searchText}
             onChangeText={setSearchText}
-            style={{ flex: 1, marginRight: 10 }}
+            style={{ flex: 3, marginRight: 10 }}
           />
+          <SearchContextSelect value={searchContext} onSelect={setSearchContext} />
           <Button
             mode="contained"
             onPress={() => {
               if (searchText.trim() === '') {
                 return;
               }
-              EmbeddingsModule.searchFiles(searchText, route, 50)
+              EmbeddingsModule.searchFiles(searchText, searchContext, route, 50)
                 .then((results: any) => {
                   console.log('Search results:', results);
                   setSearchDirItems(

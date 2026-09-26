@@ -5,7 +5,7 @@
   "entities": [
     {
       "id": "2:6976214103391802474",
-      "lastPropertyId": "8:6288164857274920264",
+      "lastPropertyId": "10:8346089213624150726",
       "name": "FileEmbeddingEntity",
       "properties": [
         {
@@ -47,6 +47,16 @@
           "id": "8:6288164857274920264",
           "name": "frameTimeMs",
           "type": 6
+        },
+        {
+          "id": "9:5750245086073294424",
+          "name": "embeddingType",
+          "type": 9
+        },
+        {
+          "id": "10:8346089213624150726",
+          "name": "textSnapshot",
+          "type": 9
         }
       ],
       "relations": []

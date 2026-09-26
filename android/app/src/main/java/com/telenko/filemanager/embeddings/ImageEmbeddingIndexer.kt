@@ -11,6 +11,8 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.nio.FloatBuffer
 
+private const val TAG = "ImageEmbeddingIndexer"
+
 class ImageEmbeddingIndexer(
     private val ortEnv: OrtEnvironment,
     private val visualSession: OrtSession?
@@ -23,13 +25,24 @@ class ImageEmbeddingIndexer(
         return ext in SUPPORTED_EXTENSIONS
     }
 
-    override suspend fun indexFile(filePath: String): List<ExtractedEmbedding> = withContext(Dispatchers.IO) {
+    override suspend fun indexFile(filePath: String): ExtractionResult = withContext(Dispatchers.IO) {
         val vector = getVisualEmbeddingInternal(filePath)
-        listOf(
-            ExtractedEmbedding(
-                vector = vector,
-                metadata = EmbeddingMetadata(mediaType = mediaType)
-            )
+        Log.d(TAG, "Extracted visual embedding for image: $filePath")
+
+        val fileName = filePath.substringAfterLast('/')
+
+        // Автоматично повертається як результат withContext
+        ExtractionResult(
+            embeddings = listOf(
+                FileEmbeddingEntity(
+                    filePath = filePath,
+                    fileName = fileName,
+                    embedding = vector, // Виправлено: embedding замість vector
+                    mediaType = MediaType.IMAGE.name, // Або mediaType.name, якщо це змінна класу
+                    embeddingType = EmbeddingType.IMAGE.name
+                )
+            ),
+            snapshots = emptyList()
         )
     }
 
