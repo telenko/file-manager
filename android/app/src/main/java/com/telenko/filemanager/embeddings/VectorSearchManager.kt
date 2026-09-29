@@ -5,6 +5,7 @@ import android.util.Log
 import io.objectbox.Box
 import io.objectbox.query.QueryBuilder
 import kotlin.math.sqrt
+import com.telenko.filemanager.db.ObjectBoxStore
 
 private const val TAG = "VectorSearchManager"
 

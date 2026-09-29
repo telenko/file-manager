@@ -14,6 +14,7 @@ import { FileApi } from './src/services/FileApi';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import ExceptionHandler from './src/common/components/ExceptionHandler';
+// @TODO Andrii get rid of unreliable library
 import { SnackbarProvider } from 'react-native-paper-snackbar-stack';
 import NoPermissionScreen from './src/common/components/NoPermissionScreen';
 

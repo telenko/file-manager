@@ -91,10 +91,58 @@
         }
       ],
       "relations": []
+    },
+    {
+      "id": "4:8711431975065846805",
+      "lastPropertyId": "7:5660366566074224020",
+      "name": "FileIndexEntity",
+      "properties": [
+        {
+          "id": "1:5045162099299500579",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:2149735389785912529",
+          "name": "filePath",
+          "indexId": "6:61865324763524138",
+          "type": 9,
+          "flags": 34848
+        },
+        {
+          "id": "3:147499704444555290",
+          "name": "fileName",
+          "type": 9
+        },
+        {
+          "id": "4:4438179750298340153",
+          "name": "mediaType",
+          "type": 9
+        },
+        {
+          "id": "5:3227639641054479947",
+          "name": "lastModified",
+          "type": 6
+        },
+        {
+          "id": "6:3462491136058765830",
+          "name": "fileSize",
+          "type": 6
+        },
+        {
+          "id": "7:5660366566074224020",
+          "name": "parentPath",
+          "indexId": "7:7721810984512901512",
+          "type": 9,
+          "flags": 2048
+        }
+      ],
+      "relations": []
     }
   ],
-  "lastEntityId": "3:4478851551586251735",
-  "lastIndexId": "5:1982365850848533079",
+  "lastEntityId": "4:8711431975065846805",
+  "lastIndexId": "7:7721810984512901512",
   "lastRelationId": "0:0",
   "lastSequenceId": "0:0",
   "modelVersion": 5,

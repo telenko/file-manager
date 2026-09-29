@@ -1288,7 +1288,7 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
   _reactNative.AppRegistry.registerComponent("FileManagerPicker", function () {
     return _FilePicker.default;
   });
-},0,[1,2,609,1554,1555],"index.js");
+},0,[1,2,609,1556,1557],"index.js");
 __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, exports, _dependencyMap) {
   function _interopRequireDefault(e) {
     return e && e.__esModule ? e : {
@@ -98211,7 +98211,7 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
   var _NoPermissionScreen = _interopRequireDefault(_$$_REQUIRE(_dependencyMap[6], "./src/common/components/NoPermissionScreen"));
   var _jsxRuntime = _$$_REQUIRE(_dependencyMap[7], "react/jsx-runtime");
   var _this = this,
-    _jsxFileName = "C:\\Projects\\file-manager\\App.tsx";
+    _jsxFileName = "C:\\Projects\\file-manager\\App.tsx"; // @TODO Andrii get rid of unreliable library
   function _interopRequireWildcard(e, t) { if ("function" == typeof WeakMap) var r = new WeakMap(), n = new WeakMap(); return (_interopRequireWildcard = function _interopRequireWildcard(e, t) { if (!t && e && e.__esModule) return e; var o, i, f = { __proto__: null, default: e }; if (null === e || "object" != typeof e && "function" != typeof e) return f; if (o = t ? n : r) { if (o.has(e)) return o.get(e); o.set(e, f); } for (var _t in e) "default" !== _t && {}.hasOwnProperty.call(e, _t) && ((i = (o = Object.defineProperty) && Object.getOwnPropertyDescriptor(e, _t)) && (i.get || i.set) ? o(f, _t, i) : f[_t] = e[_t]); return f; })(e, t); }
   var EmbeddingsModule = _reactNative.NativeModules.EmbeddingsModule;
   var MAX_SNACK = 2;
@@ -98309,7 +98309,7 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
     });
   };
   var _default = exports.default = App;
-},609,[1,34,73,2,610,912,1537,171,617,1538,877,823,1048,656,1526],"App.tsx");
+},609,[1,34,73,2,610,912,1539,171,617,1540,877,823,1048,656,1526],"App.tsx");
 __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, exports, _dependencyMap) {
   var _interopRequireDefault = _$$_REQUIRE(_dependencyMap[0], "@babel/runtime/helpers/interopRequireDefault");
   Object.defineProperty(exports, "__esModule", {
@@ -98388,10 +98388,17 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
     var _useInitialState = (0, _$$_REQUIRE(_dependencyMap[21], "./useInitialState").useInitialState)(roots, rootsReady),
       state = _useInitialState.state,
       stateReady = _useInitialState.ready;
+    var _useIndexedFiles = (0, _$$_REQUIRE(_dependencyMap[22], "../../common/hooks/useIndexedFiles").useIndexedFiles)(),
+      files = _useIndexedFiles.files,
+      isIndexing = _useIndexedFiles.isIndexing;
+    (0, _react.useEffect)(function () {
+      console.log('IS INDEXING', isIndexing);
+      console.log('FILES leength', files == null ? void 0 : files.length);
+    }, [isIndexing]);
     var createDirectory = (0, _react.useCallback)(function (navigation) {
       var _getRouteDirectory;
       setNewDirName('');
-      var directory = (_getRouteDirectory = (0, _$$_REQUIRE(_dependencyMap[22], "./FileGuiHelper").getRouteDirectory)(navigation)) != null ? _getRouteDirectory : _$$_REQUIRE(_dependencyMap[23], "../../services/FileApi").FileApi.ROOT_PATH;
+      var directory = (_getRouteDirectory = (0, _$$_REQUIRE(_dependencyMap[23], "./FileGuiHelper").getRouteDirectory)(navigation)) != null ? _getRouteDirectory : _$$_REQUIRE(_dependencyMap[24], "../../services/FileApi").FileApi.ROOT_PATH;
       setNewDirPath(directory);
     }, []);
     var showFileDetails = (0, _react.useCallback)(function (dirItem) {
@@ -98403,7 +98410,7 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
           setLongOperation({
             message: t('copyInProgress')
           });
-          yield _$$_REQUIRE(_dependencyMap[23], "../../services/FileApi").FileApi.copyFilesOrDirectoriesBatched(sources, destination, injectIfConflict);
+          yield _$$_REQUIRE(_dependencyMap[24], "../../services/FileApi").FileApi.copyFilesOrDirectoriesBatched(sources, destination, injectIfConflict);
           // user manually closed dialog of long operation
           if (!hasLongOperationVisibleRef.current) {
             enqueueSnackbar({
@@ -98429,7 +98436,7 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
           setLongOperation({
             message: t('moveInProgress')
           });
-          yield _$$_REQUIRE(_dependencyMap[23], "../../services/FileApi").FileApi.moveFilesOrDirectoriesBatched(sources, destination, injectIfConflict);
+          yield _$$_REQUIRE(_dependencyMap[24], "../../services/FileApi").FileApi.moveFilesOrDirectoriesBatched(sources, destination, injectIfConflict);
           // user manually closed dialog of long operation
           if (!hasLongOperationVisibleRef.current) {
             enqueueSnackbar({
@@ -98453,7 +98460,7 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
       var _ref3 = (0, _asyncToGenerator2.default)(function* (files) {
         var deleteInitiated = false;
         try {
-          var res = yield _$$_REQUIRE(_dependencyMap[22], "./FileGuiHelper").FileGuiHelper.deleteContent(files, function () {
+          var res = yield _$$_REQUIRE(_dependencyMap[23], "./FileGuiHelper").FileGuiHelper.deleteContent(files, function () {
             deleteInitiated = true;
             setLongOperation({
               message: t('deleteInProgress')
@@ -98485,7 +98492,7 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
       return Object.assign({
         reloadRequired: reloadRequired,
         setReloadRequired: setReloadRequired
-      }, _$$_REQUIRE(_dependencyMap[22], "./FileGuiHelper").FileGuiHelper, {
+      }, _$$_REQUIRE(_dependencyMap[23], "./FileGuiHelper").FileGuiHelper, {
         renameContent: setRenameDialogActive,
         renameDialogItem: renameDialogActive,
         setRenameDialogActive: setRenameDialogActive,
@@ -98528,15 +98535,15 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
           justifyContent: 'center',
           alignItems: 'center'
         },
-        children: /*#__PURE__*/(0, _jsxRuntime.jsx)(_$$_REQUIRE(_dependencyMap[24], "react-native-paper").ActivityIndicator, {
-          size: _$$_REQUIRE(_dependencyMap[25], "../../theme").theme.primaryLoaderSize,
-          color: _$$_REQUIRE(_dependencyMap[25], "../../theme").theme.selectionColor
+        children: /*#__PURE__*/(0, _jsxRuntime.jsx)(_$$_REQUIRE(_dependencyMap[25], "react-native-paper").ActivityIndicator, {
+          size: _$$_REQUIRE(_dependencyMap[26], "../../theme").theme.primaryLoaderSize,
+          color: _$$_REQUIRE(_dependencyMap[26], "../../theme").theme.selectionColor
         })
       });
     }
-    return /*#__PURE__*/(0, _jsxRuntime.jsxs)(_$$_REQUIRE(_dependencyMap[26], "./FileManagerContext").FileManagerContext.Provider, {
+    return /*#__PURE__*/(0, _jsxRuntime.jsxs)(_$$_REQUIRE(_dependencyMap[27], "./FileManagerContext").FileManagerContext.Provider, {
       value: ctxValue,
-      children: [/*#__PURE__*/(0, _jsxRuntime.jsx)(_RenameContentDialog.default, {}), /*#__PURE__*/(0, _jsxRuntime.jsx)(_CreateDirectoryDialog.default, {}), /*#__PURE__*/(0, _jsxRuntime.jsx)(_FileDetailsDialog.default, {}), /*#__PURE__*/(0, _jsxRuntime.jsx)(_SettingsDialog.default, {}), /*#__PURE__*/(0, _jsxRuntime.jsxs)(_$$_REQUIRE(_dependencyMap[27], "@react-navigation/native").NavigationContainer, {
+      children: [/*#__PURE__*/(0, _jsxRuntime.jsx)(_RenameContentDialog.default, {}), /*#__PURE__*/(0, _jsxRuntime.jsx)(_CreateDirectoryDialog.default, {}), /*#__PURE__*/(0, _jsxRuntime.jsx)(_FileDetailsDialog.default, {}), /*#__PURE__*/(0, _jsxRuntime.jsx)(_SettingsDialog.default, {}), /*#__PURE__*/(0, _jsxRuntime.jsxs)(_$$_REQUIRE(_dependencyMap[28], "@react-navigation/native").NavigationContainer, {
         initialState: state,
         children: [/*#__PURE__*/(0, _jsxRuntime.jsx)(_LongOperationDialog.default, {}), /*#__PURE__*/(0, _jsxRuntime.jsxs)(Stack.Navigator, {
           screenOptions: {
@@ -98583,7 +98590,7 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
       })]
     });
   }
-},610,[1,167,34,73,611,1367,1405,1408,1409,1040,1404,1410,1411,2,171,1441,877,1526,656,1351,1535,1536,1035,823,617,821,1036,917],"src\\widgets\\FileManager\\FileManager.tsx");
+},610,[1,167,34,73,611,1367,1405,1408,1409,1040,1404,1410,1411,2,171,1441,877,1526,656,1351,1535,1536,1537,1035,823,617,821,1036,917],"src\\widgets\\FileManager\\FileManager.tsx");
 __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, exports, _dependencyMap) {
   var _interopRequireDefault = _$$_REQUIRE(_dependencyMap[0], "@babel/runtime/helpers/interopRequireDefault");
   Object.defineProperty(exports, "__esModule", {
@@ -205909,6 +205916,195 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
   Object.defineProperty(exports, "__esModule", {
     value: true
   });
+  exports.useIndexedFiles = void 0;
+  var _asyncToGenerator2 = _interopRequireDefault(_$$_REQUIRE(_dependencyMap[1], "@babel/runtime/helpers/asyncToGenerator"));
+  var _slicedToArray2 = _interopRequireDefault(_$$_REQUIRE(_dependencyMap[2], "@babel/runtime/helpers/slicedToArray"));
+  var _react = _$$_REQUIRE(_dependencyMap[3], "react");
+  var _reactNative = _$$_REQUIRE(_dependencyMap[4], "react-native");
+  var _debounce = _interopRequireDefault(_$$_REQUIRE(_dependencyMap[5], "debounce"));
+  var FileIndexer = _reactNative.NativeModules.FileIndexer;
+  var fileIndexerEmitter = new _reactNative.NativeEventEmitter(FileIndexer);
+  var getFilesDebounced = (0, _debounce.default)(function () {
+    return FileIndexer.getFiles.apply(FileIndexer, arguments);
+  }, 300);
+  var useIndexedFiles = exports.useIndexedFiles = function useIndexedFiles() {
+    var mediaTypes = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : ['IMAGE', 'VIDEO', 'AUDIO', 'TEXT'];
+    var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+    var _options$limit = options.limit,
+      limit = _options$limit === void 0 ? 0 : _options$limit,
+      _options$autoStart = options.autoStart,
+      autoStart = _options$autoStart === void 0 ? true : _options$autoStart;
+    var _useState = (0, _react.useState)([]),
+      _useState2 = (0, _slicedToArray2.default)(_useState, 2),
+      files = _useState2[0],
+      setFiles = _useState2[1];
+    var _useState3 = (0, _react.useState)(false),
+      _useState4 = (0, _slicedToArray2.default)(_useState3, 2),
+      isIndexing = _useState4[0],
+      setIsIndexing = _useState4[1];
+    var _useState5 = (0, _react.useState)('IDLE'),
+      _useState6 = (0, _slicedToArray2.default)(_useState5, 2),
+      indexingStatus = _useState6[0],
+      setIndexingStatus = _useState6[1];
+    var _useState7 = (0, _react.useState)(0),
+      _useState8 = (0, _slicedToArray2.default)(_useState7, 2),
+      indexedCount = _useState8[0],
+      setIndexedCount = _useState8[1];
+
+    // Використовуємо ref для масиву медіатипів, щоб уникнути зайвих перестворень через посилання на масив
+    var mediaTypesRef = (0, _react.useRef)(mediaTypes);
+    (0, _react.useEffect)(function () {
+      mediaTypesRef.current = mediaTypes;
+    }, [JSON.stringify(mediaTypes)]);
+
+    // 1. Одноразове зчитування файлів із бази ObjectBox
+    var refreshFiles = (0, _react.useCallback)(/*#__PURE__*/(0, _asyncToGenerator2.default)(function* () {
+      try {
+        var data = yield FileIndexer.getFiles(mediaTypesRef.current, limit);
+        setFiles(data);
+      } catch (error) {
+        console.error('[useIndexedFiles] Помилка завантаження файлів:', error);
+      }
+    }), [limit]);
+    (0, _react.useEffect)(function () {
+      // А. Завантажуємо те, що ВЖЕ є в базі на момент відкриття
+      // refreshFiles();
+
+      if (!autoStart) return;
+      setIsIndexing(true);
+
+      // Б. Підписуємося на події прогресу індексації з Kotlin
+      var subscription = fileIndexerEmitter.addListener('onIndexingProgress', function (event) {
+        console.log('event received index', event.status);
+        if (event.status === 'MEDIA_COMPLETE' || event.status === 'DOCUMENTS_COMPLETE') {
+          refreshFiles();
+          setIsIndexing(false);
+        }
+        // setIndexingStatus(event.status);
+        // setIndexedCount(event.count);
+
+        // if (event.status === 'COMPLETED') {
+        //   setIsIndexing(false);
+        //   refreshFiles();
+        // } else {
+        //   setIsIndexing(true);
+        //   // Оновлюємо список файлів під час індексації, щоб файли з'являлися плавно
+        //   refreshFiles();
+        // }
+      });
+
+      // В. Запускаємо сканування та живий слухач (LiveObserver)
+      FileIndexer.startIndexing();
+
+      // Г. При анмаунті компонента — прибираємо підписку та зупиняємо фоновий обсервер
+      return function () {
+        subscription.remove();
+        FileIndexer.stopIndexing();
+      };
+    }, [refreshFiles, autoStart]);
+    return {
+      files: files,
+      isIndexing: isIndexing,
+      indexingStatus: indexingStatus,
+      indexedCount: indexedCount,
+      refreshFiles: refreshFiles
+    };
+  };
+},1537,[1,167,34,73,2,1538],"src\\common\\hooks\\useIndexedFiles.ts");
+__d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, exports, _dependencyMap) {
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  exports.default = debounce;
+  function debounce(function_) {
+    var wait = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 100;
+    var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+    if (typeof function_ !== 'function') {
+      throw new TypeError(`Expected the first parameter to be a function, got \`${typeof function_}\`.`);
+    }
+    if (wait < 0) {
+      throw new RangeError('`wait` must not be negative.');
+    }
+    if (typeof options === 'boolean') {
+      throw new TypeError('The `options` parameter must be an object, not a boolean. Use `{immediate: true}` instead.');
+    }
+    var immediate = options.immediate;
+    var storedContext;
+    var storedArguments;
+    var timeoutId;
+    var timestamp;
+    var result;
+    function run() {
+      var callContext = storedContext;
+      var callArguments = storedArguments;
+      storedContext = undefined;
+      storedArguments = undefined;
+      result = function_.apply(callContext, callArguments);
+      return result;
+    }
+    function later() {
+      var last = Date.now() - timestamp;
+      if (last < wait && last >= 0) {
+        timeoutId = setTimeout(later, wait - last);
+      } else {
+        timeoutId = undefined;
+        if (!immediate) {
+          result = run();
+        }
+      }
+    }
+    var debounced = function debounced() {
+      if (storedContext && this !== storedContext && Object.getPrototypeOf(this) === Object.getPrototypeOf(storedContext)) {
+        throw new Error('Debounced method called with different contexts of the same prototype.');
+      }
+      storedContext = this; // eslint-disable-line unicorn/no-this-assignment
+      for (var _len = arguments.length, arguments_ = new Array(_len), _key = 0; _key < _len; _key++) {
+        arguments_[_key] = arguments[_key];
+      }
+      storedArguments = arguments_;
+      timestamp = Date.now();
+      var callNow = immediate && !timeoutId;
+      if (!timeoutId) {
+        timeoutId = setTimeout(later, wait);
+      }
+      if (callNow) {
+        result = run();
+        return result;
+      }
+      return undefined;
+    };
+    Object.defineProperty(debounced, 'isPending', {
+      get: function get() {
+        return timeoutId !== undefined;
+      }
+    });
+    debounced.clear = function () {
+      if (!timeoutId) {
+        return;
+      }
+      clearTimeout(timeoutId);
+      timeoutId = undefined;
+      storedContext = undefined;
+      storedArguments = undefined;
+    };
+    debounced.flush = function () {
+      if (!timeoutId) {
+        return;
+      }
+      debounced.trigger();
+    };
+    debounced.trigger = function () {
+      result = run();
+      debounced.clear();
+    };
+    return debounced;
+  }
+},1538,[],"node_modules\\debounce\\index.js");
+__d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, exports, _dependencyMap) {
+  var _interopRequireDefault = _$$_REQUIRE(_dependencyMap[0], "@babel/runtime/helpers/interopRequireDefault");
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
   exports.default = void 0;
   var _react = _interopRequireDefault(_$$_REQUIRE(_dependencyMap[1], "react"));
   var _reactNative = _$$_REQUIRE(_dependencyMap[2], "react-native");
@@ -205965,7 +206161,7 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
       marginTop: 8
     }
   });
-},1537,[1,73,2,171,877,617],"src\\common\\components\\NoPermissionScreen.tsx");
+},1539,[1,73,2,171,877,617],"src\\common\\components\\NoPermissionScreen.tsx");
 __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, exports, _dependencyMap) {
   var _interopRequireDefault = _$$_REQUIRE(_dependencyMap[0], "@babel/runtime/helpers/interopRequireDefault");
   Object.defineProperty(exports, "__esModule", {
@@ -205996,7 +206192,7 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
       _dayjs.default.locale(targetLanguageCode);
     }, []);
   };
-},1538,[1,1539,842,73,1543,1350],"src\\i18n\\hooks\\useDeviceLocale.ts");
+},1540,[1,1541,842,73,1545,1350],"src\\i18n\\hooks\\useDeviceLocale.ts");
 __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, exports, _dependencyMap) {
   "use strict";
 
@@ -206130,7 +206326,7 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
       }
     }
   }
-},1539,[1540,1542],"node_modules\\react-native-localize\\dist\\commonjs\\index.js");
+},1541,[1542,1544],"node_modules\\react-native-localize\\dist\\commonjs\\index.js");
 __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, exports, _dependencyMap) {
   "use strict";
 
@@ -206189,7 +206385,7 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
     var _NativeRNLocalize$def2;
     return (_NativeRNLocalize$def2 = _NativeRNLocalize.default.usesAutoTimeZone()) != null ? _NativeRNLocalize$def2 : undefined;
   }
-},1540,[1541],"node_modules\\react-native-localize\\dist\\commonjs\\module.js");
+},1542,[1543],"node_modules\\react-native-localize\\dist\\commonjs\\module.js");
 __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, exports, _dependencyMap) {
   "use strict";
 
@@ -206199,10 +206395,10 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
   exports.default = void 0;
   var _reactNative = _$$_REQUIRE(_dependencyMap[0], "react-native");
   var _default = exports.default = _reactNative.TurboModuleRegistry.getEnforcing("RNLocalize");
-},1541,[2],"node_modules\\react-native-localize\\dist\\commonjs\\NativeRNLocalize.js");
+},1543,[2],"node_modules\\react-native-localize\\dist\\commonjs\\NativeRNLocalize.js");
 __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, exports, _dependencyMap) {
   "use strict";
-},1542,[],"node_modules\\react-native-localize\\dist\\commonjs\\types.js");
+},1544,[],"node_modules\\react-native-localize\\dist\\commonjs\\types.js");
 __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, exports, _dependencyMap) {
   _$$_REQUIRE(_dependencyMap[0], "dayjs/locale/uk");
   _$$_REQUIRE(_dependencyMap[1], "dayjs/locale/pl");
@@ -206214,7 +206410,7 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
   _$$_REQUIRE(_dependencyMap[7], "dayjs/locale/nl");
   _$$_REQUIRE(_dependencyMap[8], "dayjs/locale/tr");
   _$$_REQUIRE(_dependencyMap[9], "dayjs/locale/pt");
-},1543,[1544,1545,1546,1547,1548,1549,1550,1551,1552,1553],"src\\i18n\\preparedayJs.ts");
+},1545,[1546,1547,1548,1549,1550,1551,1552,1553,1554,1555],"src\\i18n\\preparedayJs.ts");
 __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, exports, _dependencyMap) {
   !function (_, e) {
     "object" == typeof exports && "undefined" != typeof module ? module.exports = e(_$$_REQUIRE(_dependencyMap[0], "dayjs")) : "function" == typeof define && define.amd ? define(["dayjs"], e) : (_ = "undefined" != typeof globalThis ? globalThis : _ || self).dayjs_locale_uk = e(_.dayjs);
@@ -206282,7 +206478,7 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
     };
     return t.default.locale(r, null, !0), r;
   });
-},1544,[1350],"node_modules\\dayjs\\locale\\uk.js");
+},1546,[1350],"node_modules\\dayjs\\locale\\uk.js");
 __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, exports, _dependencyMap) {
   !function (e, t) {
     "object" == typeof exports && "undefined" != typeof module ? module.exports = t(_$$_REQUIRE(_dependencyMap[0], "dayjs")) : "function" == typeof define && define.amd ? define(["dayjs"], t) : (e = "undefined" != typeof globalThis ? globalThis : e || self).dayjs_locale_pl = t(e.dayjs);
@@ -206360,7 +206556,7 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
     };
     return i.default.locale(o, null, !0), o;
   });
-},1545,[1350],"node_modules\\dayjs\\locale\\pl.js");
+},1547,[1350],"node_modules\\dayjs\\locale\\pl.js");
 __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, exports, _dependencyMap) {
   !function (e, n) {
     "object" == typeof exports && "undefined" != typeof module ? module.exports = n(_$$_REQUIRE(_dependencyMap[0], "dayjs")) : "function" == typeof define && define.amd ? define(["dayjs"], n) : (e = "undefined" != typeof globalThis ? globalThis : e || self).dayjs_locale_de = n(e.dayjs);
@@ -206428,7 +206624,7 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
     };
     return t.default.locale(r, null, !0), r;
   });
-},1546,[1350],"node_modules\\dayjs\\locale\\de.js");
+},1548,[1350],"node_modules\\dayjs\\locale\\de.js");
 __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, exports, _dependencyMap) {
   !function (e, n) {
     "object" == typeof exports && "undefined" != typeof module ? module.exports = n() : "function" == typeof define && define.amd ? define(n) : (e = "undefined" != typeof globalThis ? globalThis : e || self).dayjs_locale_en = n();
@@ -206446,7 +206642,7 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
       }
     };
   });
-},1547,[],"node_modules\\dayjs\\locale\\en.js");
+},1549,[],"node_modules\\dayjs\\locale\\en.js");
 __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, exports, _dependencyMap) {
   !function (e, o) {
     "object" == typeof exports && "undefined" != typeof module ? module.exports = o(_$$_REQUIRE(_dependencyMap[0], "dayjs")) : "function" == typeof define && define.amd ? define(["dayjs"], o) : (e = "undefined" != typeof globalThis ? globalThis : e || self).dayjs_locale_es = o(e.dayjs);
@@ -206496,7 +206692,7 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
       };
     return s.default.locale(d, null, !0), d;
   });
-},1548,[1350],"node_modules\\dayjs\\locale\\es.js");
+},1550,[1350],"node_modules\\dayjs\\locale\\es.js");
 __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, exports, _dependencyMap) {
   !function (e, n) {
     "object" == typeof exports && "undefined" != typeof module ? module.exports = n(_$$_REQUIRE(_dependencyMap[0], "dayjs")) : "function" == typeof define && define.amd ? define(["dayjs"], n) : (e = "undefined" != typeof globalThis ? globalThis : e || self).dayjs_locale_fr = n(e.dayjs);
@@ -206547,7 +206743,7 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
       };
     return t.default.locale(i, null, !0), i;
   });
-},1549,[1350],"node_modules\\dayjs\\locale\\fr.js");
+},1551,[1350],"node_modules\\dayjs\\locale\\fr.js");
 __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, exports, _dependencyMap) {
   !function (e, o) {
     "object" == typeof exports && "undefined" != typeof module ? module.exports = o(_$$_REQUIRE(_dependencyMap[0], "dayjs")) : "function" == typeof define && define.amd ? define(["dayjs"], o) : (e = "undefined" != typeof globalThis ? globalThis : e || self).dayjs_locale_it = o(e.dayjs);
@@ -206597,7 +206793,7 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
       };
     return t.default.locale(n, null, !0), n;
   });
-},1550,[1350],"node_modules\\dayjs\\locale\\it.js");
+},1552,[1350],"node_modules\\dayjs\\locale\\it.js");
 __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, exports, _dependencyMap) {
   !function (e, a) {
     "object" == typeof exports && "undefined" != typeof module ? module.exports = a(_$$_REQUIRE(_dependencyMap[0], "dayjs")) : "function" == typeof define && define.amd ? define(["dayjs"], a) : (e = "undefined" != typeof globalThis ? globalThis : e || self).dayjs_locale_nl = a(e.dayjs);
@@ -206648,7 +206844,7 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
       };
     return d.default.locale(n, null, !0), n;
   });
-},1551,[1350],"node_modules\\dayjs\\locale\\nl.js");
+},1553,[1350],"node_modules\\dayjs\\locale\\nl.js");
 __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, exports, _dependencyMap) {
   !function (a, e) {
     "object" == typeof exports && "undefined" != typeof module ? module.exports = e(_$$_REQUIRE(_dependencyMap[0], "dayjs")) : "function" == typeof define && define.amd ? define(["dayjs"], e) : (a = "undefined" != typeof globalThis ? globalThis : a || self).dayjs_locale_tr = e(a.dayjs);
@@ -206698,7 +206894,7 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
       };
     return t.default.locale(_, null, !0), _;
   });
-},1552,[1350],"node_modules\\dayjs\\locale\\tr.js");
+},1554,[1350],"node_modules\\dayjs\\locale\\tr.js");
 __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, exports, _dependencyMap) {
   !function (e, a) {
     "object" == typeof exports && "undefined" != typeof module ? module.exports = a(_$$_REQUIRE(_dependencyMap[0], "dayjs")) : "function" == typeof define && define.amd ? define(["dayjs"], a) : (e = "undefined" != typeof globalThis ? globalThis : e || self).dayjs_locale_pt = a(e.dayjs);
@@ -206749,7 +206945,7 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
       };
     return o.default.locale(t, null, !0), t;
   });
-},1553,[1350],"node_modules\\dayjs\\locale\\pt.js");
+},1555,[1350],"node_modules\\dayjs\\locale\\pt.js");
 __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, exports, _dependencyMap) {
   var _interopRequireDefault = _$$_REQUIRE(_dependencyMap[0], "@babel/runtime/helpers/interopRequireDefault");
   Object.defineProperty(exports, "__esModule", {
@@ -206776,12 +206972,12 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
     });
   };
   var _default = exports.default = FilePickerComponent;
-},1554,[1,73,2,171],"src\\widgets\\FilePicker\\index.tsx");
+},1556,[1,73,2,171],"src\\widgets\\FilePicker\\index.tsx");
 __d(function(global, require, _importDefaultUnused, _importAllUnused, module, exports, _dependencyMapUnused) {
   module.exports = {
   "name": "fileManager",
   "displayName": "File Manager"
 };
-},1555,[],"app.json");
+},1557,[],"app.json");
 __r(111);
 __r(0);

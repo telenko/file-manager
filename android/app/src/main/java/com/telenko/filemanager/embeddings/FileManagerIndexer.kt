@@ -9,6 +9,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
 import android.util.Log
+import com.telenko.filemanager.db.ObjectBoxStore
 
 
 private const val TAG = "FileManagerIndexer"

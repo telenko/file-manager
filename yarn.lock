@@ -4859,6 +4859,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"debounce@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "debounce@npm:3.0.0"
+  checksum: 131cfbd31910c02fb0c8bb4223fb2c73255a68873ffc9220ea82f1fb85b4dd4e7611d3fb1a82c96b23656fba30795afa14883ffb1a7918515982ae5598b6ef66
+  languageName: node
+  linkType: hard
+
 "debug@npm:2.6.9, debug@npm:^2.6.9":
   version: 2.6.9
   resolution: "debug@npm:2.6.9"
@@ -5769,6 +5776,7 @@ __metadata:
     "@types/react-test-renderer": ^19.1.0
     babel-jest: ^29.6.3
     dayjs: ^1.11.19
+    debounce: ^3.0.0
     eslint: ^8.19.0
     i18next: ^23.11.3
     jest: ^29.6.3

@@ -32,7 +32,11 @@ import SettingsDialog from './dialogs/SettingsDialog';
 import { useInitialState } from './useInitialState';
 import { theme } from '../../theme';
 import { View } from 'react-native';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from 'react-native-safe-area-context';
+import { useIndexedFiles } from '../../common/hooks/useIndexedFiles';
 
 const SNACK_DEFAULT_DURATION_MS = 4000;
 
@@ -57,6 +61,13 @@ export default function FileManager() {
   const { setStoreLatestFolder, storeLatestFolder } = useStoreLatestFolder();
   const { refresh: refreshRoots, rootsReady, roots } = useFsRoots();
   const { state, ready: stateReady } = useInitialState(roots, rootsReady);
+
+  const { files, isIndexing } = useIndexedFiles();
+
+  useEffect(() => {
+    console.log('IS INDEXING', isIndexing);
+    console.log('FILES leength', files?.length);
+  }, [isIndexing]);
 
   const createDirectory = useCallback(
     (navigation: NavigationProp<FileManagerNavigation>) => {
@@ -255,7 +266,7 @@ export default function FileManager() {
               marginTop: insets.top,
               marginLeft: insets.left,
               marginRight: insets.right,
-              marginBottom: insets.bottom 
+              marginBottom: insets.bottom,
             },
           }}>
           <Stack.Screen
