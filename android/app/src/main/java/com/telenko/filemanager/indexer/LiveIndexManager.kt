@@ -2,6 +2,7 @@ package com.telenko.filemanager.indexer
 
 import android.content.Context
 import android.os.FileObserver
+import com.telenko.filemanager.infiniteapi.MediaTypeResolver
 import io.objectbox.Box
 import io.objectbox.query.QueryBuilder.StringOrder
 import kotlinx.coroutines.CoroutineScope
@@ -10,6 +11,8 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.File
+import android.util.Log
+
 
 class LiveIndexManager(
     private val context: Context,
@@ -22,18 +25,18 @@ class LiveIndexManager(
     private var mediaObserver: MediaContentObserver? = null
     private val documentObservers = mutableListOf<DocumentFileObserver>()
 
-    fun startListening() {
-        // Виконуємо ВСЮ реєстрацію у фоновому потоці IO, щоб не блокувати Main Thread
+    fun startListening(onEvent: ((eventName: String, count: Int) -> Unit)? = null) {
+        // Реєстрація у фоновому потоці IO
         scope.launch(Dispatchers.IO) {
             // 1. Старт спостерігача MediaStore
             mediaObserver = MediaContentObserver(context) {
+                Log.d("MediaStoreImporter", "detected a change in media")
                 mediaDebounceJob?.cancel()
-                // Переконуємося, що debounce працює строго на Dispatchers.IO
                 mediaDebounceJob = scope.launch(Dispatchers.IO) {
                     delay(2000)
-                    // 💡 ПРИМІТКА: Тут краще імпортувати тільки останні зміни, 
-                    // а не робити повний re-import усіх 10k файлів!
-                    mediaStoreImporter.importAllMedia()
+                    // Імпортуємо лише нові файли, які з'явилися після збереженої дати
+                    mediaStoreImporter.importMedia(isFirstScan = false)
+                    onEvent?.invoke("SCAN_RESYNC", 1)
                 }
             }
             mediaObserver?.register()
@@ -48,6 +51,7 @@ class LiveIndexManager(
                 if (dir.exists()) {
                     val observer = DocumentFileObserver(dir) { event, filePath ->
                         handleDocumentEvent(event, filePath)
+                        onEvent?.invoke("SCAN_RESYNC", 1)
                     }
                     observer.start()
                     documentObservers.add(observer)
@@ -68,20 +72,19 @@ class LiveIndexManager(
         
         when (event and FileObserver.ALL_EVENTS) {
             FileObserver.CREATE, FileObserver.MODIFY, FileObserver.MOVED_TO -> {
-                if (file.isFile && DocumentResolver.isDocument(file)) {
+                if (file.isFile && MediaTypeResolver.isDocument(file)) {
                     val entity = FileIndexEntity(
                         filePath = file.absolutePath,
                         fileName = file.name,
-                        mediaType = MediaType.TEXT,
+                        mediaType = MediaTypeResolver.resolve(file),
                         lastModified = file.lastModified(),
                         fileSize = file.length(),
                         parentPath = file.parent ?: ""
                     )
-                    fileIndexBox.put(entity) // Завдяки @Unique запис оновиться або створиться
+                    fileIndexBox.put(entity) // Завдяки @Unique оновиться або створиться
                 }
             }
             FileObserver.DELETE, FileObserver.MOVED_FROM -> {
-                // Миттєве видалення з індексу за шляхом
                 fileIndexBox.query()
                     .equal(FileIndexEntity_.filePath, filePath, StringOrder.CASE_SENSITIVE)
                     .build()

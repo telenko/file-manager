@@ -139,9 +139,38 @@
         }
       ],
       "relations": []
+    },
+    {
+      "id": "5:6229189450526791095",
+      "lastPropertyId": "4:2049835961281153764",
+      "name": "IndexerStateEntity",
+      "properties": [
+        {
+          "id": "1:437944359774171899",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:5301217588307560812",
+          "name": "mediaLastModifiedDate",
+          "type": 6
+        },
+        {
+          "id": "3:3571871297232693570",
+          "name": "documentLastModifiedDate",
+          "type": 6
+        },
+        {
+          "id": "4:2049835961281153764",
+          "name": "isFirstScanCompleted",
+          "type": 1
+        }
+      ],
+      "relations": []
     }
   ],
-  "lastEntityId": "4:8711431975065846805",
+  "lastEntityId": "5:6229189450526791095",
   "lastIndexId": "7:7721810984512901512",
   "lastRelationId": "0:0",
   "lastSequenceId": "0:0",

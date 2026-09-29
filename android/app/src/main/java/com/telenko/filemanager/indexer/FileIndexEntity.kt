@@ -1,11 +1,13 @@
 package com.telenko.filemanager.indexer
 
+import com.telenko.filemanager.infiniteapi.MediaType
+import com.telenko.filemanager.infiniteapi.MediaTypeConverter
+import io.objectbox.annotation.ConflictStrategy
 import io.objectbox.annotation.Convert
 import io.objectbox.annotation.Entity
 import io.objectbox.annotation.Id
-import io.objectbox.annotation.Unique
-import io.objectbox.annotation.ConflictStrategy
 import io.objectbox.annotation.Index
+import io.objectbox.annotation.Unique
 
 @Entity
 data class FileIndexEntity(

@@ -1,29 +1,34 @@
 package com.telenko.filemanager.indexer
 
+import com.telenko.filemanager.infiniteapi.MediaType
+import com.telenko.filemanager.infiniteapi.MediaTypeResolver
 import io.objectbox.Box
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
 import java.io.File
+import android.util.Log
+
 
 class DocumentScanner(
-    private val fileIndexBox: Box<FileIndexEntity>
+    private val fileIndexBox: Box<FileIndexEntity>,
+    private val stateBox: Box<IndexerStateEntity>
 ) {
 
     companion object {
         private const val BATCH_SIZE = 500
-        // Папки, які слід ігнорувати для збереження ресурсів та батареї
         private val IGNORED_DIRS = setOf("Android", "DCIM", "Pictures", "Movies", "Music", "Podcasts")
     }
 
-    /**
-     * Сканує вказану папку (або весь накопичувач) лише на наявність текстових/PDF документів.
-     */
     suspend fun scanDocuments(
         rootDirectory: File,
-        onProgress: ((indexedCount: Int) -> Unit)? = null
+        isFirstScan: Boolean
     ): Int = withContext(Dispatchers.IO) {
         if (!rootDirectory.exists() || !rootDirectory.isDirectory) return@withContext 0
+
+        val state = stateBox.get(1) ?: IndexerStateEntity()
+        val lastSavedDate = if (isFirstScan) 0L else state.documentLastModifiedDate
+        var maxObservedDate = lastSavedDate
 
         val buffer = ArrayList<FileIndexEntity>(BATCH_SIZE)
         var totalIndexed = 0
@@ -31,20 +36,27 @@ class DocumentScanner(
         rootDirectory.walkTopDown()
             .onEnter { dir ->
                 val name = dir.name
-                // Не заходимо в приховані папки та відомі медіа-директорії (бо їх закриває MediaStoreImporter)
                 !name.startsWith(".") && !IGNORED_DIRS.contains(name)
             }
-            .filter { file -> file.isFile && !file.name.startsWith(".") }
+            .filter { file -> 
+                file.isFile && 
+                !file.name.startsWith(".") && 
+                (isFirstScan || file.lastModified() > lastSavedDate)
+            }
             .forEach { file ->
-                // Перевірка на зупинку корутини (наприклад, за сигналом Battery Monitor)
                 if (!coroutineContext.isActive) return@withContext totalIndexed
 
-                if (DocumentResolver.isDocument(file)) {
+                if (MediaTypeResolver.isDocument(file)) {
+                    val fileLastModified = file.lastModified()
+                    if (fileLastModified > maxObservedDate) {
+                        maxObservedDate = fileLastModified
+                    }
+
                     val entity = FileIndexEntity(
                         filePath = file.absolutePath,
                         fileName = file.name,
                         mediaType = MediaType.TEXT,
-                        lastModified = file.lastModified(),
+                        lastModified = fileLastModified,
                         fileSize = file.length(),
                         parentPath = file.parent ?: ""
                     )
@@ -53,18 +65,20 @@ class DocumentScanner(
                     if (buffer.size >= BATCH_SIZE) {
                         fileIndexBox.put(buffer)
                         totalIndexed += buffer.size
-                        onProgress?.invoke(totalIndexed)
                         buffer.clear()
                     }
                 }
             }
 
-        // Записуємо залишок з буфера
         if (buffer.isNotEmpty()) {
             fileIndexBox.put(buffer)
             totalIndexed += buffer.size
-            onProgress?.invoke(totalIndexed)
             buffer.clear()
+        }
+
+        if (maxObservedDate > state.documentLastModifiedDate) {
+            state.documentLastModifiedDate = maxObservedDate
+            stateBox.put(state)
         }
 
         return@withContext totalIndexed

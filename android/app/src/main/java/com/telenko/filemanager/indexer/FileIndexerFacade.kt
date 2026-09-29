@@ -1,7 +1,10 @@
 package com.telenko.filemanager.indexer
 
 import android.content.Context
-import io.objectbox.query.QueryBuilder
+import com.telenko.filemanager.infiniteapi.MediaType
+import com.telenko.filemanager.infiniteapi.MediaTypeResolver
+import com.telenko.filemanager.infiniteapi.PagedFileRepository
+import com.telenko.filemanager.infiniteapi.UiFileEntity
 import io.objectbox.Box
 import io.objectbox.query.QueryBuilder.StringOrder
 import io.objectbox.kotlin.inValues
@@ -10,18 +13,16 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.io.File
-import android.util.Log
-import com.telenko.filemanager.indexer.FileIndexEntity_
-import kotlin.time.measureTimedValue
 
 class FileIndexerFacade private constructor(
     private val context: Context,
-    private val fileIndexBox: Box<FileIndexEntity>
-) {
+    private val fileIndexBox: Box<FileIndexEntity>,
+    private val stateBox: Box<IndexerStateEntity>
+) : PagedFileRepository {
 
     private val scope = CoroutineScope(Dispatchers.IO)
-    private val mediaImporter = MediaStoreImporter(context, fileIndexBox)
-    private val documentScanner = DocumentScanner(fileIndexBox)
+    private val mediaImporter = MediaStoreImporter(context, fileIndexBox, stateBox)
+    private val documentScanner = DocumentScanner(fileIndexBox, stateBox)
     private val liveIndexManager = LiveIndexManager(context, fileIndexBox, mediaImporter)
 
     private var syncJob: Job? = null
@@ -30,47 +31,40 @@ class FileIndexerFacade private constructor(
         @Volatile
         private var INSTANCE: FileIndexerFacade? = null
 
-        fun getInstance(context: Context, box: Box<FileIndexEntity>): FileIndexerFacade {
+        fun getInstance(
+            context: Context, 
+            box: Box<FileIndexEntity>,
+            stateBox: Box<IndexerStateEntity>
+        ): FileIndexerFacade {
             return INSTANCE ?: synchronized(this) {
-                INSTANCE ?: FileIndexerFacade(context.applicationContext, box).also { INSTANCE = it }
+                INSTANCE ?: FileIndexerFacade(context.applicationContext, box, stateBox).also { INSTANCE = it }
             }
         }
     }
 
-    /**
-     * Запуск лінивої синхронізації при старті додатка + активація live observers.
-     */
-    fun startIndexing(onProgress: ((status: String, count: Int) -> Unit)? = null) {
-        liveIndexManager.startListening()
+    fun startIndexing(onEvent: ((eventName: String, count: Int) -> Unit)? = null) {
+        liveIndexManager.startListening(onEvent)
 
         syncJob?.cancel()
-        // ⚠️ ОБОВ'ЯЗКОВО перевірте, чи запуск йде на Dispatchers.IO!
-        syncJob = scope.launch(Dispatchers.IO) { 
-            var finalMediaCount = 0
-            
-            // Вимірюємо MediaStore
-            val (_, mediaTime) = measureTimedValue {
-                mediaImporter.importAllMedia { count ->
-                    finalMediaCount = count
-                    // onProgress?.invoke("IMPORTING_MEDIA", count)
-                }
-            }
-            Log.d("Benchmark", "⏱️ [MediaImporter]: $mediaTime, $finalMediaCount")
-            // 🏁 Івент завершення імпорту медіа
-            onProgress?.invoke("MEDIA_COMPLETE", finalMediaCount)
+        syncJob = scope.launch(Dispatchers.IO) {
+            val state = stateBox.get(1) ?: IndexerStateEntity()
+            val isFirstScan = !state.isFirstScanCompleted
 
-            // Вимірюємо Документи
-            var finalDocsCount = 0
-            val (_, docsTime) = measureTimedValue {
-                val rootDir = File("/storage/emulated/0")
-                documentScanner.scanDocuments(rootDir) { docCount ->
-                    finalDocsCount = docCount
-                    // onProgress?.invoke("SCANNING_DOCUMENTS", docCount)
-                }
+            val mediaCount = mediaImporter.importMedia(isFirstScan)
+            val rootDir = File("/storage/emulated/0")
+            val docsCount = documentScanner.scanDocuments(rootDir, isFirstScan)
+
+            val totalCount = mediaCount + docsCount
+
+            if (isFirstScan) {
+                val updatedState = stateBox.get(1) ?: IndexerStateEntity()
+                updatedState.isFirstScanCompleted = true
+                stateBox.put(updatedState)
+
+                onEvent?.invoke("SCAN_COMPLETE", totalCount)
+            } else {
+                onEvent?.invoke("SCAN_RESYNC", totalCount)
             }
-            Log.d("Benchmark", "⏱️ [DocumentScanner]: $docsTime, $finalDocsCount")
-            // 🏁 Івент завершення сканування документів
-            onProgress?.invoke("DOCUMENTS_COMPLETE", finalDocsCount)
         }
     }
 
@@ -79,22 +73,12 @@ class FileIndexerFacade private constructor(
         liveIndexManager.stopListening()
     }
 
-    // --- Публічне API для внутрішнього використання в додатку ---
-
-    /**
-     * Точкове додавання/оновлення одного файла (наприклад, після завантаження PDF з мережі).
-     */
     fun indexFile(filePath: String) {
         scope.launch {
             val file = File(filePath)
             if (!file.exists() || !file.isFile) return@launch
 
-            val mediaType = if (DocumentResolver.isDocument(file)) {
-                MediaType.TEXT
-            } else {
-                MediaTypeResolver.resolve(file)
-            }
-
+            val mediaType = MediaTypeResolver.resolve(file)
             if (mediaType != MediaType.OTHER) {
                 val entity = FileIndexEntity(
                     filePath = file.absolutePath,
@@ -109,21 +93,15 @@ class FileIndexerFacade private constructor(
         }
     }
 
-    /**
-     * Реіндексація конкретної папки.
-     */
     fun indexDirectory(dirPath: String) {
         scope.launch {
             val dir = File(dirPath)
             if (dir.exists() && dir.isDirectory) {
-                documentScanner.scanDocuments(dir)
+                documentScanner.scanDocuments(dir, isFirstScan = false)
             }
         }
     }
 
-    /**
-     * Видалення файла з індексу.
-     */
     fun removeFile(filePath: String) {
         scope.launch {
             fileIndexBox.query()
@@ -133,34 +111,35 @@ class FileIndexerFacade private constructor(
         }
     }
 
-    fun getIndexedCount(): Int {
-        return fileIndexBox.count().toInt()
-    }
+    // --- Реалізація PagedFileRepository для infiniteapi ---
 
-    /**
-    * Отримання списку файлів за МАСИВОМ типів медіа з сортуванням від найновіших до найстаріших.
-    * Наприклад: mediaTypes = ["IMAGE", "VIDEO"]
-    */
-    fun getFilesByMediaTypes(mediaTypes: List<String>?, limit: Long = 0): List<FileIndexEntity> {
+    override fun getFilesPaged(
+        mediaTypes: List<MediaType>?, 
+        offset: Long, 
+        pageSize: Int
+    ): List<UiFileEntity> {
         val queryBuilder = fileIndexBox.query()
 
-        if (!mediaTypes.isNullOrEmpty() && !mediaTypes.contains("ALL")) {
-            val validTypes: Array<String> = mediaTypes.map { it.uppercase() }.toTypedArray()
-            
-            if (validTypes.isNotEmpty()) {
-                // Прямий виклик через генератор ObjectBox для StringArray
-                queryBuilder.inValues(
-                    FileIndexEntity_.mediaType,
-                    validTypes,
-                    StringOrder.CASE_SENSITIVE
-                )
-            }
+        if (!mediaTypes.isNullOrEmpty()) {
+            val typeNames = mediaTypes.map { it.name }.toTypedArray()
+            queryBuilder.inValues(
+                FileIndexEntity_.mediaType,
+                typeNames,
+                StringOrder.CASE_SENSITIVE
+            )
         }
 
-        // Сортування: найновіші першими
         queryBuilder.orderDesc(FileIndexEntity_.lastModified)
 
         val query = queryBuilder.build()
-        return if (limit > 0) query.find(0, limit) else query.find()
+        val entities = query.find(offset, pageSize.toLong())
+
+        return entities.map { entity ->
+            UiFileEntity(
+                filePath = entity.filePath,
+                lastModified = entity.lastModified,
+                mediaType = entity.mediaType
+            )
+        }
     }
 }

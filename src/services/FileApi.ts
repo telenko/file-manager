@@ -7,6 +7,8 @@ import {
   ErrorType,
   FileManagerError,
 } from '../common/components/ExceptionHandler';
+import { DeviceEventEmitter } from 'react-native';
+
 
 export type DirItem = ReadDirItem & { isStorage?: boolean };
 export type StorageItem = {

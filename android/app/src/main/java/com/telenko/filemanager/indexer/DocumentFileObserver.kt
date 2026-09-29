@@ -3,6 +3,8 @@ package com.telenko.filemanager.indexer
 import android.os.Build
 import android.os.FileObserver
 import java.io.File
+import android.util.Log
+
 
 class DocumentFileObserver(
     private val targetDirectory: File,
@@ -24,12 +26,14 @@ class DocumentFileObserver(
         fileObserver = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             object : FileObserver(targetDirectory, mask) {
                 override fun onEvent(event: Int, path: String?) {
+                    Log.d("MediaStoreImporter", "detected a change in docs")
                     path?.let { onFileEvent(event, "$targetDirectory/$it") }
                 }
             }
         } else {
             object : FileObserver(targetDirectory.absolutePath, mask) {
                 override fun onEvent(event: Int, path: String?) {
+                    Log.d("MediaStoreImporter", "detected a change in docs 2")
                     path?.let { onFileEvent(event, "$targetDirectory/$it") }
                 }
             }

@@ -65,9 +65,10 @@ export default function FileManager() {
   const { files, isIndexing } = useIndexedFiles();
 
   useEffect(() => {
+    console.log('FILES', files);
     console.log('IS INDEXING', isIndexing);
     console.log('FILES leength', files?.length);
-  }, [isIndexing]);
+  }, [isIndexing, files]);
 
   const createDirectory = useCallback(
     (navigation: NavigationProp<FileManagerNavigation>) => {
