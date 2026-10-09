@@ -36,6 +36,9 @@ class FileIndexerModule(
         }
     }
 
+    // @ReactMethod
+    // fun 
+
     @ReactMethod
     fun stopIndexing() {
         indexerFacade.stopIndexing()

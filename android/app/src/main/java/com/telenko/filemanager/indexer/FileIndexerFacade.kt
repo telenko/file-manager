@@ -44,7 +44,31 @@ class FileIndexerFacade private constructor(
 
     fun startIndexing(onEvent: ((eventName: String, count: Int) -> Unit)? = null) {
         liveIndexManager.startListening(onEvent)
+        importFiles(onEvent)
+        // syncJob?.cancel()
+        // syncJob = scope.launch(Dispatchers.IO) {
+        //     val state = stateBox.get(1) ?: IndexerStateEntity()
+        //     val isFirstScan = !state.isFirstScanCompleted
 
+        //     val mediaCount = mediaImporter.importMedia(isFirstScan)
+        //     val rootDir = File("/storage/emulated/0")
+        //     val docsCount = documentScanner.scanDocuments(rootDir, isFirstScan)
+
+        //     val totalCount = mediaCount + docsCount
+
+        //     if (isFirstScan) {
+        //         val updatedState = stateBox.get(1) ?: IndexerStateEntity()
+        //         updatedState.isFirstScanCompleted = true
+        //         stateBox.put(updatedState)
+
+        //         onEvent?.invoke("SCAN_COMPLETE", totalCount)
+        //     } else {
+        //         onEvent?.invoke("SCAN_RESYNC", totalCount)
+        //     }
+        // }
+    }
+
+    fun importFiles(onEvent: ((eventName: String, count: Int) -> Unit)? = null) {
         syncJob?.cancel()
         syncJob = scope.launch(Dispatchers.IO) {
             val state = stateBox.get(1) ?: IndexerStateEntity()
