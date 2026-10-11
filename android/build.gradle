@@ -4,7 +4,7 @@ buildscript {
         minSdkVersion = 24
         compileSdkVersion = 36
         targetSdkVersion = 36
-        ndkVersion = "27.1.12297006"
+        ndkVersion = "28.2.13676358"
         kotlinVersion = "2.1.20"
     }
     repositories {
@@ -16,7 +16,8 @@ buildscript {
         classpath("com.android.tools.build:gradle:8.5.1")
         classpath("com.facebook.react:react-native-gradle-plugin")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin")
-        classpath "io.objectbox:objectbox-gradle-plugin:4.0.0"
+        classpath "io.objectbox:objectbox-gradle-plugin:5.4.2"
+        // classpath "io.objectbox:objectbox-gradle-plugin:4.0.0"
     }
 }
 
