@@ -6,7 +6,9 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import { DirItem, FileApi } from '../../services/FileApi';
-import { Cache } from '../../services/Cache';
+import { RootState } from '../../store';
+import { restoreFileItem } from '../../store/fileData';
+import { useSelector } from 'react-redux';
 import Gallery from '../../common/components/Gallery';
 import ImageViewer from '../../common/components/ImageViewer';
 import { useNavigation } from '../../common/hooks/useNavigation';
@@ -52,6 +54,10 @@ const ImagePreviewScreen: React.FC<ImageViewerScreenProps> = ({
   const [file, setFile] = useState<DirItem | null>(null);
   const [imagesInFolderSorted, setImagesInFolderSorted] = useState<DirItem[]>(
     [],
+  );
+  const parentPath = FileApi.getParentDirectoryPath(route);
+  const storedItems = useSelector(
+    (state: RootState) => state.fileData.directories[parentPath],
   );
   const { width, height } = useWindowDimensions();
   const [isLandscape, setIsLandscape] = useState(width > height);
@@ -140,17 +146,14 @@ const ImagePreviewScreen: React.FC<ImageViewerScreenProps> = ({
     (async () => {
       FileApi.getMetadata(route).then(setFile);
 
-      let dirItems = Cache.getDirItems(FileApi.getParentDirectoryPath(route));
-      if (!dirItems) {
-        // if no files in cache - then fetch them manually
-        dirItems = FileApi.sortDirItems(
-          await FileApi.readDir(FileApi.getParentDirectoryPath(route)),
-          sort,
-        );
-      }
-      setImagesInFolderSorted(dirItems.filter(FileApi.isFileViewable));
+      const dirItems = storedItems
+        ? storedItems.map(restoreFileItem)
+        : await FileApi.readDir(parentPath);
+      setImagesInFolderSorted(
+        FileApi.sortDirItems(dirItems, sort).filter(FileApi.isFileViewable),
+      );
     })();
-  }, []);
+  }, [parentPath, route, sort, storedItems]);
 
   const imagesCarousel = useMemo<DirItem[]>(() => {
     if (!imagesInFolderSorted || imagesInFolderSorted.length === 0) {

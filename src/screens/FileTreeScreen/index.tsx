@@ -2,17 +2,21 @@ import React, {
   useCallback,
   useEffect,
   useMemo,
-  useRef,
   useState,
 } from 'react';
-import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import { DirItem, FileApi } from '../../services/FileApi';
 import FilePathBreadCrumb from './FilePathBreadCrumb';
 import { useNavigation } from '../../common/hooks/useNavigation';
 import { View, StyleSheet, useWindowDimensions } from 'react-native';
-import { FileTreeContext, FileTreeContextType } from './FileTreeContext';
+import { useFileTreeActions, useFileTreeContext } from './FileTreeContext';
 import { DataProvider, LayoutProvider } from 'recyclerlistview';
-import { Cache } from '../../services/Cache';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '../../store';
+import {
+  clearVideoPreviews,
+  // setDirectoryItems,
+} from '../../store/fileDataSlice';
+// import { restoreFileItem, storeFileItem } from '../../store/fileData';
 import { useTranslation } from 'react-i18next';
 import { navigateFromSelectable } from '../../common/utils/navigator';
 import { useFileManager } from '../../widgets/FileManager';
@@ -34,53 +38,60 @@ import {
 import { useStoreLatestFolder } from '../../widgets/FileManager/settings';
 import { useFocusEffect } from '@react-navigation/native';
 import { ItemWithSkeleton } from './ItemWithSkeleton';
-import FileTreeList, { FileTreeListRef } from './FileTreeList';
-import { NativeModules } from 'react-native';
-import { SearchContextSelect } from './SearchContextSelect';
+import FileTreeList from './FileTreeList';
+import { useScrollIndicatorState } from '../../common/components/ScrollIndicator/ScrollIndicatorProvider';
+// import { NativeModules } from 'react-native';
+// import { SearchContextSelect } from './SearchContextSelect';
+import { FileTreeState } from '../../store/fileTreeSlice';
+import { useDataManager } from './DataManager/useDataManager';
 
-const { EmbeddingsModule } = NativeModules;
+// const { EmbeddingsModule } = NativeModules;
 
 export type FileScreenProps = {
   route: {
     params: {
       route: string;
-      mode?: 'tree' | 'copy' | 'move';
+      mode?: FileTreeState['mode'];
       fromRoute?: string[];
     };
   };
 };
 
-const hapticFallbackOptions = {
-  enableVibrateFallback: true,
-  ignoreAndroidSystemSettings: false,
-};
-const selectVibrate = () => {
-  ReactNativeHapticFeedback.trigger('impactLight', hapticFallbackOptions);
-};
-
-const FileScreen: React.FC<FileScreenProps> = ({
-  route: {
-    params: { route, ...routeMetadatas },
-  },
-}) => {
+const FileScreen: React.FC<FileScreenProps> = stackRoute => {
+  const {
+    route: {
+      params: { route, ...routeMetadatas },
+    },
+  } = stackRoute;
   const { width: SCREEN_WIDTH } = useWindowDimensions();
+  const scrollIndicator = useScrollIndicatorState();
   const navigator = useNavigation();
   const { t } = useTranslation();
-  const [dirLoadingDone, setDirLoadingDone] = useState(false);
-  const [dirItems, setDirItems] = useState<DirItem[]>([]);
-  const [dirLoading, setDirLoading] = useState<boolean>(false);
-  const [dirError, setDirError] = useState<Error | null>(null);
-  const [selectedPaths, setSelectedPaths] = useState<string[]>([]);
+  // const [dirLoadingDone, setDirLoadingDone] = useState(false);
+  // const directoryPath = route ?? FileApi.ROOT_PATH;
+  // const storedDirItems = useSelector(
+  //   (state: RootState) => state.fileData.directories[directoryPath] ?? [],
+  // );
+  // const dirItems = useMemo(
+  //   () => storedDirItems.map(restoreFileItem),
+  //   [storedDirItems],
+  // );
+  const dispatch = useDispatch<AppDispatch>();
+  // const [dirLoading, setDirLoading] = useState<boolean>(false);
+  // const [dirError, setDirError] = useState<Error | null>(null);
+  const { selectedPaths } = useFileTreeContext();
+  const source = useSelector((state: RootState) => state.fileTree.source);
+  const { setSelectedPaths, setFileTree } = useFileTreeActions();
   const [copyInProgress, setCopyInProgress] = useState<boolean>(false);
   const [moveInProgress, setMoveInProgress] = useState<boolean>(false);
   const fileManager = useFileManager();
   const isMultiSelectActivated = selectedPaths.length > 0;
   const isStorageLevel = fileManager.roots.map(r => r.path).includes(route);
   const { saveLatestFolder } = useStoreLatestFolder();
-  const hasFiles = useMemo(
-    () => dirItems.some(dirIt => dirIt.isFile()),
-    [dirItems],
-  );
+  const dataManager = useDataManager({
+    route,
+    mode: routeMetadatas.mode || 'tree',
+  });
   const isOperational = ['copy', 'move'].includes(routeMetadatas.mode || '');
   useEffect(() => {
     let title = '';
@@ -115,14 +126,14 @@ const FileScreen: React.FC<FileScreenProps> = ({
           </View>
         ) : isMultiSelectActivated ? (
           <SelectorAction
-            dirItems={dirItems}
+            dirItems={dataManager.items}
             navigation={navigator}
             selectedPaths={selectedPaths}
             setSelectedPaths={setSelectedPathsExternal}
           />
         ) : (
           <DefaultFolderActions
-            folderHasFiles={hasFiles}
+            folderHasFiles={dataManager.hasFiles}
             isOperational={isOperational}
           />
         ),
@@ -131,61 +142,54 @@ const FileScreen: React.FC<FileScreenProps> = ({
     routeMetadatas.mode,
     navigator,
     selectedPaths,
-    dirItems,
+    dataManager.items,
     fileManager.longOperation,
     isStorageLevel,
   ]);
 
-  const reloadDir = useCallback(async () => {
-    setDirLoading(true);
-    setDirError(null);
-    // @ts-ignore
-    await new Promise(r => setTimeout(r, 100));
-    try {
-      const newDirItems = await FileApi.readDir(route ?? FileApi.ROOT_PATH);
-      setDirItems(newDirItems.filter(file => !FileApi.isItemHidden(file)));
-      setDirLoadingDone(true);
-    } catch (e: any) {
-      setDirError(e as Error);
-      setDirItems([]);
-      exceptionHandler.handleError(e);
-    } finally {
-      setDirLoading(false);
-    }
-  }, [route]);
+  // @TODO ANDRII MOVE
+  // const reloadDir = useCallback(async () => {
+  //   setDirLoading(true);
+  //   setDirError(null);
+  //   // @ts-ignore
+  //   await new Promise(r => setTimeout(r, 100));
+  //   try {
+  //     const newDirItems = await FileApi.readDir(directoryPath);
+  //     dispatch(
+  //       setDirectoryItems({
+  //         path: directoryPath,
+  //         items: newDirItems
+  //           .filter(file => !FileApi.isItemHidden(file))
+  //           .map(storeFileItem),
+  //       }),
+  //     );
+  //     setDirLoadingDone(true);
+  //   } catch (e: any) {
+  //     setDirError(e as Error);
+  //     dispatch(setDirectoryItems({ path: directoryPath, items: [] }));
+  //     exceptionHandler.handleError(e);
+  //   } finally {
+  //     setDirLoading(false);
+  //   }
+  // }, [directoryPath, dispatch]);
 
-  const sortedDirItems = useMemo<DirItem[]>(() => {
-    return FileApi.sortDirItems(
-      dirItems.filter(file => !FileApi.isItemHidden(file)),
-      fileManager.sort,
-    );
-  }, [dirItems, fileManager.sort]);
-  useEffect(() => {
-    Cache.putDirItems(route ?? FileApi.ROOT_PATH, sortedDirItems);
-  }, [sortedDirItems]);
-
-  const fileTreeListRef = useRef<FileTreeListRef>(null);
-
-  const setSelectedPathsExternal = useCallback((v: string[]) => {
-    selectVibrate();
-    const paths = [...new Set(v)];
-    setSelectedPaths(paths);
-    fileTreeListRef.current?.updateSelection(paths);
-  }, []);
-
-  const value = useMemo<FileTreeContextType>(
-    () => ({
-      route: route ?? FileApi.ROOT_PATH,
-      mode: routeMetadatas.mode ?? 'tree',
-      selectedPaths,
-      setSelectedPaths: setSelectedPathsExternal,
-    }),
-    [route, routeMetadatas.mode, selectedPaths],
+  // @TODO ANDRII MOVE
+  // const sortedDirItems = useMemo<DirItem[]>(() => {
+  //   return FileApi.sortDirItems(
+  //     dirItems.filter(file => !FileApi.isItemHidden(file)),
+  //     fileManager.sort,
+  //   );
+  // }, [dirItems, fileManager.sort]);
+  const setSelectedPathsExternal = useCallback(
+    (v: string[]) => {
+      setSelectedPaths(v);
+    },
+    [setSelectedPaths],
   );
 
   useEffect(() => {
     if (fileManager.reloadRequired) {
-      reloadDir();
+      dataManager.load();
       fileManager.setReloadRequired(false);
       setSelectedPaths([]);
     }
@@ -193,22 +197,27 @@ const FileScreen: React.FC<FileScreenProps> = ({
 
   useEffect(() => {
     setSelectedPaths([]);
-    reloadDir();
-    Cache.clearVideoPreviews();
+    dataManager.load();
+    dispatch(clearVideoPreviews());
     return () => {
-      Cache.clearDirItems();
-      setDirLoadingDone(false);
-      setDirItems([]);
       setSelectedPaths([]);
     };
-  }, [route, reloadDir]);
+  }, [route, dataManager.load, dispatch, setSelectedPaths]);
 
   useFocusEffect(
     useCallback(() => {
-      if (route && !isOperational) {
+      setFileTree(route ?? FileApi.ROOT_PATH, routeMetadatas.mode ?? 'tree');
+      if (route && !isOperational && source !== 'search') {
         saveLatestFolder(route);
       }
-    }, []),
+    }, [
+      route,
+      routeMetadatas.mode,
+      source,
+      isOperational,
+      saveLatestFolder,
+      setFileTree,
+    ]),
   );
 
   const backHandle = useCallback(() => {
@@ -221,20 +230,23 @@ const FileScreen: React.FC<FileScreenProps> = ({
   useBackAction(backHandle);
 
   const exceptionHandler = useExceptionHandler();
-  const [searchText, setSearchText] = useState('');
-  const [searchDirItems, setSearchDirItems] = useState<DirItem[]>([]);
-  const [searchContext, setSearchContext] = useState<'VISUAL' | 'TEXT' | 'ALL'>('VISUAL');
+  // const [searchText, setSearchText] = useState('');
+  // const [searchDirItems, setSearchDirItems] = useState<DirItem[]>([]);
+  // const [searchContext, setSearchContext] = useState<'VISUAL' | 'TEXT' | 'ALL'>(
+  //   'VISUAL',
+  // );
 
   // virtualized memoized contents
-  const dataProvider = useMemo(
-    () =>
-      new DataProvider((r1, r2) => r1 !== r2).cloneWithRows(
-        !!searchText.trim() && searchDirItems?.length > 0
-          ? searchDirItems
-          : sortedDirItems,
-      ),
-    [sortedDirItems, searchDirItems, searchText],
-  );
+  // @TODO ANDRII MOVE
+  // const dataProvider = useMemo(
+  //   () =>
+  //     new DataProvider((r1, r2) => r1 !== r2).cloneWithRows(
+  //       // !!searchText.trim() && searchDirItems?.length > 0
+  //       //   ? searchDirItems
+  //       /**:*/ sortedDirItems,
+  //     ),
+  //   [sortedDirItems /**, searchDirItems, searchText*/],
+  // );
   const layoutProvider = useMemo(
     () =>
       new LayoutProvider(
@@ -258,6 +270,7 @@ const FileScreen: React.FC<FileScreenProps> = ({
         key={item.path}
         item={item}
         layout={fileManager.layout}
+        isUserDragging={scrollIndicator.isUserDragging}
       />
     ),
     [fileManager.layout],
@@ -274,10 +287,10 @@ const FileScreen: React.FC<FileScreenProps> = ({
 
   const timestamps = useMemo(
     () =>
-      sortedDirItems.map(item =>
+      dataManager.items.map(item =>
         item.isFile() ? item.mtime?.getTime() : undefined,
       ),
-    [sortedDirItems],
+    [dataManager.items],
   );
 
   const listStyle = useMemo(
@@ -290,23 +303,27 @@ const FileScreen: React.FC<FileScreenProps> = ({
     [fileManager.layout],
   );
 
-  useEffect(() => {
-    setSearchDirItems([]);
-  }, [searchText]);
+  // useEffect(() => {
+  //   setSearchDirItems([]);
+  // }, [searchText]);
 
   return (
-    <FileTreeContext.Provider value={value}>
+    <>
       <View style={styles.container}>
-        {!isStorageLevel ? (
-          <View style={styles.breadCrumbsContainer}>
-            <FilePathBreadCrumb />
-          </View>
-        ) : null}
-        {isOperational && isStorageLevel ? (
-          <View style={{ marginLeft: 10 }}>
-            <StorageSelect route={route || ''} />
-          </View>
-        ) : null}
+        {source === 'search' ? null : (
+          <>
+            {!isStorageLevel ? (
+              <View style={styles.breadCrumbsContainer}>
+                <FilePathBreadCrumb />
+              </View>
+            ) : null}
+            {isOperational && isStorageLevel ? (
+              <View style={{ marginLeft: 10 }}>
+                <StorageSelect route={route || ''} />
+              </View>
+            ) : null}
+          </>
+        )}
 
         <View
           style={{
@@ -316,13 +333,16 @@ const FileScreen: React.FC<FileScreenProps> = ({
             justifyContent: 'space-between',
             marginBottom: 10,
           }}>
-          <TextInput
+          {/* <TextInput
             label="Search..."
             value={searchText}
             onChangeText={setSearchText}
             style={{ flex: 3, marginRight: 10 }}
           />
-          <SearchContextSelect value={searchContext} onSelect={setSearchContext} />
+          <SearchContextSelect
+            value={searchContext}
+            onSelect={setSearchContext}
+          />
           <Button
             mode="contained"
             onPress={() => {
@@ -346,9 +366,9 @@ const FileScreen: React.FC<FileScreenProps> = ({
                 .catch((e: any) => console.error('Search error:', e));
             }}>
             Search
-          </Button>
+          </Button> */}
         </View>
-        {sortedDirItems.length === 0 ? (
+        {dataManager.items.length === 0 ? (
           <ScrollView
             contentContainerStyle={{
               flex: 1,
@@ -357,21 +377,24 @@ const FileScreen: React.FC<FileScreenProps> = ({
               alignItems: 'center',
             }}
             refreshControl={
-              <RefreshControl refreshing={dirLoading} onRefresh={reloadDir} />
+              <RefreshControl
+                refreshing={dataManager.isLoading}
+                onRefresh={dataManager.load}
+              />
             }>
-            {dirLoadingDone ? <EmptyData message={t('noDataHere')} /> : null}
+            {dataManager.loadingDone ? <EmptyData message={t('noDataHere')} /> : null}
           </ScrollView>
         ) : (
           <FileTreeList
-            ref={fileTreeListRef}
             scrollKey={route ?? FileApi.ROOT_PATH}
-            dataProvider={dataProvider}
+            dataProvider={dataManager.dataProvider}
             layoutProvider={layoutProvider}
             rowRenderer={rowRenderer}
             listStyle={listStyle}
-            dirLoading={dirLoading}
-            reloadDir={reloadDir}
+            dirLoading={dataManager.isLoading}
+            reloadDir={dataManager.load}
             timestamps={timestamps}
+            scrollIndicator={scrollIndicator}
           />
         )}
         <View
@@ -450,14 +473,14 @@ const FileScreen: React.FC<FileScreenProps> = ({
         </View>
         {isMultiSelectActivated ? (
           <MultiSelectActions
-            dirItems={dirItems}
+            dirItems={dataManager.items}
             navigation={navigator}
             selectedPaths={selectedPaths}
             setSelectedPaths={setSelectedPaths}
           />
         ) : null}
       </View>
-    </FileTreeContext.Provider>
+    </>
   );
 };
 

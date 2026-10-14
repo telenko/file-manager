@@ -15,7 +15,11 @@ import {
   useFileManager,
 } from '../../../widgets/FileManager';
 import { type FileScreenProps } from '..';
-import { useFileTreeContext } from '../FileTreeContext';
+import {
+  useFileTreeActions,
+  useIsMultiSelectActivated,
+  useIsPathSelected,
+} from '../FileTreeContext';
 import { useExceptionHandler } from '../../../common/components/ExceptionHandler';
 import VideoThumbnail from '../../../common/components/VideoThumbnail';
 
@@ -29,7 +33,7 @@ const MENU_ICON_SIZE = 30;
 
 const DirectoryItemView: React.FC<DirItemProps> = ({ item }) => {
   const fileManager = useFileManager();
-  const fileTreeScreen = useFileTreeContext();
+  const { selectPath, togglePath } = useFileTreeActions();
   const navigation = useNavigation();
   const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -49,10 +53,7 @@ const DirectoryItemView: React.FC<DirItemProps> = ({ item }) => {
           key: 'select',
           enabled: true,
           onPress: () => {
-            fileTreeScreen.setSelectedPaths([
-              ...fileTreeScreen.selectedPaths,
-              item.path,
-            ]);
+            selectPath(item.path);
           },
         },
         {
@@ -135,8 +136,8 @@ const DirectoryItemView: React.FC<DirItemProps> = ({ item }) => {
     [item],
   );
 
-  const multiSelectActivated = fileTreeScreen.selectedPaths.length > 0;
-  const isSelected = fileTreeScreen.selectedPaths.includes(item.path);
+  const multiSelectActivated = useIsMultiSelectActivated();
+  const isSelected = useIsPathSelected(item.path);
 
   const RIGHT_ICON_OFFSET = -10;
 
@@ -239,13 +240,7 @@ const DirectoryItemView: React.FC<DirItemProps> = ({ item }) => {
                   }
                   iconColor={theme.selectionColor}
                   onPress={() => {
-                    fileTreeScreen.setSelectedPaths(
-                      isSelected
-                        ? fileTreeScreen.selectedPaths.filter(
-                            p => p !== item.path,
-                          )
-                        : [...fileTreeScreen.selectedPaths, item.path],
-                    );
+                    togglePath(item.path);
                   }}
                 />
               </View>
@@ -282,18 +277,11 @@ const DirectoryItemView: React.FC<DirItemProps> = ({ item }) => {
         if (!operationsAllowed) {
           return;
         }
-        fileTreeScreen.setSelectedPaths([
-          ...fileTreeScreen.selectedPaths,
-          item.path,
-        ]);
+        selectPath(item.path);
       }}
       onPress={() => {
         if (multiSelectActivated && operationsAllowed) {
-          fileTreeScreen.setSelectedPaths(
-            isSelected
-              ? fileTreeScreen.selectedPaths.filter(p => p !== item.path)
-              : [...fileTreeScreen.selectedPaths, item.path],
-          );
+          togglePath(item.path);
           return;
         }
         if (item.isFile()) {

@@ -14,9 +14,12 @@ import { useFileManager } from '../../../widgets/FileManager';
 import { useNavigation } from '../../../common/hooks/useNavigation';
 import { TouchableOpacity, useWindowDimensions, View } from 'react-native';
 import { theme } from '../../../theme';
+import { useDispatch } from 'react-redux';
+import { setSource } from '../../../store/fileTreeSlice';
 
 const StorageSelect: React.FC<{ route: string }> = ({ route }) => {
   const fileManager = useFileManager();
+  const dispatch = useDispatch();
   const [open, setOpen] = useState(false);
   const navigator = useNavigation();
   const { width } = useWindowDimensions();
@@ -54,6 +57,24 @@ const StorageSelect: React.FC<{ route: string }> = ({ route }) => {
         </TouchableOpacity>
       }
       visible={open}>
+      <List.Item
+        key={'global_search'}
+        left={() => (
+          <View
+            style={{
+              paddingLeft: 10,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+            <Icon size={25} source="magnify" />
+          </View>
+        )}
+        title={'Global Search'}
+        onPress={() => {
+          dispatch(setSource('search'));
+          setOpen(false);
+        }}
+      />
       {fileManager.roots.map(root => (
         <List.Item
           key={root.path}

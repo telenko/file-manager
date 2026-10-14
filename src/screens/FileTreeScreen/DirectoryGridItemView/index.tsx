@@ -14,7 +14,11 @@ import {
   useFileManager,
 } from '../../../widgets/FileManager';
 import { type FileScreenProps } from '..';
-import { useFileTreeContext } from '../FileTreeContext';
+import {
+  useFileTreeActions,
+  useIsMultiSelectActivated,
+  useIsPathSelected,
+} from '../FileTreeContext';
 import { useExceptionHandler } from '../../../common/components/ExceptionHandler';
 import VideoThumbnail from '../../../common/components/VideoThumbnail';
 import { calcGridColumns, GRID_HEIGHT } from '../../../common/utils/layout';
@@ -27,6 +31,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import dayjs from 'dayjs';
+import { specialFolderIcon } from '../specialFoldersIcons';
 
 export const ItemGestureWrapper = ({
   children,
@@ -108,7 +113,7 @@ const DirectoryGridItemView: React.FC<DirItemProps> = ({
   const fileManager = useFileManager();
   const [isScrolling, setScrolling] = useState(false);
   const startY = useRef<number | null>(null);
-  const fileTreeScreen = useFileTreeContext();
+  const { selectPath, togglePath } = useFileTreeActions();
   const navigation = useNavigation();
   const { t } = useTranslation();
   const exceptionHandler = useExceptionHandler();
@@ -120,8 +125,8 @@ const DirectoryGridItemView: React.FC<DirItemProps> = ({
 
   const operationsAllowed = mode !== 'copy' && mode !== 'move';
 
-  const multiSelectActivated = fileTreeScreen.selectedPaths.length > 0;
-  const isSelected = fileTreeScreen.selectedPaths.includes(item.path);
+  const multiSelectActivated = useIsMultiSelectActivated();
+  const isSelected = useIsPathSelected(item.path);
 
   const content = useMemo(
     () =>
@@ -222,7 +227,7 @@ const DirectoryGridItemView: React.FC<DirItemProps> = ({
           <Icon
             size={ICON_SIZE - 10}
             color={theme.folderColor}
-            source={'folder'}
+            source={specialFolderIcon(item.path) || 'folder'}
           />
         </View>
       ) : (
@@ -250,21 +255,14 @@ const DirectoryGridItemView: React.FC<DirItemProps> = ({
           if (!operationsAllowed) {
             return;
           }
-          fileTreeScreen.setSelectedPaths([
-            ...fileTreeScreen.selectedPaths,
-            item.path,
-          ]);
+          selectPath(item.path);
         }}
         onPress={() => {
           if (isScrolling) {
             return;
           }
           if (multiSelectActivated && operationsAllowed) {
-            fileTreeScreen.setSelectedPaths(
-              isSelected
-                ? fileTreeScreen.selectedPaths.filter(p => p !== item.path)
-                : [...fileTreeScreen.selectedPaths, item.path],
-            );
+            togglePath(item.path);
             return;
           }
           if (item.isFile()) {
@@ -331,11 +329,7 @@ const DirectoryGridItemView: React.FC<DirItemProps> = ({
             icon={'check-circle'}
             iconColor="rgb(52,116,235)"
             onPress={() => {
-              fileTreeScreen.setSelectedPaths(
-                isSelected
-                  ? fileTreeScreen.selectedPaths.filter(p => p !== item.path)
-                  : [...fileTreeScreen.selectedPaths, item.path],
-              );
+              togglePath(item.path);
             }}
           />
           <View

@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import { View } from 'react-native';
 import ErrorModal from './ErrorModal';
 
@@ -31,13 +31,9 @@ export class FileManagerError extends Error {
   }
 }
 
-type ExceptionHandlerType = {
+export type ExceptionHandlerType = {
   handleError: (error: FileManagerError | Error) => void;
 };
-
-const ExceptionHandlerContext = React.createContext<ExceptionHandlerType>({
-  handleError: () => {},
-});
 
 const GLOBAL_KEY = '___global_exception_handler___';
 
@@ -95,10 +91,7 @@ class ExceptionHandler extends React.Component<
   }
   render() {
     return (
-      <ExceptionHandlerContext.Provider
-        value={{
-          handleError: this.handleError.bind(this),
-        }}>
+      <>
         <View style={{ flex: 1 }} key={this.state.appCount}>
           {this.props.children}
         </View>
@@ -114,13 +107,13 @@ class ExceptionHandler extends React.Component<
             }}
           />
         ) : null}
-      </ExceptionHandlerContext.Provider>
+      </>
     );
   }
 }
 
 export const useExceptionHandler = (): ExceptionHandlerType => {
-  return useContext(ExceptionHandlerContext);
+  return getGlobalExceptionHandler() ?? { handleError: () => {} };
 };
 
 export const getGlobalExceptionHandler = (): ExceptionHandlerType | null => {

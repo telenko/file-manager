@@ -12,7 +12,7 @@ import Animated, {
   useAnimatedScrollHandler,
 } from 'react-native-reanimated';
 import { RecyclerListView } from 'recyclerlistview';
-import { useScrollIndicator } from './ScrollIndicatorProvider';
+import { ScrollIndicatorContextType } from './ScrollIndicatorProvider';
 import { View } from 'react-native';
 import { ScrolledDateIndicator } from './ScrolledDateIndicator_thumb';
 
@@ -30,6 +30,7 @@ export const ScrollableRecyclerListView = forwardRef<
     timestamps: (number | undefined)[];
     minIndicatorFactor?: number;
     scrollKey?: string;
+    scrollIndicator: ScrollIndicatorContextType;
   }
 >(
   (
@@ -37,6 +38,7 @@ export const ScrollableRecyclerListView = forwardRef<
       timestamps,
       minIndicatorFactor = 3,
       scrollKey,
+      scrollIndicator,
       ...props
     },
     forwardedRef,
@@ -52,7 +54,7 @@ export const ScrollableRecyclerListView = forwardRef<
       isUserDragging,
       clamped,
       dateMs,
-    } = useScrollIndicator();
+    } = scrollIndicator;
 
     useImperativeHandle(
       forwardedRef,
@@ -102,9 +104,24 @@ export const ScrollableRecyclerListView = forwardRef<
       },
     });
 
+    const updateIndicatorVisibility = useCallback(
+      (viewportHeight: number) => {
+        const contentHeight = ref.current?.getContentDimension().height ?? 0;
+        const shouldShow =
+          viewportHeight > 0 &&
+          contentHeight >= viewportHeight * minIndicatorFactor;
+        setIndicatorVisible(current =>
+          current === shouldShow ? current : shouldShow,
+        );
+      },
+      [minIndicatorFactor],
+    );
+
     useLayoutEffect(() => {
-      setIndicatorVisible(false);
-    }, [timestamps]);
+      requestAnimationFrame(() =>
+        updateIndicatorVisibility(layoutHeight.value),
+      );
+    }, [layoutHeight, timestamps, updateIndicatorVisibility]);
 
     useAnimatedReaction(
       () => clamped.value,
@@ -134,12 +151,19 @@ export const ScrollableRecyclerListView = forwardRef<
 
     const handleScrollViewLayout = useCallback(
       (e: any) => {
-        layoutHeight.value = e.nativeEvent.layout.height;
+        const viewportHeight = e.nativeEvent.layout.height;
+        layoutHeight.value = viewportHeight;
         // @ts-ignore
         props.scrollViewProps?.onLayout?.(e);
+        updateIndicatorVisibility(viewportHeight);
         requestAnimationFrame(restoreScrollOffset);
       },
-      [layoutHeight, props.scrollViewProps, restoreScrollOffset],
+      [
+        layoutHeight,
+        props.scrollViewProps,
+        restoreScrollOffset,
+        updateIndicatorVisibility,
+      ],
     );
 
     const handleContentSizeChange = useCallback(
@@ -147,9 +171,16 @@ export const ScrollableRecyclerListView = forwardRef<
         contentHeight.value = h;
         // @ts-ignore
         props.scrollViewProps?.onContentSizeChange?.(_, h);
+        updateIndicatorVisibility(layoutHeight.value);
         requestAnimationFrame(restoreScrollOffset);
       },
-      [contentHeight, props.scrollViewProps, restoreScrollOffset],
+      [
+        contentHeight,
+        layoutHeight,
+        props.scrollViewProps,
+        restoreScrollOffset,
+        updateIndicatorVisibility,
+      ],
     );
 
     const handleVisibleIndicesChanged = useCallback(
@@ -157,7 +188,9 @@ export const ScrollableRecyclerListView = forwardRef<
         const visibleCount = indices.length;
         const totalCount = timestamps.length;
         const shouldShow = totalCount >= visibleCount * minIndicatorFactor;
-        setIndicatorVisible(current => (current === shouldShow ? current : shouldShow));
+        setIndicatorVisible(current =>
+          current === shouldShow ? current : shouldShow,
+        );
         // @ts-ignore
         props.onVisibleIndicesChanged?.(indices, ...rest);
       },
@@ -172,11 +205,7 @@ export const ScrollableRecyclerListView = forwardRef<
         onLayout: handleScrollViewLayout,
         onContentSizeChange: handleContentSizeChange,
       }),
-      [
-        handleContentSizeChange,
-        handleScrollViewLayout,
-        props.scrollViewProps,
-      ],
+      [handleContentSizeChange, handleScrollViewLayout, props.scrollViewProps],
     );
 
     return (
@@ -192,7 +221,10 @@ export const ScrollableRecyclerListView = forwardRef<
           scrollEventThrottle={16}
         />
         {indicatorVisible ? (
-          <ScrolledDateIndicator onScroll={scrollToOffsetPercentage} />
+          <ScrolledDateIndicator
+            onScroll={scrollToOffsetPercentage}
+            scrollIndicator={scrollIndicator}
+          />
         ) : null}
       </View>
     );

@@ -2,19 +2,26 @@ import React, { useEffect, useState } from 'react';
 import Video, { ViewType } from 'react-native-video';
 import { DirItem, FileApi } from '../../../services/FileApi';
 import { useWindowDimensions, View } from 'react-native';
-import { Cache } from '../../../services/Cache';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '../../../store';
+import { setVideoPreview } from '../../../store/fileDataSlice';
 import LoadingIndicator from '../LoadingIndicator';
 
 const VideoViewer: React.FC<{
   file: Partial<DirItem>;
   activeFile?: DirItem;
   onActive?: (v: boolean) => void;
-}> = ({ file, activeFile, onActive }) => {
+}> = ({ file, activeFile }) => {
   const [preview, setPreview] = useState<string | null>('');
   const [videoSize, setVideoSize] = useState({ width: 0, height: 0 });
   const { width, height } = useWindowDimensions();
   const isCurrentViewable = activeFile?.path === file.path;
   const [paused, setPaused] = useState(true);
+  const dispatch = useDispatch<AppDispatch>();
+  const previewKey = `${file.path ?? ''}_0`;
+  const storedPreview = useSelector(
+    (state: RootState) => state.fileData.videoPreviews[previewKey],
+  );
 
   useEffect(() => {
     if (!isCurrentViewable) {
@@ -26,16 +33,19 @@ const VideoViewer: React.FC<{
     if (!file.path) {
       return;
     }
-    const cachedPreview = Cache.getVideoPreview(file.path!);
-    if (cachedPreview) {
-      setPreview(cachedPreview);
+    if (storedPreview) {
+      setPreview(storedPreview);
     } else {
-      // @ts-ignore
-      FileApi.makeVideoPreview(file)
-        .then(setPreview)
+      FileApi.makeVideoPreview(file as DirItem, 0)
+        .then(result => {
+          setPreview(result);
+          if (result) {
+            dispatch(setVideoPreview({ key: previewKey, preview: result }));
+          }
+        })
         .catch(() => {});
     }
-  }, [file?.path]);
+  }, [dispatch, file, previewKey, storedPreview]);
 
   const ratio = videoSize.width / videoSize.height;
   const hasRatio = ratio > 0;

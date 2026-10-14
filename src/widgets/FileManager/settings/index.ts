@@ -1,8 +1,17 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { FileManagerLayout } from '../FileManagerContext';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '../../../store';
+import {
+  setLayout as setLayoutAction,
+  setSort,
+  setStoreLatestFolder as setStoreLatestFolderAction,
+} from '../../../store/fileManagerSlice';
 
 export const useSort = (): ['asc' | 'desc', () => void] => {
+  const dispatch = useDispatch<AppDispatch>();
+  const sort = useSelector((state: RootState) => state.fileManager.sort);
   const SORT_STORAGE_KEY = '__sort_direction__';
   const getSortDirection = async () => {
     try {
@@ -17,21 +26,20 @@ export const useSort = (): ['asc' | 'desc', () => void] => {
       AsyncStorage.setItem(SORT_STORAGE_KEY, s);
     } catch {}
   };
-  const [sort, setSort] = useState<'asc' | 'desc'>('asc');
   const sortRead = useRef(false);
   useEffect(() => {
     (async () => {
-      setSort(await getSortDirection());
+      dispatch(setSort(await getSortDirection()));
       sortRead.current = true;
     })();
-  }, []);
+  }, [dispatch]);
   useEffect(() => {
     if (!sortRead.current) {
       return;
     }
     setSortDirection(sort);
   }, [sort]);
-  const toggleSort = () => setSort(sort === 'asc' ? 'desc' : 'asc');
+  const toggleSort = () => dispatch(setSort(sort === 'asc' ? 'desc' : 'asc'));
   return [sort, toggleSort];
 };
 
@@ -39,6 +47,8 @@ export const useLayout = (): [
   FileManagerLayout,
   (v: FileManagerLayout) => void,
 ] => {
+  const dispatch = useDispatch<AppDispatch>();
+  const layout = useSelector((state: RootState) => state.fileManager.layout);
   const LAYOUT_STORAGE_KEY = '__layout_type__';
   const getLayoutStore = async () => {
     try {
@@ -53,24 +63,27 @@ export const useLayout = (): [
       AsyncStorage.setItem(LAYOUT_STORAGE_KEY, s);
     } catch {}
   };
-  const [layout, setLayout] = useState<FileManagerLayout>('list');
   const layoutRead = useRef(false);
   useEffect(() => {
     (async () => {
-      setLayout(await getLayoutStore());
+      dispatch(setLayoutAction(await getLayoutStore()));
       layoutRead.current = true;
     })();
-  }, []);
+  }, [dispatch]);
   useEffect(() => {
     if (!layoutRead.current) {
       return;
     }
     setLayoutStore(layout);
   }, [layout]);
-  return [layout, setLayout];
+  return [layout, value => dispatch(setLayoutAction(value))];
 };
 
 export const useStoreLatestFolder = () => {
+  const dispatch = useDispatch<AppDispatch>();
+  const storeLatestFolder = useSelector(
+    (state: RootState) => state.fileManager.storeLatestFolder,
+  );
   const STORE_FOLDER_KEY = '__latest-folder-store__';
   const STORE_FOLDER_PATH_KEY = '__latest-folder-path__';
   const getStoreLatestFolder = async () => {
@@ -86,17 +99,16 @@ export const useStoreLatestFolder = () => {
       AsyncStorage.setItem(STORE_FOLDER_KEY, v + '');
     } catch {}
   };
-  const [storeLatestFolder, setStoreLatestFolder] = useState<boolean>(false);
   const [settingReady, setSettingReady] = useState(false);
   const [folderReady, setFolderReady] = useState(false);
   const valueRead = useRef(false);
   useEffect(() => {
     (async () => {
-      setStoreLatestFolder(await getStoreLatestFolder());
+      dispatch(setStoreLatestFolderAction(await getStoreLatestFolder()));
       valueRead.current = true;
       setSettingReady(true);
     })();
-  }, []);
+  }, [dispatch]);
   useEffect(() => {
     if (!valueRead.current) {
       return;
@@ -133,7 +145,8 @@ export const useStoreLatestFolder = () => {
 
   return {
     storeLatestFolder,
-    setStoreLatestFolder,
+    setStoreLatestFolder: (value: boolean) =>
+      dispatch(setStoreLatestFolderAction(value)),
     storedLatestFolder,
     saveLatestFolder,
     latestFolderReady: folderReady && settingReady,

@@ -1,4 +1,4 @@
-import React, { PropsWithChildren, useEffect, useState } from 'react';
+import React, { PropsWithChildren, useEffect } from 'react';
 import { Platform, View, Text, Button, TextInput } from 'react-native';
 import FileManager from './src/widgets/FileManager/FileManager';
 import { useDeviceLocale } from './src/i18n/hooks/useDeviceLocale';
@@ -17,6 +17,9 @@ import ExceptionHandler from './src/common/components/ExceptionHandler';
 // @TODO Andrii get rid of unreliable library
 import { SnackbarProvider } from 'react-native-paper-snackbar-stack';
 import NoPermissionScreen from './src/common/components/NoPermissionScreen';
+import { Provider, useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState, store } from './src/store';
+import { setPermissionGranted } from './src/store/appSlice';
 
 import { NativeModules } from 'react-native';
 
@@ -73,12 +76,15 @@ const FontsProvider: React.FC<PropsWithChildren> = ({ children }) => {
  */
 
 const App = () => {
-  const [permissionGranted, setPermissionGranted] = useState<boolean>(false);
+  const dispatch = useDispatch<AppDispatch>();
+  const permissionGranted = useSelector(
+    (state: RootState) => state.app.permissionGranted,
+  );
   useDeviceLocale();
   const { t } = useTranslation();
   const askPermission = () =>
     FileApi.askForStoragePermission()
-      .then(() => setPermissionGranted(true))
+      .then(() => dispatch(setPermissionGranted(true)))
       .then(() => {
         EmbeddingsModule.initModel()
           .then(() => {
@@ -106,9 +112,7 @@ const App = () => {
               </SnackbarProvider>
             </ExceptionHandler>
           ) : (
-            <NoPermissionScreen
-              onGrantPermission={askPermission}
-            />
+            <NoPermissionScreen onGrantPermission={askPermission} />
           )}
         </FontsProvider>
       </SafeAreaProvider>
@@ -116,4 +120,10 @@ const App = () => {
   );
 };
 
-export default App;
+const AppWithStore = () => (
+  <Provider store={store}>
+    <App />
+  </Provider>
+);
+
+export default AppWithStore;

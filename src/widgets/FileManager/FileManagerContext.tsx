@@ -1,8 +1,26 @@
-import React, { useContext } from 'react';
-import { FileGuiHelper } from './FileGuiHelper';
-import { DirItem, StorageItem } from '../../services/FileApi';
+import { useCallback, useMemo } from 'react';
+import { FileGuiHelper, getRouteDirectory } from './FileGuiHelper';
+import { DirItem, FileApi, StorageItem } from '../../services/FileApi';
 import { NavigationProp } from '@react-navigation/native';
 import { FileManagerNavigation } from '../../common/types/navigation';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState, store } from '../../store';
+import {
+  setFileDetails,
+  setLongOperation,
+  setNewDirName,
+  setNewDirPath,
+  setReloadRequired,
+  setRenameDialogItem,
+  setRoots,
+  setSettingsOpen,
+  setStoreLatestFolder,
+  setLayout,
+  toggleSort,
+} from '../../store/fileManagerSlice';
+import { restoreFileItem, storeFileItem } from '../../store/fileData';
+import { useSnackbar } from 'react-native-paper-snackbar-stack';
+import { useTranslation } from 'react-i18next';
 
 export type FileLongOperationType = {
   message: string;
@@ -54,36 +72,156 @@ export type FileManagerContextType = {
 } & typeof FileGuiHelper;
 
 export const useFileManager = (): FileManagerContextType => {
-  const ctx = useContext(FileManagerContext);
-  return ctx;
+  const dispatch = useDispatch<AppDispatch>();
+  const { enqueueSnackbar } = useSnackbar();
+  const { t } = useTranslation();
+  const state = useSelector((root: RootState) => root.fileManager);
+  const roots = useMemo(
+    () => state.roots.map(item => restoreFileItem(item) as StorageItem),
+    [state.roots],
+  );
+
+  const refreshRoots = useCallback(async () => {
+    const nextRoots = await FileApi.prepareFsRoots();
+    dispatch(setRoots(nextRoots.map(storeFileItem)));
+  }, [dispatch]);
+
+  const setRenameDialogActive = useCallback(
+    (item: DirItem | null) =>
+      dispatch(setRenameDialogItem(item ? storeFileItem(item) : null)),
+    [dispatch],
+  );
+  const setFileDetailsValue = useCallback(
+    (item: DirItem | null) =>
+      dispatch(setFileDetails(item ? storeFileItem(item) : null)),
+    [dispatch],
+  );
+  const showFileDetails = setFileDetailsValue;
+  const createDirectory = useCallback(
+    (navigation: NavigationProp<FileManagerNavigation>) => {
+      dispatch(setNewDirName(''));
+      dispatch(
+        setNewDirPath(getRouteDirectory(navigation) ?? FileApi.ROOT_PATH),
+      );
+    },
+    [dispatch],
+  );
+  const performCopyContent = useCallback(
+    async (
+      sources: string[],
+      destination: string,
+      injectIfConflict: boolean,
+    ) => {
+      dispatch(setLongOperation({ message: t('copyInProgress') }));
+      try {
+        await FileApi.copyFilesOrDirectoriesBatched(
+          sources,
+          destination,
+          injectIfConflict,
+        );
+        if (!store.getState().fileManager.longOperation?.hidden) {
+          enqueueSnackbar({
+            variant: 'success',
+            message: t('copyIsDone'),
+            duration: 4000,
+          });
+        }
+        await refreshRoots();
+      } finally {
+        dispatch(setLongOperation(null));
+      }
+    },
+    [dispatch, enqueueSnackbar, refreshRoots, t],
+  );
+  const performMoveContent = useCallback(
+    async (
+      sources: string[],
+      destination: string,
+      injectIfConflict: boolean,
+    ) => {
+      dispatch(setLongOperation({ message: t('moveInProgress') }));
+      try {
+        await FileApi.moveFilesOrDirectoriesBatched(
+          sources,
+          destination,
+          injectIfConflict,
+        );
+        if (!store.getState().fileManager.longOperation?.hidden) {
+          enqueueSnackbar({
+            variant: 'success',
+            message: t('moveIsDone'),
+            duration: 4000,
+          });
+        }
+        await refreshRoots();
+      } finally {
+        dispatch(setLongOperation(null));
+      }
+    },
+    [dispatch, enqueueSnackbar, refreshRoots, t],
+  );
+  const deleteContent = useCallback(
+    async (items: DirItem[]) => {
+      let deleteInitiated = false;
+      try {
+        const result = await FileGuiHelper.deleteContent(items, () => {
+          deleteInitiated = true;
+          dispatch(setLongOperation({ message: t('deleteInProgress') }));
+        });
+        if (result) {
+          if (
+            deleteInitiated &&
+            !store.getState().fileManager.longOperation?.hidden
+          ) {
+            enqueueSnackbar({
+              variant: 'success',
+              message: t('deleteIsDone'),
+              duration: 4000,
+            });
+          }
+          await refreshRoots();
+        }
+        return result;
+      } finally {
+        if (deleteInitiated) {
+          dispatch(setLongOperation(null));
+        }
+      }
+    },
+    [dispatch, enqueueSnackbar, refreshRoots, t],
+  );
+
+  return {
+    ...FileGuiHelper,
+    sort: state.sort,
+    layout: state.layout,
+    storeLatestFolder: state.storeLatestFolder,
+    setStoreLatestFolder: value => dispatch(setStoreLatestFolder(value)),
+    setLayout: value => dispatch(setLayout(value)),
+    toggleSort: () => dispatch(toggleSort()),
+    reloadRequired: state.reloadRequired,
+    setReloadRequired: value => dispatch(setReloadRequired(value)),
+    roots,
+    rootsReady: state.rootsReady,
+    renameContent: setRenameDialogActive,
+    renameDialogItem: state.renameDialogItem
+      ? restoreFileItem(state.renameDialogItem)
+      : null,
+    setRenameDialogActive,
+    createDirectory,
+    newDirName: state.newDirName,
+    newDirPath: state.newDirPath,
+    settingsOpen: state.settingsOpen,
+    setSettingsOpen: value => dispatch(setSettingsOpen(value)),
+    setNewDirName: value => dispatch(setNewDirName(value)),
+    setNewDirPath: value => dispatch(setNewDirPath(value)),
+    performCopyContent,
+    performMoveContent,
+    showFileDetails,
+    setFileDetails: setFileDetailsValue,
+    fileDetails: state.fileDetails ? restoreFileItem(state.fileDetails) : null,
+    longOperation: state.longOperation,
+    setLongOperation: value => dispatch(setLongOperation(value)),
+    deleteContent,
+  };
 };
-
-export const FileManagerContext = React.createContext<FileManagerContextType>({
-  sort: 'asc',
-  layout: 'list',
-  storeLatestFolder: false,
-  setStoreLatestFolder: () => {},
-  setLayout: () => {},
-  toggleSort: () => {},
-  reloadRequired: false,
-  setReloadRequired: () => {},
-  roots: [],
-  rootsReady: false,
-
-  renameContent: () => {},
-  settingsOpen: false,
-  setSettingsOpen: () => {},
-  setRenameDialogActive: () => {},
-  createDirectory: () => {},
-  setNewDirName: () => {},
-  setNewDirPath: () => {},
-
-  showFileDetails: () => {},
-  setFileDetails: () => {},
-  longOperation: null,
-  setLongOperation: () => {},
-  performCopyContent: async () => {},
-  performMoveContent: async () => {},
-
-  ...FileGuiHelper,
-});

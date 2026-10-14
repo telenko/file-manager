@@ -13,7 +13,7 @@ import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { Icon } from 'react-native-paper';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import dayjs from 'dayjs';
-import { useScrollIndicator } from './ScrollIndicatorProvider';
+import { ScrollIndicatorContextType } from './ScrollIndicatorProvider';
 
 const hapticFallbackOptions = {
   enableVibrateFallback: true,
@@ -31,6 +31,7 @@ export interface ScrolledDateIndicatorRef {
 
 interface Props {
   onScroll?: (progress: number) => void; // викликається коли юзер тягне повзунок
+  scrollIndicator: ScrollIndicatorContextType;
 }
 
 const HIT_SLOP_WIDTH = 30; // draggable area
@@ -42,7 +43,7 @@ const DATE_BUBBLE_WIDTH = 90;
 export const ScrolledDateIndicator = forwardRef<
   ScrolledDateIndicatorRef,
   Props
->(({ onScroll }, ref) => {
+>(({ onScroll, scrollIndicator }, ref) => {
   const {
     dateMs: dateStartMs,
     clamped,
@@ -50,7 +51,7 @@ export const ScrolledDateIndicator = forwardRef<
     isUserDragging,
     layoutHeight,
     scrollY,
-  } = useScrollIndicator();
+  } = scrollIndicator;
   const containerHeight = useSharedValue(1);
   const containerTop = useSharedValue(0);
 

@@ -1,17 +1,14 @@
-import React, {
-  forwardRef,
-  useImperativeHandle,
-  useMemo,
-  useRef,
-} from 'react';
+import React, { forwardRef, useImperativeHandle, useMemo, useRef } from 'react';
 import { StyleSheet, View, ViewStyle } from 'react-native';
-import { DataProvider, LayoutProvider, RecyclerListView } from 'recyclerlistview';
+import {
+  DataProvider,
+  LayoutProvider,
+  RecyclerListView,
+} from 'recyclerlistview';
 import { RefreshControl } from 'react-native-gesture-handler';
 import { DirItem } from '../../services/FileApi';
-import {
-  ScrollableRecyclerListView,
-  ScrollIndicatorProvider,
-} from '../../common/components/ScrollIndicator';
+import { ScrollableRecyclerListView } from '../../common/components/ScrollIndicator';
+import { ScrollIndicatorContextType } from '../../common/components/ScrollIndicator/ScrollIndicatorProvider';
 
 export type FileTreeListRef = {
   updateSelection: (selectedPaths: string[]) => void;
@@ -26,6 +23,7 @@ type FileTreeListProps = {
   dirLoading: boolean;
   reloadDir: () => void;
   timestamps: (number | undefined)[];
+  scrollIndicator: ScrollIndicatorContextType;
 };
 
 const FileTreeList = forwardRef<FileTreeListRef, FileTreeListProps>(
@@ -39,6 +37,7 @@ const FileTreeList = forwardRef<FileTreeListRef, FileTreeListProps>(
       dirLoading,
       reloadDir,
       timestamps,
+      scrollIndicator,
     },
     forwardedRef,
   ) => {
@@ -63,22 +62,21 @@ const FileTreeList = forwardRef<FileTreeListRef, FileTreeListProps>(
 
     return (
       <View style={styles.listContainer}>
-        <ScrollIndicatorProvider>
-          <ScrollableRecyclerListView
-            ref={listRef}
-            canChangeSize
-            scrollKey={scrollKey}
-            extendedState={extendedStateRef.current}
-            dataProvider={dataProvider}
-            layoutProvider={layoutProvider}
-            rowRenderer={rowRenderer}
-            style={listStyle}
-            optimizeForInsertDeleteAnimations
-            // @ts-ignore
-            refreshControl={refreshControl}
-            timestamps={timestamps}
-          />
-        </ScrollIndicatorProvider>
+        <ScrollableRecyclerListView
+          ref={listRef}
+          canChangeSize
+          scrollKey={scrollKey}
+          extendedState={extendedStateRef.current}
+          dataProvider={dataProvider}
+          layoutProvider={layoutProvider}
+          rowRenderer={rowRenderer}
+          style={listStyle}
+          optimizeForInsertDeleteAnimations
+          // @ts-ignore
+          refreshControl={refreshControl}
+          timestamps={timestamps}
+          scrollIndicator={scrollIndicator}
+        />
       </View>
     );
   },
