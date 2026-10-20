@@ -4,6 +4,7 @@ import { FileTreeState } from '../../../store/fileTreeSlice';
 
 export type DataManagerType = {
   load(): Promise<void>;
+  loadNext?(): Promise<void>;
   dataProvider: DataProvider;
   items: DirItem[];
   isLoading: boolean;
@@ -16,4 +17,5 @@ export type DataManagerType = {
 export type DataManagerHookType = (route: {
   route: FileTreeState['route'];
   mode: FileTreeState['mode'];
+  source: FileTreeState['source'];
 }) => DataManagerType;

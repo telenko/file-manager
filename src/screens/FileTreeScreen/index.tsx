@@ -1,9 +1,5 @@
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { Searchbar } from 'react-native-paper';
 import { DirItem, FileApi } from '../../services/FileApi';
 import FilePathBreadCrumb from './FilePathBreadCrumb';
 import { useNavigation } from '../../common/hooks/useNavigation';
@@ -42,8 +38,9 @@ import FileTreeList from './FileTreeList';
 import { useScrollIndicatorState } from '../../common/components/ScrollIndicator/ScrollIndicatorProvider';
 // import { NativeModules } from 'react-native';
 // import { SearchContextSelect } from './SearchContextSelect';
-import { FileTreeState } from '../../store/fileTreeSlice';
+import { FileTreeState, setSearchQuery } from '../../store/fileTreeSlice';
 import { useDataManager } from './DataManager/useDataManager';
+import { DebouncedSearchbar } from './DebouncedSearchbar';
 
 // const { EmbeddingsModule } = NativeModules;
 
@@ -51,6 +48,7 @@ export type FileScreenProps = {
   route: {
     params: {
       route: string;
+      source?: FileTreeState['source'];
       mode?: FileTreeState['mode'];
       fromRoute?: string[];
     };
@@ -67,20 +65,11 @@ const FileScreen: React.FC<FileScreenProps> = stackRoute => {
   const scrollIndicator = useScrollIndicatorState();
   const navigator = useNavigation();
   const { t } = useTranslation();
-  // const [dirLoadingDone, setDirLoadingDone] = useState(false);
-  // const directoryPath = route ?? FileApi.ROOT_PATH;
-  // const storedDirItems = useSelector(
-  //   (state: RootState) => state.fileData.directories[directoryPath] ?? [],
-  // );
-  // const dirItems = useMemo(
-  //   () => storedDirItems.map(restoreFileItem),
-  //   [storedDirItems],
-  // );
+
   const dispatch = useDispatch<AppDispatch>();
-  // const [dirLoading, setDirLoading] = useState<boolean>(false);
-  // const [dirError, setDirError] = useState<Error | null>(null);
   const { selectedPaths } = useFileTreeContext();
-  const source = useSelector((state: RootState) => state.fileTree.source);
+  const reduxSource = useSelector((state: RootState) => state.fileTree.source);
+  const source = routeMetadatas.source || reduxSource;
   const { setSelectedPaths, setFileTree } = useFileTreeActions();
   const [copyInProgress, setCopyInProgress] = useState<boolean>(false);
   const [moveInProgress, setMoveInProgress] = useState<boolean>(false);
@@ -91,8 +80,10 @@ const FileScreen: React.FC<FileScreenProps> = stackRoute => {
   const dataManager = useDataManager({
     route,
     mode: routeMetadatas.mode || 'tree',
+    source,
   });
   const isOperational = ['copy', 'move'].includes(routeMetadatas.mode || '');
+
   useEffect(() => {
     let title = '';
     if (isMultiSelectActivated) {
@@ -147,39 +138,6 @@ const FileScreen: React.FC<FileScreenProps> = stackRoute => {
     isStorageLevel,
   ]);
 
-  // @TODO ANDRII MOVE
-  // const reloadDir = useCallback(async () => {
-  //   setDirLoading(true);
-  //   setDirError(null);
-  //   // @ts-ignore
-  //   await new Promise(r => setTimeout(r, 100));
-  //   try {
-  //     const newDirItems = await FileApi.readDir(directoryPath);
-  //     dispatch(
-  //       setDirectoryItems({
-  //         path: directoryPath,
-  //         items: newDirItems
-  //           .filter(file => !FileApi.isItemHidden(file))
-  //           .map(storeFileItem),
-  //       }),
-  //     );
-  //     setDirLoadingDone(true);
-  //   } catch (e: any) {
-  //     setDirError(e as Error);
-  //     dispatch(setDirectoryItems({ path: directoryPath, items: [] }));
-  //     exceptionHandler.handleError(e);
-  //   } finally {
-  //     setDirLoading(false);
-  //   }
-  // }, [directoryPath, dispatch]);
-
-  // @TODO ANDRII MOVE
-  // const sortedDirItems = useMemo<DirItem[]>(() => {
-  //   return FileApi.sortDirItems(
-  //     dirItems.filter(file => !FileApi.isItemHidden(file)),
-  //     fileManager.sort,
-  //   );
-  // }, [dirItems, fileManager.sort]);
   const setSelectedPathsExternal = useCallback(
     (v: string[]) => {
       setSelectedPaths(v);
@@ -230,23 +188,7 @@ const FileScreen: React.FC<FileScreenProps> = stackRoute => {
   useBackAction(backHandle);
 
   const exceptionHandler = useExceptionHandler();
-  // const [searchText, setSearchText] = useState('');
-  // const [searchDirItems, setSearchDirItems] = useState<DirItem[]>([]);
-  // const [searchContext, setSearchContext] = useState<'VISUAL' | 'TEXT' | 'ALL'>(
-  //   'VISUAL',
-  // );
 
-  // virtualized memoized contents
-  // @TODO ANDRII MOVE
-  // const dataProvider = useMemo(
-  //   () =>
-  //     new DataProvider((r1, r2) => r1 !== r2).cloneWithRows(
-  //       // !!searchText.trim() && searchDirItems?.length > 0
-  //       //   ? searchDirItems
-  //       /**:*/ sortedDirItems,
-  //     ),
-  //   [sortedDirItems /**, searchDirItems, searchText*/],
-  // );
   const layoutProvider = useMemo(
     () =>
       new LayoutProvider(
@@ -307,10 +249,26 @@ const FileScreen: React.FC<FileScreenProps> = stackRoute => {
   //   setSearchDirItems([]);
   // }, [searchText]);
 
+  const searchQuery = useSelector(
+    (state: RootState) => state.fileTree.searchQuery,
+  );
+  const searchContext = useSelector(
+    (state: RootState) => state.fileTree.serchContext,
+  );
+
   return (
     <>
       <View style={styles.container}>
-        {source === 'search' ? null : (
+        {source === 'search' ? (
+          <View style={styles.searchContainer}>
+            <DebouncedSearchbar
+              style={styles.searchBar}
+              inputStyle={styles.searchInput}
+              iconColor={'#6200ee'}
+              placeholderTextColor="#888"
+            />
+          </View>
+        ) : (
           <>
             {!isStorageLevel ? (
               <View style={styles.breadCrumbsContainer}>
@@ -332,42 +290,7 @@ const FileScreen: React.FC<FileScreenProps> = stackRoute => {
             alignItems: 'center',
             justifyContent: 'space-between',
             marginBottom: 10,
-          }}>
-          {/* <TextInput
-            label="Search..."
-            value={searchText}
-            onChangeText={setSearchText}
-            style={{ flex: 3, marginRight: 10 }}
-          />
-          <SearchContextSelect
-            value={searchContext}
-            onSelect={setSearchContext}
-          />
-          <Button
-            mode="contained"
-            onPress={() => {
-              if (searchText.trim() === '') {
-                return;
-              }
-              EmbeddingsModule.searchFiles(searchText, searchContext, route, 50)
-                .then((results: any) => {
-                  console.log('Search results:', results);
-                  setSearchDirItems(
-                    results
-                      .sort((a: any, b: any) => b.score - a.score)
-                      .map((result: any) => ({
-                        path: result.filePath,
-                        name: result.fileName,
-                        isFile: () => true,
-                        mtime: new Date().getTime(), // Placeholder, adjust as needed,
-                      })),
-                  );
-                })
-                .catch((e: any) => console.error('Search error:', e));
-            }}>
-            Search
-          </Button> */}
-        </View>
+          }}></View>
         {dataManager.items.length === 0 ? (
           <ScrollView
             contentContainerStyle={{
@@ -382,7 +305,9 @@ const FileScreen: React.FC<FileScreenProps> = stackRoute => {
                 onRefresh={dataManager.load}
               />
             }>
-            {dataManager.loadingDone ? <EmptyData message={t('noDataHere')} /> : null}
+            {dataManager.loadingDone ? (
+              <EmptyData message={t('noDataHere')} />
+            ) : null}
           </ScrollView>
         ) : (
           <FileTreeList
@@ -395,6 +320,7 @@ const FileScreen: React.FC<FileScreenProps> = stackRoute => {
             reloadDir={dataManager.load}
             timestamps={timestamps}
             scrollIndicator={scrollIndicator}
+            loadNext={dataManager.loadNext}
           />
         )}
         <View
@@ -501,6 +427,24 @@ const styles = StyleSheet.create({
   },
   actionButton: {
     marginBottom: -5,
+  },
+  searchContainer: {
+    // flex: 1,
+    marginTop: -10,
+    marginBottom: -5,
+    // paddingBottom: 10,
+    marginHorizontal: 0,
+    justifyContent: 'center',
+  },
+  searchBar: {
+    elevation: 0, // Прибираємо стандартну тінь Android для більш плоского та сучасного вигляду
+    backgroundColor: 'rgba(0, 0, 0, 0.05)',
+    borderRadius: 8,
+    height: 40,
+  },
+  searchInput: {
+    fontSize: 14,
+    minHeight: 0, // Допомагає вирівняти текст по вертикалі у React Native Paper
   },
 });
 

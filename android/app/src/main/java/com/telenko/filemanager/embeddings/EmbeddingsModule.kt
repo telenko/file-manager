@@ -11,22 +11,12 @@ import kotlinx.coroutines.*
 import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
 import kotlin.math.sqrt
 
-// @TODO Andrii plan for indexing feature
-// 1. consistency of image and pdf indexers (5p) [DONE]
-// 1.1. cache of all files in system + events listening -> emiting events embeddings changes (5p)
-// 2. syncing indexer with battery and memory usage + limit of indexing (8p)
-// 3. re-syncing engine based on events from ui and android events + scheduler (8p)
-// 4. UI layout + settings (3p)
-// 5. S3 for models + download and use S3 models within app (5p)
-// 6. build optimization and preparing for release / measuring size needed (5p)
-
 private const val TAG = "EMBEDDINGS_MODULE"
 private val moduleScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
 class EmbeddingsModule(private val reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
 
     init {
-        // Ініціалізуємо PDFBox один раз для Android Context
         PDFBoxResourceLoader.init(reactContext)
     }
 
@@ -120,22 +110,21 @@ class EmbeddingsModule(private val reactContext: ReactApplicationContext) : Reac
         }
     }
 
-    // 3. ПОШУК ФАЙЛІВ З КОНТЕКСТОМ ПАПКИ ТА КОНТЕКСТОМ ПОШУКУ
+    // 3. ПОШУК ФАЙЛІВ З ПАГІНАЦІЄЮ ТА CONTEXT.ALL
     @ReactMethod
     fun searchFiles(
         queryText: String,
         searchContextString: String,
         targetFolder: String?,
-        topK: Int,
+        offset: Int,
+        size: Int,
         promise: Promise
     ) {
         val searchManager = vectorSearchManager
-                    ?: throw IllegalStateException("Модуль пошуку не ініціалізовано. Спочатку викличте initModel()")
+            ?: throw IllegalStateException("Модуль пошуку не ініціалізовано. Спочатку викличте initModel()")
+        
         moduleScope.launch {
             try {
-                val indexer = fileManagerIndexer
-                    ?: throw IllegalStateException("Модуль пошуку не ініціалізовано. Спочатку викличте initModel()")
-
                 val textIndexer = textEmbeddingIndexer
                     ?: throw IllegalStateException("Модуль текстової індексації не ініціалізовано. Спочатку викличте initModel()")
 
@@ -151,7 +140,8 @@ class EmbeddingsModule(private val reactContext: ReactApplicationContext) : Reac
                     queryVector = queryEmbedding,
                     queryText = queryText,
                     searchContext = searchContext,
-                    topK = topK,
+                    offset = offset,
+                    size = size,
                     targetFolder = targetFolder
                 )
 
@@ -175,5 +165,4 @@ class EmbeddingsModule(private val reactContext: ReactApplicationContext) : Reac
             }
         }
     }
-
 }

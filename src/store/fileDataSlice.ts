@@ -5,12 +5,14 @@ type FileDataState = {
   directories: Record<string, StoredFileItem[]>;
   videoPreviews: Record<string, string>;
   indexFiles: StoredFileItem[];
+  searchFiles: StoredFileItem[];
 };
 
 const initialState: FileDataState = {
   directories: {},
   videoPreviews: {},
   indexFiles: [],
+  searchFiles: [],
 };
 
 const fileDataSlice = createSlice({
@@ -38,6 +40,9 @@ const fileDataSlice = createSlice({
     setIndexFiles(state, action: PayloadAction<StoredFileItem[]>) {
       state.indexFiles = action.payload;
     },
+    setSearchFiles(state, action: PayloadAction<StoredFileItem[]>) {
+      state.searchFiles = action.payload;
+    },
   },
 });
 
@@ -47,5 +52,6 @@ export const {
   setVideoPreview,
   clearVideoPreviews,
   setIndexFiles,
+  setSearchFiles,
 } = fileDataSlice.actions;
 export default fileDataSlice.reducer;

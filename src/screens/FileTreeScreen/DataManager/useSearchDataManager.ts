@@ -1,173 +1,230 @@
-import { useState, useCallback, useRef, useMemo } from 'react';
+
+import {
+  useState,
+  useCallback,
+  useMemo,
+  useEffect,
+  useRef,
+} from 'react';
 import { DataProvider } from 'recyclerlistview';
 import { NativeModules } from 'react-native';
-import { DirItem } from '../../../services/FileApi';
-import type { DataManagerHookType, DataManagerType } from './DataManagerType';
-import { IndexedFile } from '../../../common/hooks/useIndexedFiles';
-import { AppDispatch, RootState } from '../../../store';
 import { useDispatch, useSelector } from 'react-redux';
-import { setIndexFiles } from '../../../store/fileDataSlice';
+
+import type { DirItem } from '../../../services/FileApi';
+import type { DataManagerHookType, DataManagerType } from './DataManagerType';
+import type { AppDispatch, RootState } from '../../../store';
+
 import {
   restoreFileItem,
-  StoredFileItem,
   storeFileItem,
+  type StoredFileItem,
 } from '../../../store/fileData';
+import { setSearchFiles } from '../../../store/fileDataSlice';
 
-const { FileIndexer } = NativeModules;
+const { EmbeddingsModule } = NativeModules;
 
-// Константи за розмірами порцій
-const INITIAL_LOAD_SIZE = 500; // N - перша порція для миттєвого відображення
-const BACKGROUND_PAGE_SIZE = 5000; // M - розмір наступних фонових порцій
-const BACKGROUND_DELAY_MS = 100; // Пауза між ітераціями фонового завантаження
+export interface FileEmbeddingEntityRaw {
+  id: number;
+  filePath: string;
+  fileName: string;
+  mediaType: string;
+  embeddingType: string;
+  frameTimeMs: number;
+  pageIndex: number;
+}
 
-/**
- * Адаптер для перетворення IndexedFile у DirItem.
- */
-export const adaptIndexedItemIntoDirItem = (
-  indexedFile: IndexedFile,
+export const adaptEmbeddingItemIntoDirItem = (
+  entity: FileEmbeddingEntityRaw,
 ): DirItem => {
-  const hasFileExtensionRegex = /\/[^\/]+\.[a-zA-Z0-9]+$/;
-  const isFileCheck = hasFileExtensionRegex.test(indexedFile.filePath);
+  const isFile = /\/[^/]+\.[a-zA-Z0-9]+$/.test(entity.filePath);
 
   return {
     ctime: undefined,
-    mtime: indexedFile.lastModified
-      ? new Date(indexedFile.lastModified)
-      : undefined,
-    name: indexedFile.filePath.split('/').pop() ?? '',
-    path: indexedFile.filePath,
-    size: indexedFile.fileSize,
-    isFile: () => isFileCheck,
-    isDirectory: () => !isFileCheck,
+    mtime: undefined,
+    name: entity.fileName || entity.filePath.split('/').pop() || '',
+    path: entity.filePath,
+    size: 0,
+    isFile: () => isFile,
+    isDirectory: () => !isFile,
   };
 };
 
 export const useSearchDataManager: DataManagerHookType = (
   route,
 ): DataManagerType => {
-  const items = useSelector((state: RootState) => state.fileData.indexFiles);
-  const dirItems = useMemo(() => items.map(restoreFileItem), [items]);
   const dispatch = useDispatch<AppDispatch>();
 
-  const setItems = useCallback(
+  const searchText = useSelector(
+    (state: RootState) => state.fileTree.searchQuery || '',
+  );
+
+  const items = useSelector(
+    (state: RootState) => state.fileData.searchFiles || [],
+  );
+
+  const dirItems = useMemo(
+    () => items.map(restoreFileItem),
+    [items],
+  );
+
+  const itemsRef = useRef(items);
+  itemsRef.current = items;
+
+  const latestQueryRef = useRef(searchText.trim());
+  latestQueryRef.current = searchText.trim();
+
+  // Інвалідує результати старих запитів.
+  const requestIdRef = useRef(0);
+
+  const [dataProvider, setDataProvider] = useState(
+    () => new DataProvider((r1, r2) => r1 !== r2),
+  );
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+  const [loadingDone, setLoadingDone] = useState(false);
+
+  const updateItemsAndProvider = useCallback(
     (newItems: StoredFileItem[]) => {
-      dispatch(setIndexFiles(newItems));
+      itemsRef.current = newItems;
+
+      dispatch(setSearchFiles(newItems));
+
+      setDataProvider(prev =>
+        prev.cloneWithRows(newItems.map(restoreFileItem)),
+      );
     },
     [dispatch],
   );
 
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [error, setError] = useState<Error | null>(null);
-  const [loadingDone, setLoadingDone] = useState<boolean>(false);
+  const loadPage = useCallback(
+    async (offset = 0, size = 50): Promise<StoredFileItem[]> => {
+      const query = latestQueryRef.current;
 
-  // Реф для запобігання паралельним/дублюючим циклам завантаження
-  const isFetchingRef = useRef<boolean>(false);
-
-  // DataProvider для RecyclerListView
-  const [dataProvider, setDataProvider] = useState<DataProvider>(
-    new DataProvider((r1, r2) => r1 !== r2),
-  );
-
-  // Допоміжна функція для оновлення локального стейту та DataProvider
-  const updateItemsAndProvider = useCallback(
-    (newStoredItems: StoredFileItem[]) => {
-      setItems(newStoredItems);
-      setDataProvider(prev =>
-        prev.cloneWithRows(newStoredItems.map(restoreFileItem)),
-      );
-    },
-    [setItems],
-  );
-
-  // Головна функція завантаження: миттєвий старт N елементів + фоновий цикл порціями M
-  const load = useCallback(async () => {
-    if (isFetchingRef.current) return;
-    isFetchingRef.current = true;
-
-    setIsLoading(true);
-    setError(null);
-    setLoadingDone(false);
-
-    try {
-      // Крок 1: Миттєво вантажимо першу порцію N (INITIAL_LOAD_SIZE)
-      console.log(`[Search] Завантаження першої порції: ${INITIAL_LOAD_SIZE}`);
-      const initialRawFiles: IndexedFile[] = await FileIndexer.getFilesPaged(
-        ['IMAGE', 'VIDEO', 'AUDIO', 'TEXT'],
-        0,
-        INITIAL_LOAD_SIZE,
-      );
-
-      const initialAdapted = initialRawFiles
-        .map(adaptIndexedItemIntoDirItem)
-        .map(storeFileItem);
-
-      updateItemsAndProvider(initialAdapted);
-      setIsLoading(false);
-      setLoadingDone(true); // Показуємо дані на екрані одразу
-
-      // Якщо перша порція порожня або менша за ліміт — далі немає чого вантажити
-      if (initialAdapted.length < INITIAL_LOAD_SIZE) {
-        isFetchingRef.current = false;
-        return;
+      // Без запиту нативний модуль не викликається.
+      if (!query) {
+        ++requestIdRef.current;
+        setIsLoading(false);
+        setLoadingDone(false);
+        setError(null);
+        return [];
       }
 
-      // Крок 2: Фоновий цикл для довантаження решти порціями M (BACKGROUND_PAGE_SIZE)
-      let currentOffset = initialAdapted.length;
+      const requestId = ++requestIdRef.current;
 
-      // Використовуємо асинхронну функцію для циклу з паузами
-      const fetchRemainingInLoop = async () => {
-        try {
-          let hasMore = true;
-          let accumulatedItems = [...initialAdapted];
+      setIsLoading(true);
+      setError(null);
 
-          while (hasMore) {
-            // Робимо затримку перед наступним запитом, щоб не навантажувати міст та UI
-            await new Promise(resolve => setTimeout(resolve, BACKGROUND_DELAY_MS));
+      try {
+        const rawResults: FileEmbeddingEntityRaw[] =
+          await EmbeddingsModule.searchFiles(
+            query,
+            'ALL',
+            null,
+            offset,
+            size,
+          );
 
-            console.log(`[Search] Фонове довантаження offset: ${currentOffset}, limit: ${BACKGROUND_PAGE_SIZE}`);
-            const batchRawFiles: IndexedFile[] = await FileIndexer.getFilesPaged(
-              ['IMAGE', 'VIDEO', 'AUDIO', 'TEXT'],
-              currentOffset,
-              BACKGROUND_PAGE_SIZE,
-            );
-
-            const batchAdapted = batchRawFiles
-              .map(adaptIndexedItemIntoDirItem)
-              .map(storeFileItem);
-
-            if (batchAdapted.length === 0) {
-              hasMore = false;
-            } else {
-              currentOffset += batchAdapted.length;
-              accumulatedItems = [...accumulatedItems, ...batchAdapted];
-              // Оновлюємо дані у реальному часі без лоадера на весь екран
-              updateItemsAndProvider(accumulatedItems);
-
-              if (batchAdapted.length < BACKGROUND_PAGE_SIZE) {
-                hasMore = false;
-              }
-            }
-          }
-        } catch (bgErr) {
-          console.error('[Search] Помилка у фоновому циклі завантаження:', bgErr);
-        } finally {
-          isFetchingRef.current = false;
+        // Ігноруємо результат, якщо запит уже не актуальний.
+        if (
+          requestId !== requestIdRef.current ||
+          latestQueryRef.current !== query
+        ) {
+          return [];
         }
-      };
 
-      // Запускаємо фоновий процес, не блокуючи завершення початкового `load`
-      fetchRemainingInLoop();
+        const formattedItems: StoredFileItem[] = (rawResults || [])
+          .map(adaptEmbeddingItemIntoDirItem)
+          .map(storeFileItem);
 
-    } catch (err: any) {
-      setError(err);
+        const nextItems =
+          offset === 0
+            ? formattedItems
+            : [
+                ...itemsRef.current,
+                ...formattedItems,
+              ];
+
+        updateItemsAndProvider(nextItems);
+
+        setLoadingDone(formattedItems.length < size);
+
+        return formattedItems;
+      } catch (err: unknown) {
+        if (
+          requestId === requestIdRef.current &&
+          latestQueryRef.current === query
+        ) {
+          const message =
+            err instanceof Error
+              ? err.message
+              : 'Unknown search error occurred';
+
+          setError(new Error(message));
+        }
+
+        return [];
+      } finally {
+        if (requestId === requestIdRef.current) {
+          setIsLoading(false);
+        }
+      }
+    },
+    [updateItemsAndProvider],
+  );
+
+  useEffect(() => {
+    const query = searchText.trim();
+
+    // Інвалідуємо попередній пошук відразу після зміни запиту.
+    ++requestIdRef.current;
+
+    if (!query) {
+      updateItemsAndProvider([]);
       setIsLoading(false);
-      isFetchingRef.current = false;
-      console.error('[useSearchDataManager] Помилка load:', err);
+      setLoadingDone(false);
+      setError(null);
+      return;
     }
-  }, [updateItemsAndProvider]);
+
+    setIsLoading(true);
+    setLoadingDone(false);
+
+    const timer = setTimeout(() => {
+      // Не запускаємо пошук, якщо користувач уже ввів інший запит.
+      if (latestQueryRef.current === query) {
+        void loadPage(0, 50);
+      }
+    }, 400);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [searchText, loadPage, updateItemsAndProvider]);
+
+  const load = useCallback(() => {
+    if (!latestQueryRef.current) {
+      return Promise.resolve();
+    }
+
+    return loadPage(0, 50).then(() => {});
+  }, [loadPage]);
+
+  const loadNext = useCallback(() => {
+    if (
+      !latestQueryRef.current ||
+      isLoading ||
+      loadingDone
+    ) {
+      return Promise.resolve();
+    }
+
+    return loadPage(itemsRef.current.length, 500).then(() => {});
+  }, [loadPage, isLoading, loadingDone]);
 
   return {
     load,
+    loadNext,
     dataProvider,
     items: dirItems,
     isLoading,

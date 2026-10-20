@@ -1,6 +1,4 @@
-import React from 'react';
-import { useState } from 'react';
-import { FileTreeContextType } from '../FileTreeContext';
+import React, { useState } from 'react';
 import {
   Icon,
   List,
@@ -14,8 +12,9 @@ import { useFileManager } from '../../../widgets/FileManager';
 import { useNavigation } from '../../../common/hooks/useNavigation';
 import { TouchableOpacity, useWindowDimensions, View } from 'react-native';
 import { theme } from '../../../theme';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { setSource } from '../../../store/fileTreeSlice';
+import { RootState } from '../../../store';
 
 const StorageSelect: React.FC<{ route: string }> = ({ route }) => {
   const fileManager = useFileManager();
@@ -23,9 +22,15 @@ const StorageSelect: React.FC<{ route: string }> = ({ route }) => {
   const [open, setOpen] = useState(false);
   const navigator = useNavigation();
   const { width } = useWindowDimensions();
+  const source = useSelector((state: RootState) => state.fileTree.source);
 
-  const matchingRoot =
-    fileManager.roots.find(r => route.includes(r.path)) ?? fileManager.roots[0];
+  const isSearchMode = source === 'search';
+
+  const matchingRoot = isSearchMode
+    ? null
+    : fileManager.roots.find(r => route.includes(r.path)) ??
+      fileManager.roots[0];
+
   return (
     <Menu
       onDismiss={() => setOpen(false)}
@@ -47,10 +52,16 @@ const StorageSelect: React.FC<{ route: string }> = ({ route }) => {
           <View style={{ marginRight: 5 }}>
             <Icon
               size={20}
-              source={matchingRoot.isMainDeviceStorage ? 'memory' : 'sd'}
+              source={
+                isSearchMode
+                  ? 'magnify'
+                  : matchingRoot?.isMainDeviceStorage
+                  ? 'memory'
+                  : 'sd'
+              }
             />
           </View>
-          <Text>{matchingRoot?.name}</Text>
+          <Text>{isSearchMode ? 'Search' : matchingRoot?.name}</Text>
           <View style={{ marginLeft: 5 }}>
             <Icon size={15} source={'arrow-down'} />
           </View>
@@ -69,60 +80,69 @@ const StorageSelect: React.FC<{ route: string }> = ({ route }) => {
             <Icon size={25} source="magnify" />
           </View>
         )}
-        title={'Global Search'}
+        title={'Search'}
         onPress={() => {
+          if (isSearchMode) {
+            setOpen(false);
+            return;
+          }
           dispatch(setSource('search'));
+            fileManager.openSearch(navigator, true);
           setOpen(false);
         }}
       />
-      {fileManager.roots.map(root => (
-        <List.Item
-          key={root.path}
-          left={() => (
-            <View
-              style={{
-                paddingLeft: 10,
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}>
-              <Icon
-                size={25}
-                source={root.isMainDeviceStorage ? 'memory' : 'sd'}
-              />
-            </View>
-          )}
-          title={root.name}
-          onPress={() => {
-            if (root.path === matchingRoot.path) {
-              setOpen(false);
-              return;
-            }
-            fileManager.openDirectory(root, navigator, true);
-            setOpen(false);
-          }}
-          description={() => {
-            const percentage =
-              1 - (root.freeSpace ?? 0) / (root.totalSpace ?? 0);
-            const progressColor = (() => {
-              if (percentage < 0.8) {
-                return MD3Colors.primary50;
-              }
-              return MD3Colors.error50;
-            })();
-            return (
-              <View>
-                <Text>
-                  {FileApi.formatSize(root.totalSpace! - root.freeSpace!)} /{' '}
-                  {FileApi.formatSize(root.totalSpace!)}
-                </Text>
-                <View style={{ marginTop: 5 }}>
-                  <ProgressBar progress={percentage} color={progressColor} />
-                </View>
+      {fileManager.roots.map(root => {
+        const isSelectedRoot = !isSearchMode && matchingRoot?.path === root.path;
+        return (
+          <List.Item
+            key={root.path}
+            left={() => (
+              <View
+                style={{
+                  paddingLeft: 10,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}>
+                <Icon
+                  size={25}
+                  source={root.isMainDeviceStorage ? 'memory' : 'sd'}
+                />
               </View>
-            );
-          }}
-        />
-      ))}
+            )}
+            title={root.name}
+            onPress={() => {
+              if (isSelectedRoot) {
+                setOpen(false);
+                return;
+              }
+              dispatch(setSource('storage')); // якщо потрібно скинути статус пошуку при виборі сховища
+              fileManager.openDirectory(root, navigator, true);
+              setOpen(false);
+            }}
+            description={() => {
+              const percentage =
+                1 - (root.freeSpace ?? 0) / (root.totalSpace ?? 0);
+              const progressColor = (() => {
+                if (percentage < 0.8) {
+                  return MD3Colors.primary50;
+                }
+                return MD3Colors.error50;
+              })();
+              return (
+                <View>
+                  <Text>
+                    {FileApi.formatSize(root.totalSpace! - root.freeSpace!)} /{' '}
+                    {FileApi.formatSize(root.totalSpace!)}
+                  </Text>
+                  <View style={{ marginTop: 5 }}>
+                    <ProgressBar progress={percentage} color={progressColor} />
+                  </View>
+                </View>
+              );
+            }}
+          />
+        );
+      })}
     </Menu>
   );
 };

@@ -74,6 +74,7 @@ export const FileGuiHelper = {
       route: FileApi.ROOT_PATH,
       mode: 'copy',
       fromRoute: contents.map(c => c.path),
+      source: 'storage',
     });
   },
   moveContent: (
@@ -85,6 +86,7 @@ export const FileGuiHelper = {
       route: FileApi.ROOT_PATH,
       mode: 'move',
       fromRoute: contents.map(c => c.path),
+      source: 'storage',
     });
   },
   openDirectory: (
@@ -99,6 +101,18 @@ export const FileGuiHelper = {
     navigator[replace ? 'replace' : 'push']('FileTree', {
       route: content.path,
       ...getRouteMetadatas(navigator),
+      source: 'storage',
+    });
+  },
+  openSearch: (
+    navigator: NavigationProp<FileManagerNavigation>,
+    replace: boolean = false,
+  ) => {
+    // @ts-ignore
+    navigator[replace ? 'replace' : 'push']('FileTree', {
+      route: FileApi.ROOT_PATH,
+      source: 'search',
+      mode: 'tree',
     });
   },
   openPreview: (

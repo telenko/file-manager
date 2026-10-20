@@ -24,6 +24,7 @@ type FileTreeListProps = {
   reloadDir: () => void;
   timestamps: (number | undefined)[];
   scrollIndicator: ScrollIndicatorContextType;
+  loadNext?: () => void;
 };
 
 const FileTreeList = forwardRef<FileTreeListRef, FileTreeListProps>(
@@ -38,6 +39,7 @@ const FileTreeList = forwardRef<FileTreeListRef, FileTreeListProps>(
       reloadDir,
       timestamps,
       scrollIndicator,
+      loadNext,
     },
     forwardedRef,
   ) => {
@@ -76,6 +78,8 @@ const FileTreeList = forwardRef<FileTreeListRef, FileTreeListProps>(
           refreshControl={refreshControl}
           timestamps={timestamps}
           scrollIndicator={scrollIndicator}
+          onEndReached={loadNext}
+          onEndReachedThreshold={0.5}
         />
       </View>
     );

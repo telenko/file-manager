@@ -18,30 +18,43 @@ class VectorSearchManager(context: Context) {
         queryVector: FloatArray,
         queryText: String? = null,
         searchContext: SearchContext,
-        topK: Int = 10,
-        targetFolder: String? = null,
-        candidateLimit: Int = 50
+        offset: Int = 0,
+        size: Int = 50,
+        targetFolder: String? = null
     ): List<SearchResult> {
 
-        if (searchContext == SearchContext.ALL) {
-            throw IllegalArgumentException("SearchContext.ALL is currently not supported. Use VISUAL or TEXT.")
+        Log.d(TAG, "🔍 Пошук. Контекст: $searchContext | Запит: '$queryText' | Offset: $offset, Size: $size")
+
+        val allResults = when (searchContext) {
+            SearchContext.VISUAL -> searchVisual(queryVector, targetFolder)
+            SearchContext.TEXT -> searchText(queryText ?: "", targetFolder)
+            SearchContext.ALL -> {
+                val visualResults = searchVisual(queryVector, targetFolder)
+                val textResults = searchText(queryText ?: "", targetFolder)
+
+                // Об'єднуємо результати та групуємо по filePath, обираючи максимальний скор
+                (visualResults + textResults)
+                    .groupBy { it.filePath }
+                    .mapValues { (_, results) -> results.maxByOrNull { it.score }!! }
+                    .values
+                    .sortedByDescending { it.score }
+            }
         }
 
-        Log.d(TAG, "🔍 Пошук. Контекст: $searchContext | Запит: '$queryText'")
-
-        return when (searchContext) {
-            SearchContext.VISUAL -> searchVisual(queryVector, targetFolder, candidateLimit, topK)
-            SearchContext.TEXT -> searchText(queryText ?: "", targetFolder, candidateLimit, topK)
-            else -> emptyList()
-        }
+        // Застосовуємо пагінацію (offset + size) безпосередньо в пам'яті після об'єднання/сортування
+        return paginate(allResults, offset, size)
     }
 
-    // --- Візуальний пошук (тільки вектори) ---
+    private fun paginate(results: List<SearchResult>, offset: Int, size: Int): List<SearchResult> {
+        if (offset >= results.size) return emptyList()
+        val endIdx = minOf(offset + size, results.size)
+        return results.subList(offset, endIdx)
+    }
+
+    // --- Візуальний пошук (всі доступні збіги) ---
     private fun searchVisual(
         queryVector: FloatArray,
-        targetFolder: String?,
-        candidateLimit: Int,
-        topK: Int
+        targetFolder: String?
     ): List<SearchResult> {
         val qb = box.query()
         applyFolderFilter(qb, targetFolder)
@@ -49,6 +62,10 @@ class VectorSearchManager(context: Context) {
         qb.equal(FileEmbeddingEntity_.mediaType, MediaType.IMAGE.name, QueryBuilder.StringOrder.CASE_SENSITIVE)
             .or()
             .equal(FileEmbeddingEntity_.mediaType, MediaType.VIDEO.name, QueryBuilder.StringOrder.CASE_SENSITIVE)
+
+        // Використовуємо загальну кількість записів замість фіксованого ліміту у 50
+        val totalCount = box.count()
+        val candidateLimit = if (totalCount > 0) totalCount.toInt() else 1000
 
         val visualEntities = qb.nearestNeighbors(FileEmbeddingEntity_.embedding, queryVector, candidateLimit)
             .build()
@@ -72,20 +89,17 @@ class VectorSearchManager(context: Context) {
             .mapValues { (_, results) -> results.maxByOrNull { it.score }!! }
             .values
             .sortedByDescending { it.score }
-            .take(topK)
     }
 
-    // --- Текстовий пошук (тільки чисті текстові снепшоти в 1 запит) ---
+    // --- Текстовий пошук (всі збіги без обмежень) ---
     private fun searchText(
         queryText: String,
-        targetFolder: String?,
-        candidateLimit: Int,
-        topK: Int
+        targetFolder: String?
     ): List<SearchResult> {
         val tokens = tokenizeQuery(queryText)
         if (tokens.isEmpty()) return emptyList()
 
-        val matchingSnapshots = fetchTextSnapshotsInSingleQuery(tokens, targetFolder, candidateLimit)
+        val matchingSnapshots = fetchAllTextSnapshots(tokens, targetFolder)
         Log.d(TAG, "Found ${matchingSnapshots.size} text snapshots matching query tokens.")
 
         return matchingSnapshots
@@ -108,14 +122,12 @@ class VectorSearchManager(context: Context) {
             .mapValues { (_, results) -> results.maxByOrNull { it.score }!! }
             .values
             .sortedByDescending { it.score }
-            .take(topK)
     }
 
-    // --- Одиничний запит до бази для всіх токенів ---
-    private fun fetchTextSnapshotsInSingleQuery(
+    // --- Отримання всіх збігів без ліміту по токенах ---
+    private fun fetchAllTextSnapshots(
         tokens: List<String>,
-        targetFolder: String?,
-        limit: Int
+        targetFolder: String?
     ): List<FileTextSnapshotEntity> {
         if (tokens.isEmpty()) return emptyList()
 
@@ -126,7 +138,6 @@ class VectorSearchManager(context: Context) {
             qb.startsWith(FileTextSnapshotEntity_.filePath, formattedFolder, QueryBuilder.StringOrder.CASE_SENSITIVE)
         }
 
-        // Будуємо ланцюжок .contains() OR .contains() в одному запиті
         tokens.forEachIndexed { index, token ->
             if (index > 0) {
                 qb.or()
@@ -136,7 +147,8 @@ class VectorSearchManager(context: Context) {
                 .contains(FileTextSnapshotEntity_.fileName, token, QueryBuilder.StringOrder.CASE_INSENSITIVE)
         }
 
-        return qb.build().find(0, limit.toLong())
+        // Викликаємо find() без обмежень, щоб отримати всі результати
+        return qb.build().find()
     }
 
     private fun applyFolderFilter(qb: QueryBuilder<FileEmbeddingEntity>, targetFolder: String?) {

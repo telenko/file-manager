@@ -1,8 +1,12 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
+export type FileSearchContext = 'VISUAL' | 'TEXT' | 'ALL';
+
 export type FileTreeState = {
   route: string;
-  source: "storage" | "search";
+  searchQuery?: string;
+  serchContext?: FileSearchContext;
+  source: 'storage' | 'search';
   mode: 'tree' | 'move' | 'copy';
   selectedPaths: string[];
 };
@@ -44,7 +48,13 @@ const fileTreeSlice = createSlice({
     },
     setSource(state, action: PayloadAction<'storage' | 'search'>) {
       state.source = action.payload;
-    }
+    },
+    setSearchQuery(state, action: PayloadAction<string | undefined>) {
+      state.searchQuery = action.payload;
+    },
+    setSearchContext(state, action: PayloadAction<FileSearchContext | undefined>) {
+      state.serchContext = action.payload;
+    },
   },
 });
 
@@ -54,5 +64,7 @@ export const {
   addSelectedPath,
   toggleSelectedPath,
   setSource,
+  setSearchQuery,
+  setSearchContext,
 } = fileTreeSlice.actions;
 export default fileTreeSlice.reducer;

@@ -6,9 +6,6 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import { DirItem, FileApi } from '../../services/FileApi';
-import { RootState } from '../../store';
-import { restoreFileItem } from '../../store/fileData';
-import { useSelector } from 'react-redux';
 import Gallery from '../../common/components/Gallery';
 import ImageViewer from '../../common/components/ImageViewer';
 import { useNavigation } from '../../common/hooks/useNavigation';
@@ -24,6 +21,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { theme } from '../../theme';
+import { usePreviewableContextFiles } from './usePreviewableContextFiles';
 
 export type ImageViewerScreenProps = {
   route: { params: { route: string; sort: 'asc' | 'desc' } };
@@ -52,29 +50,26 @@ const ImagePreviewScreen: React.FC<ImageViewerScreenProps> = ({
   const navigation = useNavigation();
   const [zooming, setZooming] = useState(false);
   const [file, setFile] = useState<DirItem | null>(null);
-  const [imagesInFolderSorted, setImagesInFolderSorted] = useState<DirItem[]>(
-    [],
+
+  // Використовуємо наш новий хук
+  const { imagesInFolderSorted, parentPath } = usePreviewableContextFiles(
+    route,
+    sort,
   );
-  const parentPath = FileApi.getParentDirectoryPath(route);
-  const storedItems = useSelector(
-    (state: RootState) => state.fileData.directories[parentPath],
-  );
+
   const { width, height } = useWindowDimensions();
   const [isLandscape, setIsLandscape] = useState(width > height);
+
   useEffect(() => {
     const sub = Dimensions.addEventListener('change', ({ window }) => {
-      // LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
       setIsLandscape(window.width > window.height);
     });
     return () => sub?.remove();
   }, []);
+
   const [showActions, setShowActions] = useState(true);
   useEffect(() => {
-    if (isLandscape) {
-      setShowActions(false);
-    } else {
-      setShowActions(true);
-    }
+    setShowActions(!isLandscape);
   }, [isLandscape]);
 
   useEffect(() => {
@@ -88,11 +83,7 @@ const ImagePreviewScreen: React.FC<ImageViewerScreenProps> = ({
           />
         </Animated.View>
       ),
-      headerTitleStyle: isLandscape
-        ? {
-            color: theme.negativeColor,
-          }
-        : {},
+      headerTitleStyle: isLandscape ? { color: theme.negativeColor } : {},
     });
   }, [showActions, isLandscape]);
 
@@ -104,6 +95,7 @@ const ImagePreviewScreen: React.FC<ImageViewerScreenProps> = ({
       });
     };
   }, []);
+
   const { t } = useTranslation();
   const fileManager = useFileManager();
   const opacity = useSharedValue(1);
@@ -132,28 +124,23 @@ const ImagePreviewScreen: React.FC<ImageViewerScreenProps> = ({
     };
   });
 
+  // Завантаження метаданих поточного файлу та читання папки, якщо її немає в стейті
+  useEffect(() => {
+    (async () => {
+      FileApi.getMetadata(route).then(setFile);
+    })();
+  }, [route, parentPath, sort]);
+
   useEffect(() => {
     const timeLocalized = file?.mtime
       ? `${file?.mtime?.toLocaleDateString()} ${file?.mtime
-          ?.toLocaleTimeString([], { hour12: false }) // Use 24-hour format to avoid AM/PM
+          ?.toLocaleTimeString([], { hour12: false })
           ?.replace(/^(\d{1}):/, '0$1:')}`
       : '';
     navigation.setOptions({
       headerTitle: timeLocalized,
     });
   }, [file, navigation]);
-  useEffect(() => {
-    (async () => {
-      FileApi.getMetadata(route).then(setFile);
-
-      const dirItems = storedItems
-        ? storedItems.map(restoreFileItem)
-        : await FileApi.readDir(parentPath);
-      setImagesInFolderSorted(
-        FileApi.sortDirItems(dirItems, sort).filter(FileApi.isFileViewable),
-      );
-    })();
-  }, [parentPath, route, sort, storedItems]);
 
   const imagesCarousel = useMemo<DirItem[]>(() => {
     if (!imagesInFolderSorted || imagesInFolderSorted.length === 0) {
@@ -163,16 +150,14 @@ const ImagePreviewScreen: React.FC<ImageViewerScreenProps> = ({
       return [file];
     }
     return imagesInFolderSorted;
-  }, [file, imagesInFolderSorted, route]);
+  }, [file, imagesInFolderSorted]);
 
   const actions = [
     {
       text: t('share'),
       icon: 'share-outline',
       onPress: () => {
-        if (!file) {
-          return;
-        }
+        if (!file) return;
         FileApi.shareFile([file]);
       },
     },
@@ -180,9 +165,7 @@ const ImagePreviewScreen: React.FC<ImageViewerScreenProps> = ({
       text: t('delete'),
       icon: 'delete-outline',
       onPress: () => {
-        if (!file) {
-          return;
-        }
+        if (!file) return;
         fileManager.deleteContent([file]).then(isDone => {
           if (isDone) {
             fileManager.setReloadRequired(true);
@@ -195,9 +178,7 @@ const ImagePreviewScreen: React.FC<ImageViewerScreenProps> = ({
       text: t('copy'),
       icon: 'content-copy',
       onPress: () => {
-        if (!file) {
-          return;
-        }
+        if (!file) return;
         fileManager.copyContent([file], navigation);
       },
     },
@@ -205,9 +186,7 @@ const ImagePreviewScreen: React.FC<ImageViewerScreenProps> = ({
       text: t('move'),
       icon: 'file-move-outline',
       onPress: () => {
-        if (!file) {
-          return;
-        }
+        if (!file) return;
         fileManager.moveContent([file], navigation);
       },
     },
@@ -215,9 +194,7 @@ const ImagePreviewScreen: React.FC<ImageViewerScreenProps> = ({
       text: t('details'),
       icon: 'information-outline',
       onPress: () => {
-        if (!file) {
-          return;
-        }
+        if (!file) return;
         fileManager.showFileDetails(file);
       },
     },
@@ -295,7 +272,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     color: 'white',
-    backgroundColor: 'rgba(0,0,0,0.5)', // напівпрозорий фон для контрасту
+    backgroundColor: 'rgba(0,0,0,0.5)',
   },
   headerAbsolute: {
     position: 'absolute',
@@ -303,7 +280,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     color: 'white',
-    backgroundColor: 'rgba(0,0,0,0.5)', // напівпрозорий фон для контрасту
+    backgroundColor: 'rgba(0,0,0,0.5)',
   },
 });
 
