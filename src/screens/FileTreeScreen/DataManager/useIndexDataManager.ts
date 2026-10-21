@@ -1,5 +1,4 @@
 import { useState, useCallback, useMemo } from 'react';
-import { DataProvider } from 'recyclerlistview';
 import { NativeModules } from 'react-native';
 import { DirItem } from '../../../services/FileApi';
 import type { DataManagerHookType, DataManagerType } from './DataManagerType';
@@ -7,11 +6,8 @@ import { IndexedFile } from '../../../common/hooks/useIndexedFiles';
 import { AppDispatch, RootState } from '../../../store';
 import { useDispatch, useSelector } from 'react-redux';
 import { setIndexFiles } from '../../../store/fileDataSlice';
-import {
-  restoreFileItem,
-  StoredFileItem,
-} from '../../../store/fileData';
 import { usePagedLoader } from './usePagedLoader';
+import { type DataProvider } from 'recyclerlistview';
 
 const { FileIndexer } = NativeModules;
 
@@ -25,15 +21,13 @@ export const adaptIndexedItemIntoDirItem = (
   const isFileCheck = hasFileExtensionRegex.test(indexedFile.filePath);
 
   return {
-    ctime: undefined,
-    mtime: indexedFile.lastModified
-      ? new Date(indexedFile.lastModified)
-      : undefined,
+    ctimeMs: undefined,
+    mtimeMs: indexedFile.lastModified,
     name: indexedFile.filePath.split('/').pop() ?? '',
     path: indexedFile.filePath,
     size: indexedFile.fileSize,
-    isFile: () => isFileCheck,
-    isDirectory: () => !isFileCheck,
+    isFile: isFileCheck,
+    isDirectory: !isFileCheck,
   };
 };
 
@@ -41,26 +35,19 @@ export const useIndexDataManager: DataManagerHookType = (
   route,
 ): DataManagerType => {
   const items = useSelector((state: RootState) => state.fileData.indexFiles);
-  const dirItems = useMemo(() => items.map(restoreFileItem), [items]);
+  const dirItems = items;
   const dispatch = useDispatch<AppDispatch>();
 
   const setItems = useCallback(
-    (newItems: StoredFileItem[]) => {
+    (newItems: DirItem[]) => {
       dispatch(setIndexFiles(newItems));
     },
     [dispatch],
   );
 
-  const [dataProvider, setDataProvider] = useState<DataProvider>(
-    new DataProvider((r1, r2) => r1 !== r2),
-  );
-
   const updateItemsAndProvider = useCallback(
-    (newStoredItems: StoredFileItem[]) => {
+    (newStoredItems: DirItem[]) => {
       setItems(newStoredItems);
-      setDataProvider(prev =>
-        prev.cloneWithRows(newStoredItems.map(restoreFileItem)),
-      );
     },
     [setItems],
   );
@@ -84,7 +71,6 @@ export const useIndexDataManager: DataManagerHookType = (
 
   return {
     load,
-    dataProvider,
     items: dirItems,
     isLoading,
     error,

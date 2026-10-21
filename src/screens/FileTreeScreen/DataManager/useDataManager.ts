@@ -5,6 +5,9 @@ import { useFileTreeDataManager } from './useFileTreeDataManager';
 import { useIndexDataManager } from './useIndexDataManager';
 import { RootState } from '../../../store';
 import { useSearchDataManager } from './useSearchDataManager';
+import { dataProviderBuilder } from './dataProviderBuilder';
+import { DataProvider } from 'recyclerlistview';
+import { useEffect, useState } from 'react';
 
 export const useDataManager: DataManagerHookType = (route): DataManagerType => {
   const indexManager = useIndexDataManager(route);
@@ -17,12 +20,27 @@ export const useDataManager: DataManagerHookType = (route): DataManagerType => {
     (state: { fileTree: FileTreeState }) => state.fileTree.source,
   );
   const source = route.source || reduxSource;
-  if (source === 'search') {
-    if (isSearchActivated) {
-      return searchManager;
-    }
-    return indexManager;
-  }
 
-  return fileTreeManager;
+  const manager = (() => {
+    if (source === 'search') {
+      if (isSearchActivated) {
+        return searchManager;
+      }
+      return indexManager;
+    }
+    return fileTreeManager;
+  })();
+
+  return manager;
+};
+
+export const useDataListProvider = (manager: DataManagerType) => {
+  const [dataProvider, setDataProvider] = useState<DataProvider>(
+    dataProviderBuilder(manager.items),
+  );
+  useEffect(() => {
+    setDataProvider(prev => prev.cloneWithRows(manager.items));
+  }, [manager.items]);
+
+  return dataProvider;
 };

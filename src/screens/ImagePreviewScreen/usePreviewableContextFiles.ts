@@ -1,8 +1,7 @@
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
-import { DirItem, FileApi } from '../../services/FileApi';
+import { FileApi } from '../../services/FileApi';
 import { RootState } from '../../store';
-import { restoreFileItem } from '../../store/fileData';
 
 export const usePreviewableContextFiles = (
   route: string,
@@ -29,7 +28,6 @@ export const usePreviewableContextFiles = (
     if (source === 'search') {
       const rawData = isSearchQueried ? searchData : indexData;
       return rawData
-        .map(restoreFileItem)
         .filter(item => FileApi.isFileViewable(item));
     }
 
@@ -38,7 +36,7 @@ export const usePreviewableContextFiles = (
       return [];
     }
 
-    const dirItems = storedItems.map(restoreFileItem);
+    const dirItems = storedItems;
     return FileApi.sortDirItems(dirItems, sort).filter(
       FileApi.isFileViewable,
     );

@@ -1,12 +1,5 @@
-
-import {
-  useState,
-  useCallback,
-  useMemo,
-  useEffect,
-  useRef,
-} from 'react';
-import { DataProvider } from 'recyclerlistview';
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
+import { type DataProvider } from 'recyclerlistview';
 import { NativeModules } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -14,11 +7,6 @@ import type { DirItem } from '../../../services/FileApi';
 import type { DataManagerHookType, DataManagerType } from './DataManagerType';
 import type { AppDispatch, RootState } from '../../../store';
 
-import {
-  restoreFileItem,
-  storeFileItem,
-  type StoredFileItem,
-} from '../../../store/fileData';
 import { setSearchFiles } from '../../../store/fileDataSlice';
 
 const { EmbeddingsModule } = NativeModules;
@@ -39,13 +27,13 @@ export const adaptEmbeddingItemIntoDirItem = (
   const isFile = /\/[^/]+\.[a-zA-Z0-9]+$/.test(entity.filePath);
 
   return {
-    ctime: undefined,
-    mtime: undefined,
+    ctimeMs: undefined,
+    mtimeMs: undefined,
     name: entity.fileName || entity.filePath.split('/').pop() || '',
     path: entity.filePath,
     size: 0,
-    isFile: () => isFile,
-    isDirectory: () => !isFile,
+    isFile: isFile,
+    isDirectory: !isFile,
   };
 };
 
@@ -62,10 +50,7 @@ export const useSearchDataManager: DataManagerHookType = (
     (state: RootState) => state.fileData.searchFiles || [],
   );
 
-  const dirItems = useMemo(
-    () => items.map(restoreFileItem),
-    [items],
-  );
+  const dirItems = items;
 
   const itemsRef = useRef(items);
   itemsRef.current = items;
@@ -76,29 +61,21 @@ export const useSearchDataManager: DataManagerHookType = (
   // Інвалідує результати старих запитів.
   const requestIdRef = useRef(0);
 
-  const [dataProvider, setDataProvider] = useState(
-    () => new DataProvider((r1, r2) => r1 !== r2),
-  );
-
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [loadingDone, setLoadingDone] = useState(false);
 
   const updateItemsAndProvider = useCallback(
-    (newItems: StoredFileItem[]) => {
+    (newItems: DirItem[]) => {
       itemsRef.current = newItems;
 
       dispatch(setSearchFiles(newItems));
-
-      setDataProvider(prev =>
-        prev.cloneWithRows(newItems.map(restoreFileItem)),
-      );
     },
     [dispatch],
   );
 
   const loadPage = useCallback(
-    async (offset = 0, size = 50): Promise<StoredFileItem[]> => {
+    async (offset = 0, size = 50): Promise<DirItem[]> => {
       const query = latestQueryRef.current;
 
       // Без запиту нативний модуль не викликається.
@@ -117,13 +94,7 @@ export const useSearchDataManager: DataManagerHookType = (
 
       try {
         const rawResults: FileEmbeddingEntityRaw[] =
-          await EmbeddingsModule.searchFiles(
-            query,
-            'ALL',
-            null,
-            offset,
-            size,
-          );
+          await EmbeddingsModule.searchFiles(query, 'ALL', null, offset, size);
 
         // Ігноруємо результат, якщо запит уже не актуальний.
         if (
@@ -133,17 +104,14 @@ export const useSearchDataManager: DataManagerHookType = (
           return [];
         }
 
-        const formattedItems: StoredFileItem[] = (rawResults || [])
-          .map(adaptEmbeddingItemIntoDirItem)
-          .map(storeFileItem);
+        const formattedItems: DirItem[] = (rawResults || []).map(
+          adaptEmbeddingItemIntoDirItem,
+        );
 
         const nextItems =
           offset === 0
             ? formattedItems
-            : [
-                ...itemsRef.current,
-                ...formattedItems,
-              ];
+            : [...itemsRef.current, ...formattedItems];
 
         updateItemsAndProvider(nextItems);
 
@@ -211,11 +179,7 @@ export const useSearchDataManager: DataManagerHookType = (
   }, [loadPage]);
 
   const loadNext = useCallback(() => {
-    if (
-      !latestQueryRef.current ||
-      isLoading ||
-      loadingDone
-    ) {
+    if (!latestQueryRef.current || isLoading || loadingDone) {
       return Promise.resolve();
     }
 
@@ -225,7 +189,6 @@ export const useSearchDataManager: DataManagerHookType = (
   return {
     load,
     loadNext,
-    dataProvider,
     items: dirItems,
     isLoading,
     error,

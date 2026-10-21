@@ -1,11 +1,10 @@
 import { useState, useCallback, useRef } from 'react';
-import { StoredFileItem, storeFileItem } from '../../../store/fileData';
 import { DirItem } from '../../../services/FileApi';
 
 export const usePagedLoader = <TRawData>(
   fetchFunction: (offset: number, limit: number) => Promise<TRawData[]>,
   adapter: (rawData: TRawData) => DirItem,
-  onDataUpdate: (newItems: StoredFileItem[]) => void,
+  onDataUpdate: (newItems: DirItem[]) => void,
   initialLoadSize = 1000,
   backgroundPageSize = 5000,
   backgroundDelayMs = 100,
@@ -30,7 +29,7 @@ export const usePagedLoader = <TRawData>(
       );
       const initialRawFiles = await fetchFunction(0, initialLoadSize);
 
-      const initialAdapted = initialRawFiles.map(adapter).map(storeFileItem);
+      const initialAdapted = initialRawFiles.map(adapter);
 
       onDataUpdate(initialAdapted);
       setIsLoading(false);
@@ -61,7 +60,7 @@ export const usePagedLoader = <TRawData>(
               backgroundPageSize,
             );
 
-            const batchAdapted = batchRawFiles.map(adapter).map(storeFileItem);
+            const batchAdapted = batchRawFiles.map(adapter);
 
             if (batchAdapted.length === 0) {
               hasMore = false;

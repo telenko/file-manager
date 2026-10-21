@@ -36,13 +36,12 @@ import { useFocusEffect } from '@react-navigation/native';
 import { ItemWithSkeleton } from './ItemWithSkeleton';
 import FileTreeList from './FileTreeList';
 import { useScrollIndicatorState } from '../../common/components/ScrollIndicator/ScrollIndicatorProvider';
-// import { NativeModules } from 'react-native';
-// import { SearchContextSelect } from './SearchContextSelect';
-import { FileTreeState, setSearchQuery } from '../../store/fileTreeSlice';
-import { useDataManager } from './DataManager/useDataManager';
+import { FileTreeState } from '../../store/fileTreeSlice';
+import {
+  useDataListProvider,
+  useDataManager,
+} from './DataManager/useDataManager';
 import { DebouncedSearchbar } from './DebouncedSearchbar';
-
-// const { EmbeddingsModule } = NativeModules;
 
 export type FileScreenProps = {
   route: {
@@ -82,6 +81,7 @@ const FileScreen: React.FC<FileScreenProps> = stackRoute => {
     mode: routeMetadatas.mode || 'tree',
     source,
   });
+  const dataProvider = useDataListProvider(dataManager);
   const isOperational = ['copy', 'move'].includes(routeMetadatas.mode || '');
 
   useEffect(() => {
@@ -229,9 +229,7 @@ const FileScreen: React.FC<FileScreenProps> = stackRoute => {
 
   const timestamps = useMemo(
     () =>
-      dataManager.items.map(item =>
-        item.isFile() ? item.mtime?.getTime() : undefined,
-      ),
+      dataManager.items.map(item => (item.isFile ? item.mtimeMs : undefined)),
     [dataManager.items],
   );
 
@@ -312,7 +310,7 @@ const FileScreen: React.FC<FileScreenProps> = stackRoute => {
         ) : (
           <FileTreeList
             scrollKey={route ?? FileApi.ROOT_PATH}
-            dataProvider={dataManager.dataProvider}
+            dataProvider={dataProvider}
             layoutProvider={layoutProvider}
             rowRenderer={rowRenderer}
             listStyle={listStyle}

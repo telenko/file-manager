@@ -33,13 +33,13 @@ export default function FileManager() {
   const { refresh: refreshRoots, rootsReady, roots } = useFsRoots();
   const { state, ready: stateReady } = useInitialState(roots, rootsReady);
 
-  const { files, isIndexing } = useIndexedFiles();
+  // const { files, isIndexing } = useIndexedFiles();
 
-  useEffect(() => {
-    console.log('FILES', files);
-    console.log('IS INDEXING', isIndexing);
-    console.log('FILES leength', files?.length);
-  }, [isIndexing, files]);
+  // useEffect(() => {
+  //   console.log('FILES', files);
+  //   console.log('IS INDEXING', isIndexing);
+  //   console.log('FILES leength', files?.length);
+  // }, [isIndexing, files]);
 
   useEffect(() => {
     refreshRoots();

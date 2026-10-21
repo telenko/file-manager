@@ -18,7 +18,6 @@ import {
   setLayout,
   toggleSort,
 } from '../../store/fileManagerSlice';
-import { restoreFileItem, storeFileItem } from '../../store/fileData';
 import { useSnackbar } from 'react-native-paper-snackbar-stack';
 import { useTranslation } from 'react-i18next';
 
@@ -76,24 +75,19 @@ export const useFileManager = (): FileManagerContextType => {
   const { enqueueSnackbar } = useSnackbar();
   const { t } = useTranslation();
   const state = useSelector((root: RootState) => root.fileManager);
-  const roots = useMemo(
-    () => state.roots.map(item => restoreFileItem(item) as StorageItem),
-    [state.roots],
-  );
+  const roots = useMemo(() => state.roots, [state.roots]);
 
   const refreshRoots = useCallback(async () => {
     const nextRoots = await FileApi.prepareFsRoots();
-    dispatch(setRoots(nextRoots.map(storeFileItem)));
+    dispatch(setRoots(nextRoots));
   }, [dispatch]);
 
   const setRenameDialogActive = useCallback(
-    (item: DirItem | null) =>
-      dispatch(setRenameDialogItem(item ? storeFileItem(item) : null)),
+    (item: DirItem | null) => dispatch(setRenameDialogItem(item ? item : null)),
     [dispatch],
   );
   const setFileDetailsValue = useCallback(
-    (item: DirItem | null) =>
-      dispatch(setFileDetails(item ? storeFileItem(item) : null)),
+    (item: DirItem | null) => dispatch(setFileDetails(item ? item : null)),
     [dispatch],
   );
   const showFileDetails = setFileDetailsValue;
@@ -204,9 +198,7 @@ export const useFileManager = (): FileManagerContextType => {
     roots,
     rootsReady: state.rootsReady,
     renameContent: setRenameDialogActive,
-    renameDialogItem: state.renameDialogItem
-      ? restoreFileItem(state.renameDialogItem)
-      : null,
+    renameDialogItem: state.renameDialogItem ? state.renameDialogItem : null,
     setRenameDialogActive,
     createDirectory,
     newDirName: state.newDirName,
@@ -219,7 +211,7 @@ export const useFileManager = (): FileManagerContextType => {
     performMoveContent,
     showFileDetails,
     setFileDetails: setFileDetailsValue,
-    fileDetails: state.fileDetails ? restoreFileItem(state.fileDetails) : null,
+    fileDetails: state.fileDetails ? state.fileDetails : null,
     longOperation: state.longOperation,
     setLongOperation: value => dispatch(setLongOperation(value)),
     deleteContent,

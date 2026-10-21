@@ -2,7 +2,6 @@ import { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../store';
 import { setRoots } from '../../store/fileManagerSlice';
-import { restoreFileItem, storeFileItem } from '../../store/fileData';
 import { FileApi, StorageItem } from '../../services/FileApi';
 import { useExceptionHandler } from '../../common/components/ExceptionHandler';
 
@@ -16,14 +15,14 @@ export const useFsRoots = () => {
   const rootsReady = useSelector(
     (state: RootState) => state.fileManager.rootsReady,
   );
-  const roots = storedRoots.map(root => restoreFileItem(root) as StorageItem);
+  const roots = storedRoots;
   const [rootsLoading, setRootsLoading] = useState(false);
   const exceptionHandler = useExceptionHandler();
   const refresh = useCallback(async () => {
     setRootsLoading(true);
     try {
       const result = await FileApi.prepareFsRoots();
-      dispatch(setRoots(result.map(storeFileItem)));
+      dispatch(setRoots(result));
     } catch (e: any) {
       if (!rootsReady) {
         exceptionHandler.handleError(e);

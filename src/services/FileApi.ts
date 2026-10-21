@@ -7,10 +7,18 @@ import {
   ErrorType,
   FileManagerError,
 } from '../common/components/ExceptionHandler';
-import { DeviceEventEmitter } from 'react-native';
+// import { DeviceEventEmitter } from 'react-native';
 
-
-export type DirItem = ReadDirItem & { isStorage?: boolean };
+export type DirItem = Omit<
+  ReadDirItem,
+  'isFile' | 'isDirectory' | 'ctime' | 'mtime'
+> & {
+  isStorage?: boolean;
+  isFile?: boolean;
+  isDirectory?: boolean;
+  ctimeMs?: number;
+  mtimeMs?: number;
+};
 export type StorageItem = {
   isMainDeviceStorage?: boolean;
   isSdCardStorage?: boolean;
@@ -20,6 +28,21 @@ export type StorageItem = {
   name: string;
   path: string;
 } & DirItem;
+
+const adaptReadDirItemIntoDirItem = (item: ReadDirItem): DirItem => {
+  return {
+    ...Object.keys(item)
+      .filter(key => !['isFile', 'isDirectory', 'ctime', 'mtime'].includes(key))
+      .reduce(
+        (acc, key) => ({ ...acc, [key]: (item as any)[key] }),
+        {} as DirItem,
+      ),
+    isFile: item.isFile(),
+    isDirectory: item.isDirectory(),
+    ctimeMs: item.ctime ? new Date(item.ctime).getTime() : undefined,
+    mtimeMs: item.mtime ? new Date(item.mtime).getTime() : undefined,
+  };
+};
 
 const resolveCounterConflictRecursive = async (
   destination: string,
@@ -228,8 +251,8 @@ export const FileApi = {
           name: storageItem.isMainDeviceStorage
             ? i18n.t('deviceRoot')
             : i18n.t('sdCardRoot', { name: storageItem.name }),
-          isDirectory: () => true,
-          isFile: () => false,
+          isDirectory: true,
+          isFile: false,
           isStorage: true,
         };
       });
@@ -256,9 +279,9 @@ export const FileApi = {
       );
     }
   },
-  readDir: async (path: string) => {
+  readDir: async (path: string): Promise<DirItem[]> => {
     try {
-      return await RnfsQueued.readDir(path);
+      return (await RnfsQueued.readDir(path)).map(adaptReadDirItemIntoDirItem);
     } catch (e) {
       throw new FileManagerError(
         i18n.t('readDirFailed'),
@@ -273,8 +296,10 @@ export const FileApi = {
       return {
         ...res,
         name: res.name ?? '',
-        ctime: new Date(res.ctime),
-        mtime: new Date(res.mtime),
+        ctimeMs: res.ctime ? new Date(res.ctime).getTime() : undefined,
+        mtimeMs: res.mtime ? new Date(res.mtime).getTime() : undefined,
+        isDirectory: res.isDirectory(),
+        isFile: res.isFile(),
       };
     } catch (e) {
       throw new FileManagerError(
@@ -285,7 +310,7 @@ export const FileApi = {
     }
   },
   openFile: async (item: DirItem) => {
-    if (!item.isFile()) {
+    if (!item.isFile) {
       return;
     }
 
@@ -514,7 +539,7 @@ export const FileApi = {
   },
   shareFile: async (files: DirItem[]) => {
     try {
-      const filesChecked = files.filter(f => f.isFile());
+      const filesChecked = files.filter(f => f.isFile);
       if (filesChecked.length === 0) {
         return;
       }
@@ -538,12 +563,12 @@ export const FileApi = {
   ): DirItem[] => {
     const koef = sortDirection === 'asc' ? 1 : -1;
     return [...dirItems].sort((dirItemA, dirItemB) => {
-      if (dirItemA.isDirectory() && !dirItemB.isDirectory()) {
+      if (dirItemA.isDirectory && !dirItemB.isDirectory) {
         return -1;
-      } else if (!dirItemA.isDirectory() && dirItemB.isDirectory()) {
+      } else if (!dirItemA.isDirectory && dirItemB.isDirectory) {
         return 1;
       }
-      if (dirItemA.isDirectory() && dirItemB.isDirectory()) {
+      if (dirItemA.isDirectory && dirItemB.isDirectory) {
         if (dirItemA.name < dirItemB.name) {
           return -1;
         } else if (dirItemA.name > dirItemB.name) {
@@ -551,10 +576,10 @@ export const FileApi = {
         }
         return 0;
       }
-      if (!dirItemA.isDirectory() && !dirItemB.isDirectory()) {
-        if (dirItemA.mtime! < dirItemB.mtime!) {
+      if (!dirItemA.isDirectory && !dirItemB.isDirectory) {
+        if (dirItemA.mtimeMs! < dirItemB.mtimeMs!) {
           return -1 * koef;
-        } else if (dirItemA.mtime! > dirItemB.mtime!) {
+        } else if (dirItemA.mtimeMs! > dirItemB.mtimeMs!) {
           return 1 * koef;
         }
         if (dirItemA.name < dirItemB.name) {

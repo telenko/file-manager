@@ -60,7 +60,7 @@ const DirectoryItemView: React.FC<DirItemProps> = ({ item }) => {
           title: t('share'),
           icon: 'share-outline',
           key: 'share',
-          enabled: item.isFile(),
+          enabled: item.isFile,
           onPress: () => {
             FileApi.shareFile([item]);
           },
@@ -69,7 +69,7 @@ const DirectoryItemView: React.FC<DirItemProps> = ({ item }) => {
           title: t('openWith'),
           icon: 'open-in-app',
           key: 'openWith',
-          enabled: item.isFile(),
+          enabled: item.isFile,
           onPress: () => {
             FileApi.openFile(item).catch(exceptionHandler.handleError);
           },
@@ -145,7 +145,7 @@ const DirectoryItemView: React.FC<DirItemProps> = ({ item }) => {
     <List.Item
       style={styles.item}
       title={item.name}
-      disabled={!operationsAllowed && item.isFile()}
+      disabled={!operationsAllowed && item.isFile}
       titleStyle={{
         fontSize: 16,
         color: theme.fileTitleColor,
@@ -156,7 +156,7 @@ const DirectoryItemView: React.FC<DirItemProps> = ({ item }) => {
         color: theme.fileDescriptionColor,
         fontFamily: theme.regularText,
       }}
-      description={item.mtime?.toLocaleDateString() ?? ''}
+      description={item.mtimeMs ? new Date(item.mtimeMs)?.toLocaleDateString() : ''}
       left={() =>
         FileApi.isFileImage(item) ? (
           <Image
@@ -217,8 +217,8 @@ const DirectoryItemView: React.FC<DirItemProps> = ({ item }) => {
           <View style={{ borderRadius: ICON_RADIUS }}>
             <Icon
               size={ICON_SIZE}
-              color={item.isDirectory() ? theme.folderColor : theme.fileColor}
-              source={item.isDirectory() ? 'folder' : 'file'}
+              color={item.isDirectory ? theme.folderColor : theme.fileColor}
+              source={item.isDirectory ? 'folder' : 'file'}
             />
           </View>
         )
@@ -284,7 +284,7 @@ const DirectoryItemView: React.FC<DirItemProps> = ({ item }) => {
           togglePath(item.path);
           return;
         }
-        if (item.isFile()) {
+        if (item.isFile) {
           if (operationsAllowed) {
             if (FileApi.isFileViewable(item)) {
               fileManager.openPreview(item, navigation, fileManager.sort);

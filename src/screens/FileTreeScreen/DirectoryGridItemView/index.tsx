@@ -215,7 +215,7 @@ const DirectoryGridItemView: React.FC<DirItemProps> = ({
             color={theme.archiveFileColor}
           />
         </View>
-      ) : item.isDirectory() ? (
+      ) : item.isDirectory ? (
         <View
           style={{
             borderRadius: ICON_RADIUS,
@@ -265,7 +265,7 @@ const DirectoryGridItemView: React.FC<DirItemProps> = ({
             togglePath(item.path);
             return;
           }
-          if (item.isFile()) {
+          if (item.isFile) {
             if (operationsAllowed) {
               if (FileApi.isFileViewable(item)) {
                 fileManager.openPreview(item, navigation, fileManager.sort);

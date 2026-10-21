@@ -20,7 +20,7 @@ const makeStateFromPath = async (
   try {
     if (
       !(await FileApi.exists(path)) ||
-      !(await FileApi.getMetadata(path)).isDirectory()
+      !(await FileApi.getMetadata(path)).isDirectory
     ) {
       return getDefaultState();
     }

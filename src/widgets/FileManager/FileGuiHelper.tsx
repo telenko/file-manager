@@ -94,7 +94,7 @@ export const FileGuiHelper = {
     navigator: NavigationProp<FileManagerNavigation>,
     replace: boolean = false,
   ) => {
-    if (!content.isDirectory()) {
+    if (!content.isDirectory) {
       return;
     }
     // @ts-ignore

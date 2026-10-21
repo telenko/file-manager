@@ -1,18 +1,12 @@
 import { useCallback, useMemo, useState } from 'react';
 import { DirItem, FileApi } from '../../../services/FileApi';
 import type { DataManagerHookType, DataManagerType } from './DataManagerType';
-import { DataProvider } from 'recyclerlistview';
 import { AppDispatch, RootState } from '../../../store';
 import { useDispatch, useSelector } from 'react-redux';
-import {
-  restoreFileItem,
-  storeFileItem,
-  StoredFileItem,
-} from '../../../store/fileData';
 import { setDirectoryItems } from '../../../store/fileDataSlice';
 import { useExceptionHandler } from '../../../common/components/ExceptionHandler';
 
-const EMPTY_DIR_ITEMS: StoredFileItem[] = [];
+const EMPTY_DIR_ITEMS: DirItem[] = [];
 
 export const useFileTreeDataManager: DataManagerHookType = ({
   route,
@@ -31,10 +25,7 @@ export const useFileTreeDataManager: DataManagerHookType = ({
       state.fileData.directories[directoryPath] ?? EMPTY_DIR_ITEMS,
   );
 
-  const dirItems = useMemo(
-    () => storedDirItems.map(restoreFileItem),
-    [storedDirItems],
-  );
+  const dirItems = useMemo(() => storedDirItems, [storedDirItems]);
 
   const sortedDirItems = useMemo<DirItem[]>(() => {
     return FileApi.sortDirItems(
@@ -53,9 +44,7 @@ export const useFileTreeDataManager: DataManagerHookType = ({
       dispatch(
         setDirectoryItems({
           path: directoryPath,
-          items: newDirItems
-            .filter(file => !FileApi.isItemHidden(file))
-            .map(storeFileItem),
+          items: newDirItems.filter(file => !FileApi.isItemHidden(file)),
         }),
       );
       setDirLoadingDone(true);
@@ -68,18 +57,12 @@ export const useFileTreeDataManager: DataManagerHookType = ({
     }
   }, [directoryPath, dispatch]);
 
-  const dataProvider = useMemo(
-    () => new DataProvider((r1, r2) => r1 !== r2).cloneWithRows(sortedDirItems),
-    [sortedDirItems],
-  );
-
   const hasFiles = useMemo(
-    () => sortedDirItems.filter(item => item.isFile()).length > 0,
+    () => sortedDirItems.filter(item => item.isFile).length > 0,
     [sortedDirItems],
   );
 
   return {
-    dataProvider,
     items: sortedDirItems,
     isLoading,
     error,

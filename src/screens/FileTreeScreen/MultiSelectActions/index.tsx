@@ -80,7 +80,7 @@ const MultiSelectActions: React.FC<{
         title: 'index (Experimental)',
         icon: 'information-outline',
         key: 'index',
-        enabled: item.isDirectory(),
+        enabled: item.isDirectory,
         onPress: () => {
           EmbeddingsModule.indexFolder(item.path, false)
             .then((r: any) => {
@@ -93,7 +93,7 @@ const MultiSelectActions: React.FC<{
         title: 'test embeddings (Experimental)',
         icon: 'information-outline',
         key: 'testEmbeddings',
-        enabled: item.isFile(),
+        enabled: item.isFile,
         onPress: () => {
           setScore(null);
           setEmbeddingItem(item);
@@ -104,7 +104,7 @@ const MultiSelectActions: React.FC<{
         title: t('openWith'),
         icon: 'open-in-app',
         key: 'openWith',
-        enabled: item.isFile(),
+        enabled: item.isFile,
         onPress: () => {
           FileApi.openFile(item).catch(exceptionHandler.handleError);
         },
@@ -150,7 +150,7 @@ const MultiSelectActions: React.FC<{
       <ActionButton
         text={t('share')}
         icon={'share-outline'}
-        disabled={dirItemsForOperations.some(dirItem => dirItem.isDirectory())}
+        disabled={dirItemsForOperations.some(dirItem => dirItem.isDirectory)}
         style={ICON_STYLE}
         onPress={() => {
           FileApi.shareFile(dirItemsForOperations);

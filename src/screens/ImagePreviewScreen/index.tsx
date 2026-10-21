@@ -132,10 +132,12 @@ const ImagePreviewScreen: React.FC<ImageViewerScreenProps> = ({
   }, [route, parentPath, sort]);
 
   useEffect(() => {
-    const timeLocalized = file?.mtime
-      ? `${file?.mtime?.toLocaleDateString()} ${file?.mtime
-          ?.toLocaleTimeString([], { hour12: false })
-          ?.replace(/^(\d{1}):/, '0$1:')}`
+    const timeLocalized = file?.mtimeMs
+      ? `${file?.mtimeMs ? new Date(file.mtimeMs).toLocaleDateString() : ''} ${file?.mtimeMs
+          ? new Date(file.mtimeMs)
+              .toLocaleTimeString([], { hour12: false })
+              .replace(/^(\d{1}):/, '0$1:')
+          : ''}`
       : '';
     navigation.setOptions({
       headerTitle: timeLocalized,
