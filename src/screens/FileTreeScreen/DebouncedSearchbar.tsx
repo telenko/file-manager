@@ -34,14 +34,16 @@ export const DebouncedSearchbar: React.FC<DebouncedSearchbarProps> = ({
     }
   }, [globalSearchQuery]);
 
-  const handleChangeText = (query: string) => {
+  const handleChangeText = async (query: string) => {
     setLocalQuery(query); // Миттєво оновлюємо UI
+    await new Promise(r => setTimeout(r, 100));
     dispatch(setSearchQuery(query)); // Оновлюємо Redux (наш хук з дебаунсом підхопить це)
   };
 
-  const handleClear = () => {
-    setLocalQuery('');
-    dispatch(setSearchQuery(''));
+  const handleClear = async () => {
+    // setLocalQuery('');
+    // await new Promise(r => setTimeout(r, 150));
+    // dispatch(setSearchQuery(''));
   };
 
   return (
