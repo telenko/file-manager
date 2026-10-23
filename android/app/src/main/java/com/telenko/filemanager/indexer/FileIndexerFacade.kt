@@ -1,6 +1,7 @@
 package com.telenko.filemanager.indexer
 
 import android.content.Context
+import android.util.Log
 import com.telenko.filemanager.infiniteapi.MediaType
 import com.telenko.filemanager.infiniteapi.MediaTypeResolver
 import com.telenko.filemanager.infiniteapi.PagedFileRepository
@@ -28,6 +29,8 @@ class FileIndexerFacade private constructor(
     private var syncJob: Job? = null
 
     companion object {
+        private const val TAG = "FileIndexerFacade"
+
         @Volatile
         private var INSTANCE: FileIndexerFacade? = null
 
@@ -37,62 +40,59 @@ class FileIndexerFacade private constructor(
             stateBox: Box<IndexerStateEntity>
         ): FileIndexerFacade {
             return INSTANCE ?: synchronized(this) {
-                INSTANCE ?: FileIndexerFacade(context.applicationContext, box, stateBox).also { INSTANCE = it }
+                INSTANCE ?: FileIndexerFacade(context.applicationContext, box, stateBox).also { 
+                    Log.d(TAG, "Initialized new instance of FileIndexerFacade")
+                    INSTANCE = it 
+                }
             }
         }
     }
 
     fun startIndexing(onEvent: ((eventName: String, count: Int) -> Unit)? = null) {
+        Log.d(TAG, "startIndexing called")
         liveIndexManager.startListening(onEvent)
         importFiles(onEvent)
-        // syncJob?.cancel()
-        // syncJob = scope.launch(Dispatchers.IO) {
-        //     val state = stateBox.get(1) ?: IndexerStateEntity()
-        //     val isFirstScan = !state.isFirstScanCompleted
-
-        //     val mediaCount = mediaImporter.importMedia(isFirstScan)
-        //     val rootDir = File("/storage/emulated/0")
-        //     val docsCount = documentScanner.scanDocuments(rootDir, isFirstScan)
-
-        //     val totalCount = mediaCount + docsCount
-
-        //     if (isFirstScan) {
-        //         val updatedState = stateBox.get(1) ?: IndexerStateEntity()
-        //         updatedState.isFirstScanCompleted = true
-        //         stateBox.put(updatedState)
-
-        //         onEvent?.invoke("SCAN_COMPLETE", totalCount)
-        //     } else {
-        //         onEvent?.invoke("SCAN_RESYNC", totalCount)
-        //     }
-        // }
     }
 
     fun importFiles(onEvent: ((eventName: String, count: Int) -> Unit)? = null) {
         syncJob?.cancel()
         syncJob = scope.launch(Dispatchers.IO) {
-            val state = stateBox.get(1) ?: IndexerStateEntity()
-            val isFirstScan = !state.isFirstScanCompleted
+            try {
+                Log.d(TAG, "importFiles: Starting background indexing job...")
+                val state = stateBox.get(1) ?: IndexerStateEntity().also {
+                    Log.d(TAG, "importFiles: State entity ID 1 not found, created default.")
+                }
+                val isFirstScan = !state.isFirstScanCompleted
+                Log.d(TAG, "importFiles: Is first scan? $isFirstScan")
 
-            val mediaCount = mediaImporter.importMedia(isFirstScan)
-            val rootDir = File("/storage/emulated/0")
-            val docsCount = documentScanner.scanDocuments(rootDir, isFirstScan)
+                val mediaCount = mediaImporter.importMedia(isFirstScan)
+                Log.d(TAG, "importFiles: Media files imported: $mediaCount")
 
-            val totalCount = mediaCount + docsCount
+                val rootDir = File("/storage/emulated/0")
+                val docsCount = documentScanner.scanDocuments(rootDir, isFirstScan)
+                Log.d(TAG, "importFiles: Documents scanned: $docsCount")
 
-            if (isFirstScan) {
-                val updatedState = stateBox.get(1) ?: IndexerStateEntity()
-                updatedState.isFirstScanCompleted = true
-                stateBox.put(updatedState)
+                val totalCount = mediaCount + docsCount
+                Log.d(TAG, "importFiles: Total files processed: $totalCount")
 
-                onEvent?.invoke("SCAN_COMPLETE", totalCount)
-            } else {
-                onEvent?.invoke("SCAN_RESYNC", totalCount)
+                if (isFirstScan) {
+                    val updatedState = stateBox.get(1) ?: IndexerStateEntity()
+                    updatedState.isFirstScanCompleted = true
+                    stateBox.put(updatedState)
+                    Log.d(TAG, "importFiles: First scan completed flag saved to database.")
+
+                    onEvent?.invoke("SCAN_COMPLETE", totalCount)
+                } else {
+                    onEvent?.invoke("SCAN_RESYNC", totalCount)
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "importFiles: Error during indexing process", e)
             }
         }
     }
 
     fun stopIndexing() {
+        Log.d(TAG, "stopIndexing called")
         syncJob?.cancel()
         liveIndexManager.stopListening()
     }
@@ -100,7 +100,10 @@ class FileIndexerFacade private constructor(
     fun indexFile(filePath: String) {
         scope.launch {
             val file = File(filePath)
-            if (!file.exists() || !file.isFile) return@launch
+            if (!file.exists() || !file.isFile) {
+                Log.w(TAG, "indexFile: File does not exist or is not a file: $filePath")
+                return@launch
+            }
 
             val mediaType = MediaTypeResolver.resolve(file)
             if (mediaType != MediaType.OTHER) {
@@ -113,6 +116,7 @@ class FileIndexerFacade private constructor(
                     parentPath = file.parent ?: ""
                 )
                 fileIndexBox.put(entity)
+                Log.d(TAG, "indexFile: Successfully indexed file: ${file.absolutePath}")
             }
         }
     }
@@ -121,13 +125,17 @@ class FileIndexerFacade private constructor(
         scope.launch {
             val dir = File(dirPath)
             if (dir.exists() && dir.isDirectory) {
+                Log.d(TAG, "indexDirectory: Scanning directory: $dirPath")
                 documentScanner.scanDocuments(dir, isFirstScan = false)
+            } else {
+                Log.w(TAG, "indexDirectory: Directory does not exist or is invalid: $dirPath")
             }
         }
     }
 
     fun removeFile(filePath: String) {
         scope.launch {
+            Log.d(TAG, "removeFile: Removing file from index: $filePath")
             fileIndexBox.query()
                 .equal(FileIndexEntity_.filePath, filePath, StringOrder.CASE_SENSITIVE)
                 .build()
@@ -142,10 +150,12 @@ class FileIndexerFacade private constructor(
         offset: Long, 
         pageSize: Int
     ): List<UiFileEntity> {
+        Log.d(TAG, "getFilesPaged: mediaTypes=$mediaTypes, offset=$offset, pageSize=$pageSize")
+        
         val queryBuilder = fileIndexBox.query()
 
         if (!mediaTypes.isNullOrEmpty()) {
-            val typeNames = mediaTypes.map { it.name }.toTypedArray()
+            val typeNames = mediaTypes.map { nativeType -> nativeType.name }.toTypedArray()
             queryBuilder.inValues(
                 FileIndexEntity_.mediaType,
                 typeNames,
@@ -157,6 +167,8 @@ class FileIndexerFacade private constructor(
 
         val query = queryBuilder.build()
         val entities = query.find(offset, pageSize.toLong())
+        
+        Log.d(TAG, "getFilesPaged: Found ${entities.size} entities in database for offset $offset")
 
         return entities.map { entity ->
             UiFileEntity(

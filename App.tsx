@@ -22,6 +22,7 @@ import { AppDispatch, RootState, store } from './src/store';
 import { setPermissionGranted } from './src/store/appSlice';
 
 import { NativeModules } from 'react-native';
+import { useIndexedFiles } from './src/common/hooks/useIndexedFiles';
 
 const { EmbeddingsModule } = NativeModules;
 
@@ -80,6 +81,7 @@ const App = () => {
   const permissionGranted = useSelector(
     (state: RootState) => state.app.permissionGranted,
   );
+  // useIndexedFiles();
   useDeviceLocale();
   const { t } = useTranslation();
   const askPermission = () =>

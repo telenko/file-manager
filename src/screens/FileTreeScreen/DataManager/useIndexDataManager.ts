@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { NativeModules } from 'react-native';
 import { DirItem } from '../../../services/FileApi';
 import type { DataManagerHookType, DataManagerType } from './DataManagerType';
@@ -68,6 +68,15 @@ export const useIndexDataManager: DataManagerHookType = (
     1000, // INITIAL_LOAD_SIZE (1-а порція)
     5000, // BACKGROUND_PAGE_SIZE (наступні порції)
   );
+
+  useEffect(() => {
+    FileIndexer.startIndexing();
+
+    // Д. Очищення при анмаунті
+    return () => {
+      FileIndexer.stopIndexing();
+    };
+  }, []);
 
   return {
     load,
