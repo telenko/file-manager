@@ -1,13 +1,12 @@
-import React, { useMemo, useRef, useState } from 'react';
-import { Image, StyleSheet, useWindowDimensions, View } from 'react-native';
-import { IconButton, Text } from 'react-native-paper';
+import React, { useCallback, useMemo } from 'react';
+import { Image, Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { IconButton, Text, Icon } from 'react-native-paper';
 import {
   FileApi,
   type DirItem as DirectoryItemType,
 } from '../../../services/FileApi';
-import { Icon } from 'react-native-paper';
 import { theme } from '../../../theme';
-import { useTranslation } from 'react-i18next';
+// import { useTranslation } from 'react-i18next';
 import { useNavigation } from '../../../common/hooks/useNavigation';
 import {
   getRouteMetadatas,
@@ -22,342 +21,222 @@ import {
 import { useExceptionHandler } from '../../../common/components/ExceptionHandler';
 import VideoThumbnail from '../../../common/components/VideoThumbnail';
 import { calcGridColumns, GRID_HEIGHT } from '../../../common/utils/layout';
-import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import Animated, {
-  runOnJS,
-  useAnimatedStyle,
-  useSharedValue,
-  withDelay,
-  withTiming,
-} from 'react-native-reanimated';
-import dayjs from 'dayjs';
 import { specialFolderIcon } from '../specialFoldersIcons';
-
-export const ItemGestureWrapper = ({
-  children,
-  onPress,
-  onLongPress,
-  style,
-}: any) => {
-  // 0 → normal, 1 → highlighted
-  const highlight = useSharedValue(0);
-
-  const flash = () => {
-    setTimeout(() => {
-      highlight.value = withTiming(0, { duration: 120 });
-    }, 100);
-  };
-
-  const tapGesture = Gesture.Tap()
-    .maxDistance(8)
-    .onEnd((_e, success) => {
-      if (success) {
-        highlight.value = withTiming(1, { duration: 80 });
-        runOnJS(flash)();
-        runOnJS(onPress)();
-      }
-    });
-
-  const longPressGesture = Gesture.LongPress()
-    .minDuration(350)
-    .onStart(() => {
-      highlight.value = withTiming(1, { duration: 80 });
-      runOnJS(flash)();
-      runOnJS(onLongPress)();
-    });
-
-  const highlightStyle = useAnimatedStyle(() => ({
-    opacity: highlight.value,
-  }));
-
-  return (
-    <GestureDetector gesture={Gesture.Exclusive(longPressGesture, tapGesture)}>
-      <Animated.View style={[stylesGest.container, style]}>
-        {children}
-
-        {/* overlay highlight */}
-        <Animated.View
-          pointerEvents="none"
-          style={[stylesGest.highlightOverlay, highlightStyle]}
-        />
-      </Animated.View>
-    </GestureDetector>
-  );
-};
-
-const stylesGest = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  highlightOverlay: {
-    // opacity: 1,
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.08)', // 👈 можна змінити колір
-    borderRadius: 10,
-  },
-});
 
 type DirItemProps = {
   item: DirectoryItemType;
 };
 
 const ICON_RADIUS = 4;
-
 const GRID_GAP_SINGLE = 2.5;
 const GRID_DESCRIPTION_HEIGHT = 20;
 
-const DirectoryGridItemView: React.FC<DirItemProps> = ({
-  item,
-  // isUserDragging,
-}) => {
+const DirectoryGridItemView: React.FC<DirItemProps> = ({ item }) => {
   const fileManager = useFileManager();
-  const [isScrolling, setScrolling] = useState(false);
-  const startY = useRef<number | null>(null);
   const { selectPath, togglePath } = useFileTreeActions();
   const navigation = useNavigation();
-  const { t } = useTranslation();
+  // // const { t } = useTranslation();
   const exceptionHandler = useExceptionHandler();
-  const { width, height } = useWindowDimensions();
+  const { width } = useWindowDimensions();
+  
   const GRID_WIDTH = width / calcGridColumns(width) - 5;
   const ICON_SIZE = GRID_WIDTH - 20;
+  
   const mode: FileScreenProps['route']['params']['mode'] =
     getRouteMetadatas(navigation)?.mode;
 
   const operationsAllowed = mode !== 'copy' && mode !== 'move';
-
   const multiSelectActivated = useIsMultiSelectActivated();
   const isSelected = useIsPathSelected(item.path);
 
-  const content = useMemo(
-    () =>
-      FileApi.isFileImage(item) ? (
+  // Optimized content rendering using useMemo
+  const content = useMemo(() => {
+    if (FileApi.isFileImage(item)) {
+      return (
         <Image
           source={{ uri: `file://${item.path}` }}
-          style={{
-            width: '100%',
-            height: '100%',
-            borderRadius: ICON_RADIUS,
-          }}
+          style={{ width: '100%', height: '100%', borderRadius: ICON_RADIUS }}
         />
-      ) : FileApi.isFileVideo(item) ? (
-        <View style={{ justifyContent: 'center', alignItems: 'center' }}>
-          <VideoThumbnail
-            file={item}
-            width={GRID_WIDTH - GRID_GAP_SINGLE * 2 - 10}
-            iconRadius={ICON_RADIUS}
-          />
-        </View>
-      ) : FileApi.isFileMusical(item) ? (
-        <View
-          style={{
-            borderRadius: ICON_RADIUS,
-            width: '100%',
-            height: '100%',
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}>
-          <Icon
-            size={ICON_SIZE}
-            source={'file-music'}
-            color={theme.musicalFileColor}
-          />
-        </View>
-      ) : item.path?.endsWith('.pdf') ? (
-        <View
-          style={{
-            borderRadius: ICON_RADIUS,
-            justifyContent: 'center',
-            alignItems: 'center',
-            marginTop: 5,
-          }}>
-          <Icon
-            size={ICON_SIZE}
-            source={'file-pdf-box'}
-            color={theme.pdfFileColor}
-          />
-        </View>
-      ) : /\.docx?$/i.test(item.path ?? '') ? (
-        <View
-          style={{
-            borderRadius: ICON_RADIUS,
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}>
-          <Icon
-            size={ICON_SIZE}
-            source={'file-word'}
-            color={theme.docFileColor}
-          />
-        </View>
-      ) : /\.xlsx?$/i.test(item.path ?? '') ? (
-        <View
-          style={{
-            borderRadius: ICON_RADIUS,
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}>
-          <Icon
-            size={ICON_SIZE}
-            source={'file-excel'}
-            color={theme.xlxFileColor}
-          />
-        </View>
-      ) : FileApi.isFileArchive(item) ? (
-        <View
-          style={{
-            borderRadius: ICON_RADIUS,
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}>
-          <Icon
-            size={ICON_SIZE}
-            source={'archive-arrow-down'}
-            color={theme.archiveFileColor}
-          />
-        </View>
-      ) : item.isDirectory ? (
-        <View
-          style={{
-            borderRadius: ICON_RADIUS,
-            justifyContent: 'flex-start',
-            alignItems: 'center',
-            width: '100%',
-            marginTop: 12,
-          }}>
-          <Icon
-            size={ICON_SIZE - 10}
-            color={theme.folderColor}
-            source={specialFolderIcon(item.path) || 'folder'}
-          />
-        </View>
-      ) : (
-        <View
-          style={{
-            borderRadius: ICON_RADIUS,
-            justifyContent: 'flex-start',
-            alignItems: 'center',
-            width: '100%',
-            marginTop: 0,
-          }}>
-          <Icon size={ICON_SIZE} color={theme.fileColor} source={'file'} />
-        </View>
-      ),
-    [item],
-  );
+      );
+    }
+    if (FileApi.isFileVideo(item)) {
+      return (
+        <VideoThumbnail
+          file={item}
+          width={GRID_WIDTH - GRID_GAP_SINGLE * 2 - 10}
+          iconRadius={ICON_RADIUS}
+        />
+      );
+    }
+    if (FileApi.isFileMusical(item)) {
+      return (
+        <Icon size={ICON_SIZE} source="file-music" color={theme.musicalFileColor} />
+      );
+    }
+    if (item.path?.endsWith('.pdf')) {
+      return (
+        <Icon size={ICON_SIZE} source="file-pdf-box" color={theme.pdfFileColor} />
+      );
+    }
+    if (/\.docx?$/i.test(item.path ?? '')) {
+      return (
+        <Icon size={ICON_SIZE} source="file-word" color={theme.docFileColor} />
+      );
+    }
+    if (/\.xlsx?$/i.test(item.path ?? '')) {
+      return (
+        <Icon size={ICON_SIZE} source="file-excel" color={theme.xlxFileColor} />
+      );
+    }
+    if (FileApi.isFileArchive(item)) {
+      return (
+        <Icon size={ICON_SIZE} source="archive-arrow-down" color={theme.archiveFileColor} />
+      );
+    }
+    if (item.isDirectory) {
+      return (
+        <Icon
+          size={ICON_SIZE - 10}
+          color={theme.folderColor}
+          source={specialFolderIcon(item.path) || 'folder'}
+        />
+      );
+    }
+    return <Icon size={ICON_SIZE} color={theme.fileColor} source="file" />;
+  }, [item, GRID_WIDTH, ICON_SIZE]);
+
+  // Event handlers wrapped in useCallback
+  const handleLongPress = useCallback(() => {
+    if (!operationsAllowed) return;
+    selectPath(item.path);
+  }, [operationsAllowed, selectPath, item.path]);
+
+  const handlePress = useCallback(() => {
+    if (multiSelectActivated && operationsAllowed) {
+      togglePath(item.path);
+      return;
+    }
+    if (item.isFile) {
+      if (operationsAllowed) {
+        if (FileApi.isFileViewable(item)) {
+          fileManager.openPreview(item, navigation, fileManager.sort);
+        } else {
+          FileApi.openFile(item).catch(exceptionHandler.handleError);
+        }
+      }
+    } else {
+      fileManager.openDirectory(item, navigation);
+    }
+  }, [multiSelectActivated, operationsAllowed, item, fileManager, navigation, exceptionHandler, togglePath]);
+
+  const handleToggleSelection = useCallback(() => {
+    togglePath(item.path);
+  }, [togglePath, item.path]);
 
   return (
-    <View style={{ height: '100%', width: '100%', padding: 1 }}>
-      <ItemGestureWrapper
-        onLongPress={() => {
-          if (isScrolling) {
-            return;
-          }
-          if (!operationsAllowed) {
-            return;
-          }
-          selectPath(item.path);
-        }}
-        onPress={() => {
-          if (isScrolling) {
-            return;
-          }
-          if (multiSelectActivated && operationsAllowed) {
-            togglePath(item.path);
-            return;
-          }
-          if (item.isFile) {
-            if (operationsAllowed) {
-              if (FileApi.isFileViewable(item)) {
-                fileManager.openPreview(item, navigation, fileManager.sort);
-              } else {
-                FileApi.openFile(item).catch(exceptionHandler.handleError);
-              }
-            }
-          } else {
-            fileManager.openDirectory(item, navigation);
-          }
-        }}
-        style={{
-          height: '100%',
-          width: '100%',
-          borderRadius: 10,
-          backgroundColor:
-            multiSelectActivated && isSelected
-              ? 'rgba(180,180,180,0.3)'
-              : 'transparent',
-          justifyContent: 'center',
-          alignItems: 'center',
-          padding: 1.5,
-        }}>
+    <View style={styles.outerContainer}>
+      <Pressable
+        onLongPress={handleLongPress}
+        onPress={handlePress}
+        style={[
+          styles.pressableContainer,
+          {
+            backgroundColor:
+              multiSelectActivated && isSelected
+                ? 'rgba(180,180,180,0.3)'
+                : 'transparent',
+          },
+        ]}
+      >
         <View
-          style={{
-            paddingTop: 5,
-            width: GRID_WIDTH - GRID_GAP_SINGLE * 3,
-            height: GRID_HEIGHT - GRID_DESCRIPTION_HEIGHT - GRID_GAP_SINGLE * 2,
-          }}>
+          style={[
+            styles.contentContainer,
+            {
+              width: GRID_WIDTH - GRID_GAP_SINGLE * 3,
+              height: GRID_HEIGHT - GRID_DESCRIPTION_HEIGHT - GRID_GAP_SINGLE * 2,
+              marginTop: item.isDirectory ? 12 : 5,
+            },
+          ]}
+        >
           {content}
         </View>
-        <View
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            width: '100%',
-            overflow: 'hidden',
-            height: GRID_DESCRIPTION_HEIGHT,
-          }}>
+        <View style={styles.textContainer}>
           <Text
             style={{ fontFamily: theme.mediumText }}
             numberOfLines={1}
-            ellipsizeMode="middle">
+            ellipsizeMode="middle"
+          >
             {item.name}
           </Text>
         </View>
-      </ItemGestureWrapper>
-      {multiSelectActivated && isSelected ? (
+      </Pressable>
+
+      {multiSelectActivated && isSelected && (
         <>
           <IconButton
-            style={{
-              position: 'absolute',
-              right: -5,
-              top: -5,
-              width: 25,
-              height: 25,
-              zIndex: 6,
-            }}
+            style={styles.iconButton}
             size={25}
-            icon={'check-circle'}
+            icon="check-circle"
             iconColor="rgb(52,116,235)"
-            onPress={() => {
-              togglePath(item.path);
-            }}
+            onPress={handleToggleSelection}
           />
-          <View
-            style={{
-              position: 'absolute',
-              right: 3.5,
-              top: 3.5,
-              width: 20,
-              height: 20,
-              borderRadius: 10,
-              backgroundColor: 'white',
-              zIndex: 5,
-            }}
-          />
+          <View style={styles.badgeBackground} />
         </>
-      ) : null}
+      )}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  item: {},
+  outerContainer: {
+    height: '100%',
+    width: '100%',
+    padding: 1,
+  },
+  pressableContainer: {
+    height: '100%',
+    width: '100%',
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 1.5,
+  },
+  contentContainer: {
+    paddingTop: 5,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  textContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%',
+    overflow: 'hidden',
+    height: GRID_DESCRIPTION_HEIGHT,
+  },
+  iconButton: {
+    position: 'absolute',
+    right: -5,
+    top: -5,
+    width: 25,
+    height: 25,
+    zIndex: 6,
+  },
+  badgeBackground: {
+    position: 'absolute',
+    right: 3.5,
+    top: 3.5,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: 'white',
+    zIndex: 5,
+  },
 });
 
 export default React.memo(DirectoryGridItemView);
 
 export const SkeletonGridItemView = React.memo(() => {
-  const { width, height } = useWindowDimensions();
+  const { width } = useWindowDimensions();
   const GRID_WIDTH = width / calcGridColumns(width) - 5;
   return (
     <View
@@ -367,6 +246,7 @@ export const SkeletonGridItemView = React.memo(() => {
         backgroundColor: 'rgba(180,180,180,0.9)',
         opacity: 0.5,
         borderRadius: 4,
-      }}></View>
+      }}
+    />
   );
 });
