@@ -24,8 +24,8 @@ const ImageViewer: React.FC<{
       <ImageZoom
         uri={`file://${file.path}`}
         minScale={0.5}
-        maxScale={9}
-        doubleTapScale={2}
+        maxScale={12}
+        doubleTapScale={3}
         // isSingleTapEnabled
         isDoubleTapEnabled
         isPanEnabled

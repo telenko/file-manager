@@ -217,7 +217,11 @@ const ImagePreviewScreen: React.FC<ImageViewerScreenProps> = ({
             items={imagesCarousel}
             getItemKey={it => it.path}
             renderItem={image => (
-              <ItemPreview file={image} activeFile={file ?? undefined} />
+              <ItemPreview
+                file={image}
+                activeFile={file ?? undefined}
+                onActive={setZooming}
+              />
             )}
             selectedItemKey={route}
             onItemOpen={setFile}

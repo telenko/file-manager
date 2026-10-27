@@ -44,6 +44,7 @@ export default function SimpleGallery<T>({
   const [idx, setIdx] = useState(sharedIndex.value);
   const translateX = useSharedValue(0);
   const isSwiping = useSharedValue(false);
+  const isSinglePointerGesture = useSharedValue(false);
   const itemsLengthShared = useSharedValue(items.length);
 
   useEffect(() => {
@@ -82,11 +83,21 @@ export default function SimpleGallery<T>({
   const THRESHOLD = 50;
   const panGesture = Gesture.Pan()
     .enabled(!disableScrolling)
-    .maxPointers(1) // ✌️ = no gallery
+    .maxPointers(1)
+    .onTouchesDown((event, stateManager) => {
+      if (event.numberOfTouches > 1) {
+        isSinglePointerGesture.value = false;
+        stateManager.fail();
+      } else {
+        isSinglePointerGesture.value = true;
+      }
+    })
     .activeOffsetX([-25, 25]) // ignore micro moves
     .failOffsetY([-20, 20])
     .onBegin(() => {})
     .onUpdate(e => {
+      if (!isSinglePointerGesture.value) return;
+
       if (!isSwiping.value && Math.abs(e.translationX) > THRESHOLD) {
         isSwiping.value = true;
         runOnJS(setSwiping)(true);
@@ -104,6 +115,11 @@ export default function SimpleGallery<T>({
           runOnJS(setSwiping)(false);
         });
       };
+      if (!isSinglePointerGesture.value) {
+        reset();
+        return;
+      }
+
       if (e.translationX < 0 && Math.abs(e.translationX) > THRESHOLD) {
         if ((sharedIndex.value ?? 0) < itemsLengthShared.value - 1) {
           runOnJS(swipeTo)('left');

@@ -197965,7 +197965,8 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
           renderItem: function renderItem(image) {
             return /*#__PURE__*/(0, _jsxRuntime.jsx)(ItemPreview, {
               file: image,
-              activeFile: file != null ? file : undefined
+              activeFile: file != null ? file : undefined,
+              onActive: setZooming
             });
           },
           selectedItemKey: route,
@@ -198037,49 +198038,55 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
   var _worklet_16566295737018_init_data = {
     code: "function indexTsx1(){const{sharedIndex,nextIndex,runOnJS,triggerRerender}=this.__closure;sharedIndex.value=nextIndex;runOnJS(triggerRerender)();}",
     location: "C:\\Projects\\file-manager\\src\\common\\components\\Gallery\\index.tsx",
-    sourceMap: "{\"version\":3,\"names\":[\"indexTsx1\",\"sharedIndex\",\"nextIndex\",\"runOnJS\",\"triggerRerender\",\"__closure\",\"value\"],\"sources\":[\"C:/Projects/file-manager/src/common/components/Gallery/index.tsx\"],\"mappings\":\"AA4E6D,SAAAA,SAAMA,CAAA,QAAAC,WAAA,CAAAC,SAAA,CAAAC,OAAA,CAAAC,eAAA,OAAAC,SAAA,CAC7DJ,WAAW,CAACK,KAAK,CAAGJ,SAAS,CAC7BC,OAAO,CAACC,eAAe,CAAC,CAAC,CAAC,CAC5B\",\"ignoreList\":[]}",
+    sourceMap: "{\"version\":3,\"names\":[\"indexTsx1\",\"sharedIndex\",\"nextIndex\",\"runOnJS\",\"triggerRerender\",\"__closure\",\"value\"],\"sources\":[\"C:/Projects/file-manager/src/common/components/Gallery/index.tsx\"],\"mappings\":\"AA6E6D,SAAAA,SAAMA,CAAA,QAAAC,WAAA,CAAAC,SAAA,CAAAC,OAAA,CAAAC,eAAA,OAAAC,SAAA,CAC7DJ,WAAW,CAACK,KAAK,CAAGJ,SAAS,CAC7BC,OAAO,CAACC,eAAe,CAAC,CAAC,CAAC,CAC5B\",\"ignoreList\":[]}",
     version: "3.18.0"
   };
-  var _worklet_6773715603859_init_data = {
-    code: "function indexTsx2(e){const{translateX,withTiming,isSwiping,runOnJS,setSwiping,THRESHOLD,sharedIndex,itemsLengthShared,swipeTo}=this.__closure;const reset=function(){translateX.value=withTiming(0,{duration:150},function(){isSwiping.value=false;runOnJS(setSwiping)(false);});};if(e.translationX<0&&Math.abs(e.translationX)>THRESHOLD){var _sharedIndex$value;if(((_sharedIndex$value=sharedIndex.value)!==null&&_sharedIndex$value!==void 0?_sharedIndex$value:0)<itemsLengthShared.value-1){runOnJS(swipeTo)('left');}else{reset();}}else if(e.translationX>0&&Math.abs(e.translationX)>THRESHOLD){if(sharedIndex.value>0){runOnJS(swipeTo)('right');}else{reset();}}else{reset();}}",
+  var _worklet_14153216581773_init_data = {
+    code: "function indexTsx2(e){const{translateX,withTiming,isSwiping,runOnJS,setSwiping,isSinglePointerGesture,THRESHOLD,sharedIndex,itemsLengthShared,swipeTo}=this.__closure;const reset=function(){translateX.value=withTiming(0,{duration:150},function(){isSwiping.value=false;runOnJS(setSwiping)(false);});};if(!isSinglePointerGesture.value){reset();return;}if(e.translationX<0&&Math.abs(e.translationX)>THRESHOLD){var _sharedIndex$value;if(((_sharedIndex$value=sharedIndex.value)!==null&&_sharedIndex$value!==void 0?_sharedIndex$value:0)<itemsLengthShared.value-1){runOnJS(swipeTo)('left');}else{reset();}}else if(e.translationX>0&&Math.abs(e.translationX)>THRESHOLD){if(sharedIndex.value>0){runOnJS(swipeTo)('right');}else{reset();}}else{reset();}}",
     location: "C:\\Projects\\file-manager\\src\\common\\components\\Gallery\\index.tsx",
-    sourceMap: "{\"version\":3,\"names\":[\"indexTsx2\",\"e\",\"translateX\",\"withTiming\",\"isSwiping\",\"runOnJS\",\"setSwiping\",\"THRESHOLD\",\"sharedIndex\",\"itemsLengthShared\",\"swipeTo\",\"__closure\",\"reset\",\"value\",\"duration\",\"translationX\",\"Math\",\"abs\",\"_sharedIndex$value\"],\"sources\":[\"C:/Projects/file-manager/src/common/components/Gallery/index.tsx\"],\"mappings\":\"AAmGW,QAAC,CAAAA,SAAIA,CAAAC,CAAA,QAAAC,UAAA,CAAAC,UAAA,CAAAC,SAAA,CAAAC,OAAA,CAAAC,UAAA,CAAAC,SAAA,CAAAC,WAAA,CAAAC,iBAAA,CAAAC,OAAA,OAAAC,SAAA,CACV,KAAM,CAAAC,KAAK,CAAG,QAAAA,CAAA,CAAM,CAClBV,UAAU,CAACW,KAAK,CAAGV,UAAU,CAAC,CAAC,CAAE,CAAEW,QAAQ,CAAE,GAAI,CAAC,CAAE,UAAM,CACxDV,SAAS,CAACS,KAAK,CAAG,KAAK,CACvBR,OAAO,CAACC,UAAU,CAAC,CAAC,KAAK,CAAC,CAC5B,CAAC,CAAC,CACJ,CAAC,CACD,GAAIL,CAAC,CAACc,YAAY,CAAG,CAAC,EAAIC,IAAI,CAACC,GAAG,CAAChB,CAAC,CAACc,YAAY,CAAC,CAAGR,SAAS,CAAE,KAAAW,kBAAA,CAC9D,GAAI,EAAAA,kBAAA,CAACV,WAAW,CAACK,KAAK,UAAAK,kBAAA,UAAAA,kBAAA,CAAI,CAAC,EAAIT,iBAAiB,CAACI,KAAK,CAAG,CAAC,CAAE,CAC1DR,OAAO,CAACK,OAAO,CAAC,CAAC,MAAM,CAAC,CAC1B,CAAC,IAAM,CACLE,KAAK,CAAC,CAAC,CACT,CACF,CAAC,IAAM,IAAIX,CAAC,CAACc,YAAY,CAAG,CAAC,EAAIC,IAAI,CAACC,GAAG,CAAChB,CAAC,CAACc,YAAY,CAAC,CAAGR,SAAS,CAAE,CACrE,GAAIC,WAAW,CAACK,KAAK,CAAG,CAAC,CAAE,CACzBR,OAAO,CAACK,OAAO,CAAC,CAAC,OAAO,CAAC,CAC3B,CAAC,IAAM,CACLE,KAAK,CAAC,CAAC,CACT,CACF,CAAC,IAAM,CACLA,KAAK,CAAC,CAAC,CACT,CACF\",\"ignoreList\":[]}",
+    sourceMap: "{\"version\":3,\"names\":[\"indexTsx2\",\"e\",\"translateX\",\"withTiming\",\"isSwiping\",\"runOnJS\",\"setSwiping\",\"isSinglePointerGesture\",\"THRESHOLD\",\"sharedIndex\",\"itemsLengthShared\",\"swipeTo\",\"__closure\",\"reset\",\"value\",\"duration\",\"translationX\",\"Math\",\"abs\",\"_sharedIndex$value\"],\"sources\":[\"C:/Projects/file-manager/src/common/components/Gallery/index.tsx\"],\"mappings\":\"AA8GW,QAAC,CAAAA,SAAIA,CAAAC,CAAA,QAAAC,UAAA,CAAAC,UAAA,CAAAC,SAAA,CAAAC,OAAA,CAAAC,UAAA,CAAAC,sBAAA,CAAAC,SAAA,CAAAC,WAAA,CAAAC,iBAAA,CAAAC,OAAA,OAAAC,SAAA,CACV,KAAM,CAAAC,KAAK,CAAG,QAAAA,CAAA,CAAM,CAClBX,UAAU,CAACY,KAAK,CAAGX,UAAU,CAAC,CAAC,CAAE,CAAEY,QAAQ,CAAE,GAAI,CAAC,CAAE,UAAM,CACxDX,SAAS,CAACU,KAAK,CAAG,KAAK,CACvBT,OAAO,CAACC,UAAU,CAAC,CAAC,KAAK,CAAC,CAC5B,CAAC,CAAC,CACJ,CAAC,CACD,GAAI,CAACC,sBAAsB,CAACO,KAAK,CAAE,CACjCD,KAAK,CAAC,CAAC,CACP,OACF,CAEA,GAAIZ,CAAC,CAACe,YAAY,CAAG,CAAC,EAAIC,IAAI,CAACC,GAAG,CAACjB,CAAC,CAACe,YAAY,CAAC,CAAGR,SAAS,CAAE,KAAAW,kBAAA,CAC9D,GAAI,EAAAA,kBAAA,CAACV,WAAW,CAACK,KAAK,UAAAK,kBAAA,UAAAA,kBAAA,CAAI,CAAC,EAAIT,iBAAiB,CAACI,KAAK,CAAG,CAAC,CAAE,CAC1DT,OAAO,CAACM,OAAO,CAAC,CAAC,MAAM,CAAC,CAC1B,CAAC,IAAM,CACLE,KAAK,CAAC,CAAC,CACT,CACF,CAAC,IAAM,IAAIZ,CAAC,CAACe,YAAY,CAAG,CAAC,EAAIC,IAAI,CAACC,GAAG,CAACjB,CAAC,CAACe,YAAY,CAAC,CAAGR,SAAS,CAAE,CACrE,GAAIC,WAAW,CAACK,KAAK,CAAG,CAAC,CAAE,CACzBT,OAAO,CAACM,OAAO,CAAC,CAAC,OAAO,CAAC,CAC3B,CAAC,IAAM,CACLE,KAAK,CAAC,CAAC,CACT,CACF,CAAC,IAAM,CACLA,KAAK,CAAC,CAAC,CACT,CACF\",\"ignoreList\":[]}",
     version: "3.18.0"
   };
-  var _worklet_6399808055062_init_data = {
-    code: "function indexTsx3(e){const{isSwiping,THRESHOLD,runOnJS,setSwiping,translateX}=this.__closure;if(!isSwiping.value&&Math.abs(e.translationX)>THRESHOLD){isSwiping.value=true;runOnJS(setSwiping)(true);const dir=e.translationX>0?'right':'left';}if(isSwiping.value){translateX.value=e.translationX;}}",
+  var _worklet_5584411971649_init_data = {
+    code: "function indexTsx3(e){const{isSinglePointerGesture,isSwiping,THRESHOLD,runOnJS,setSwiping,translateX}=this.__closure;if(!isSinglePointerGesture.value)return;if(!isSwiping.value&&Math.abs(e.translationX)>THRESHOLD){isSwiping.value=true;runOnJS(setSwiping)(true);const dir=e.translationX>0?'right':'left';}if(isSwiping.value){translateX.value=e.translationX;}}",
     location: "C:\\Projects\\file-manager\\src\\common\\components\\Gallery\\index.tsx",
-    sourceMap: "{\"version\":3,\"names\":[\"indexTsx3\",\"e\",\"isSwiping\",\"THRESHOLD\",\"runOnJS\",\"setSwiping\",\"translateX\",\"__closure\",\"value\",\"Math\",\"abs\",\"translationX\",\"dir\"],\"sources\":[\"C:/Projects/file-manager/src/common/components/Gallery/index.tsx\"],\"mappings\":\"AAwFc,QAAC,CAAAA,SAAIA,CAAAC,CAAA,QAAAC,SAAA,CAAAC,SAAA,CAAAC,OAAA,CAAAC,UAAA,CAAAC,UAAA,OAAAC,SAAA,CACb,GAAI,CAACL,SAAS,CAACM,KAAK,EAAIC,IAAI,CAACC,GAAG,CAACT,CAAC,CAACU,YAAY,CAAC,CAAGR,SAAS,CAAE,CAC5DD,SAAS,CAACM,KAAK,CAAG,IAAI,CACtBJ,OAAO,CAACC,UAAU,CAAC,CAAC,IAAI,CAAC,CACzB,KAAM,CAAAO,GAAG,CAAGX,CAAC,CAACU,YAAY,CAAG,CAAC,CAAG,OAAO,CAAG,MAAM,CACnD,CAEA,GAAIT,SAAS,CAACM,KAAK,CAAE,CACnBF,UAAU,CAACE,KAAK,CAAGP,CAAC,CAACU,YAAY,CACnC,CACF\",\"ignoreList\":[]}",
+    sourceMap: "{\"version\":3,\"names\":[\"indexTsx3\",\"e\",\"isSinglePointerGesture\",\"isSwiping\",\"THRESHOLD\",\"runOnJS\",\"setSwiping\",\"translateX\",\"__closure\",\"value\",\"Math\",\"abs\",\"translationX\",\"dir\"],\"sources\":[\"C:/Projects/file-manager/src/common/components/Gallery/index.tsx\"],\"mappings\":\"AAiGc,QAAC,CAAAA,SAAIA,CAAAC,CAAA,QAAAC,sBAAA,CAAAC,SAAA,CAAAC,SAAA,CAAAC,OAAA,CAAAC,UAAA,CAAAC,UAAA,OAAAC,SAAA,CACb,GAAI,CAACN,sBAAsB,CAACO,KAAK,CAAE,OAEnC,GAAI,CAACN,SAAS,CAACM,KAAK,EAAIC,IAAI,CAACC,GAAG,CAACV,CAAC,CAACW,YAAY,CAAC,CAAGR,SAAS,CAAE,CAC5DD,SAAS,CAACM,KAAK,CAAG,IAAI,CACtBJ,OAAO,CAACC,UAAU,CAAC,CAAC,IAAI,CAAC,CACzB,KAAM,CAAAO,GAAG,CAAGZ,CAAC,CAACW,YAAY,CAAG,CAAC,CAAG,OAAO,CAAG,MAAM,CACnD,CAEA,GAAIT,SAAS,CAACM,KAAK,CAAE,CACnBF,UAAU,CAACE,KAAK,CAAGR,CAAC,CAACW,YAAY,CACnC,CACF\",\"ignoreList\":[]}",
     version: "3.18.0"
   };
   var _worklet_3261898965559_init_data = {
     code: "function indexTsx4(){}",
     location: "C:\\Projects\\file-manager\\src\\common\\components\\Gallery\\index.tsx",
-    sourceMap: "{\"version\":3,\"names\":[\"indexTsx4\"],\"sources\":[\"C:/Projects/file-manager/src/common/components/Gallery/index.tsx\"],\"mappings\":\"AAuFa,SAAAA,SAAOA,CAAA\",\"ignoreList\":[]}",
+    sourceMap: "{\"version\":3,\"names\":[\"indexTsx4\"],\"sources\":[\"C:/Projects/file-manager/src/common/components/Gallery/index.tsx\"],\"mappings\":\"AAgGa,SAAAA,SAAOA,CAAA\",\"ignoreList\":[]}",
     version: "3.18.0"
   };
-  var _worklet_7262635346_init_data = {
-    code: "function indexTsx5(){const{isSwiping,runOnJS,setSwiping}=this.__closure;isSwiping.value=false;runOnJS(setSwiping)(false);}",
+  var _worklet_12451128959438_init_data = {
+    code: "function indexTsx5(event,stateManager){const{isSinglePointerGesture}=this.__closure;if(event.numberOfTouches>1){isSinglePointerGesture.value=false;stateManager.fail();}else{isSinglePointerGesture.value=true;}}",
     location: "C:\\Projects\\file-manager\\src\\common\\components\\Gallery\\index.tsx",
-    sourceMap: "{\"version\":3,\"names\":[\"indexTsx5\",\"isSwiping\",\"runOnJS\",\"setSwiping\",\"__closure\",\"value\"],\"sources\":[\"C:/Projects/file-manager/src/common/components/Gallery/index.tsx\"],\"mappings\":\"AAqG4D,SAAAA,SAAMA,CAAA,QAAAC,SAAA,CAAAC,OAAA,CAAAC,UAAA,OAAAC,SAAA,CACxDH,SAAS,CAACI,KAAK,CAAG,KAAK,CACvBH,OAAO,CAACC,UAAU,CAAC,CAAC,KAAK,CAAC,CAC5B\",\"ignoreList\":[]}",
+    sourceMap: "{\"version\":3,\"names\":[\"indexTsx5\",\"event\",\"stateManager\",\"isSinglePointerGesture\",\"__closure\",\"numberOfTouches\",\"value\",\"fail\"],\"sources\":[\"C:/Projects/file-manager/src/common/components/Gallery/index.tsx\"],\"mappings\":\"AAsFmB,QAAC,CAAAA,SAAOA,CAAAC,KAAA,CAAAC,YAAiB,QAAAC,sBAAA,OAAAC,SAAA,CACtC,GAAIH,KAAK,CAACI,eAAe,CAAG,CAAC,CAAE,CAC7BF,sBAAsB,CAACG,KAAK,CAAG,KAAK,CACpCJ,YAAY,CAACK,IAAI,CAAC,CAAC,CACrB,CAAC,IAAM,CACLJ,sBAAsB,CAACG,KAAK,CAAG,IAAI,CACrC,CACF\",\"ignoreList\":[]}",
     version: "3.18.0"
   };
-  var _worklet_11597230056361_init_data = {
-    code: "function indexTsx6(){const{translateX}=this.__closure;return{transform:[{translateX:translateX.value}]};}",
+  var _worklet_6843927657649_init_data = {
+    code: "function indexTsx6(){const{isSwiping,runOnJS,setSwiping}=this.__closure;isSwiping.value=false;runOnJS(setSwiping)(false);}",
     location: "C:\\Projects\\file-manager\\src\\common\\components\\Gallery\\index.tsx",
-    sourceMap: "{\"version\":3,\"names\":[\"indexTsx6\",\"translateX\",\"__closure\",\"transform\",\"value\"],\"sources\":[\"C:/Projects/file-manager/src/common/components/Gallery/index.tsx\"],\"mappings\":\"AA4HwC,SAAAA,UAAA,QAAAC,UAAA,OAAAC,SAAA,OAAO,CAC3CC,SAAS,CAAE,CAAC,CAAEF,UAAU,CAAEA,UAAU,CAACG,KAAM,CAAC,CAC9C,CAAC\",\"ignoreList\":[]}",
+    sourceMap: "{\"version\":3,\"names\":[\"indexTsx6\",\"isSwiping\",\"runOnJS\",\"setSwiping\",\"__closure\",\"value\"],\"sources\":[\"C:/Projects/file-manager/src/common/components/Gallery/index.tsx\"],\"mappings\":\"AAgH4D,SAAAA,SAAMA,CAAA,QAAAC,SAAA,CAAAC,OAAA,CAAAC,UAAA,OAAAC,SAAA,CACxDH,SAAS,CAACI,KAAK,CAAG,KAAK,CACvBH,OAAO,CAACC,UAAU,CAAC,CAAC,KAAK,CAAC,CAC5B\",\"ignoreList\":[]}",
     version: "3.18.0"
   };
-  var _worklet_17470106380844_init_data = {
-    code: "function indexTsx7(){const{translateX,screen,interpolate,Extrapolation}=this.__closure;const translate=translateX.value-screen.width;const opacity=interpolate(translateX.value,[0,screen.width],[0.2,1],Extrapolation.CLAMP);return{transform:[{translateX:translate}],opacity:opacity};}",
+  var _worklet_9020210580488_init_data = {
+    code: "function indexTsx7(){const{translateX}=this.__closure;return{transform:[{translateX:translateX.value}]};}",
     location: "C:\\Projects\\file-manager\\src\\common\\components\\Gallery\\index.tsx",
-    sourceMap: "{\"version\":3,\"names\":[\"indexTsx7\",\"translateX\",\"screen\",\"interpolate\",\"Extrapolation\",\"__closure\",\"translate\",\"value\",\"width\",\"opacity\",\"CLAMP\",\"transform\"],\"sources\":[\"C:/Projects/file-manager/src/common/components/Gallery/index.tsx\"],\"mappings\":\"AAgIqC,SAAAA,SAAMA,CAAA,QAAAC,UAAA,CAAAC,MAAA,CAAAC,WAAA,CAAAC,aAAA,OAAAC,SAAA,CACvC,KAAM,CAAAC,SAAS,CAAGL,UAAU,CAACM,KAAK,CAAGL,MAAM,CAACM,KAAK,CACjD,KAAM,CAAAC,OAAO,CAAGN,WAAW,CACzBF,UAAU,CAACM,KAAK,CAChB,CAAC,CAAC,CAAEL,MAAM,CAACM,KAAK,CAAC,CACjB,CAAC,GAAG,CAAE,CAAC,CAAC,CACRJ,aAAa,CAACM,KAChB,CAAC,CACD,MAAO,CACLC,SAAS,CAAE,CAAC,CAAEV,UAAU,CAAEK,SAAU,CAAC,CAAC,CACtCG,OAAA,CAAAA,OACF,CAAC,CACH\",\"ignoreList\":[]}",
+    sourceMap: "{\"version\":3,\"names\":[\"indexTsx7\",\"translateX\",\"__closure\",\"transform\",\"value\"],\"sources\":[\"C:/Projects/file-manager/src/common/components/Gallery/index.tsx\"],\"mappings\":\"AA4IwC,SAAAA,UAAA,QAAAC,UAAA,OAAAC,SAAA,OAAO,CAC3CC,SAAS,CAAE,CAAC,CAAEF,UAAU,CAAEA,UAAU,CAACG,KAAM,CAAC,CAC9C,CAAC\",\"ignoreList\":[]}",
     version: "3.18.0"
   };
-  var _worklet_535106544904_init_data = {
-    code: "function indexTsx8(){const{translateX,screen,interpolate,Extrapolation}=this.__closure;const translate=translateX.value+screen.width;const opacity=interpolate(translateX.value,[-screen.width,0],[1,0.2],Extrapolation.CLAMP);return{transform:[{translateX:translate}],opacity:opacity};}",
+  var _worklet_7635068452227_init_data = {
+    code: "function indexTsx8(){const{translateX,screen,interpolate,Extrapolation}=this.__closure;const translate=translateX.value-screen.width;const opacity=interpolate(translateX.value,[0,screen.width],[0.2,1],Extrapolation.CLAMP);return{transform:[{translateX:translate}],opacity:opacity};}",
     location: "C:\\Projects\\file-manager\\src\\common\\components\\Gallery\\index.tsx",
-    sourceMap: "{\"version\":3,\"names\":[\"indexTsx8\",\"translateX\",\"screen\",\"interpolate\",\"Extrapolation\",\"__closure\",\"translate\",\"value\",\"width\",\"opacity\",\"CLAMP\",\"transform\"],\"sources\":[\"C:/Projects/file-manager/src/common/components/Gallery/index.tsx\"],\"mappings\":\"AA8IqC,SAAAA,SAAMA,CAAA,QAAAC,UAAA,CAAAC,MAAA,CAAAC,WAAA,CAAAC,aAAA,OAAAC,SAAA,CACvC,KAAM,CAAAC,SAAS,CAAGL,UAAU,CAACM,KAAK,CAAGL,MAAM,CAACM,KAAK,CACjD,KAAM,CAAAC,OAAO,CAAGN,WAAW,CACzBF,UAAU,CAACM,KAAK,CAChB,CAAC,CAACL,MAAM,CAACM,KAAK,CAAE,CAAC,CAAC,CAClB,CAAC,CAAC,CAAE,GAAG,CAAC,CACRJ,aAAa,CAACM,KAChB,CAAC,CACD,MAAO,CACLC,SAAS,CAAE,CAAC,CAAEV,UAAU,CAAEK,SAAU,CAAC,CAAC,CACtCG,OAAA,CAAAA,OACF,CAAC,CACH\",\"ignoreList\":[]}",
+    sourceMap: "{\"version\":3,\"names\":[\"indexTsx8\",\"translateX\",\"screen\",\"interpolate\",\"Extrapolation\",\"__closure\",\"translate\",\"value\",\"width\",\"opacity\",\"CLAMP\",\"transform\"],\"sources\":[\"C:/Projects/file-manager/src/common/components/Gallery/index.tsx\"],\"mappings\":\"AAgJqC,SAAAA,SAAMA,CAAA,QAAAC,UAAA,CAAAC,MAAA,CAAAC,WAAA,CAAAC,aAAA,OAAAC,SAAA,CACvC,KAAM,CAAAC,SAAS,CAAGL,UAAU,CAACM,KAAK,CAAGL,MAAM,CAACM,KAAK,CACjD,KAAM,CAAAC,OAAO,CAAGN,WAAW,CACzBF,UAAU,CAACM,KAAK,CAChB,CAAC,CAAC,CAAEL,MAAM,CAACM,KAAK,CAAC,CACjB,CAAC,GAAG,CAAE,CAAC,CAAC,CACRJ,aAAa,CAACM,KAChB,CAAC,CACD,MAAO,CACLC,SAAS,CAAE,CAAC,CAAEV,UAAU,CAAEK,SAAU,CAAC,CAAC,CACtCG,OAAA,CAAAA,OACF,CAAC,CACH\",\"ignoreList\":[]}",
+    version: "3.18.0"
+  };
+  var _worklet_3107831053481_init_data = {
+    code: "function indexTsx9(){const{translateX,screen,interpolate,Extrapolation}=this.__closure;const translate=translateX.value+screen.width;const opacity=interpolate(translateX.value,[-screen.width,0],[1,0.2],Extrapolation.CLAMP);return{transform:[{translateX:translate}],opacity:opacity};}",
+    location: "C:\\Projects\\file-manager\\src\\common\\components\\Gallery\\index.tsx",
+    sourceMap: "{\"version\":3,\"names\":[\"indexTsx9\",\"translateX\",\"screen\",\"interpolate\",\"Extrapolation\",\"__closure\",\"translate\",\"value\",\"width\",\"opacity\",\"CLAMP\",\"transform\"],\"sources\":[\"C:/Projects/file-manager/src/common/components/Gallery/index.tsx\"],\"mappings\":\"AA8JqC,SAAAA,SAAMA,CAAA,QAAAC,UAAA,CAAAC,MAAA,CAAAC,WAAA,CAAAC,aAAA,OAAAC,SAAA,CACvC,KAAM,CAAAC,SAAS,CAAGL,UAAU,CAACM,KAAK,CAAGL,MAAM,CAACM,KAAK,CACjD,KAAM,CAAAC,OAAO,CAAGN,WAAW,CACzBF,UAAU,CAACM,KAAK,CAChB,CAAC,CAACL,MAAM,CAACM,KAAK,CAAE,CAAC,CAAC,CAClB,CAAC,CAAC,CAAE,GAAG,CAAC,CACRJ,aAAa,CAACM,KAChB,CAAC,CACD,MAAO,CACLC,SAAS,CAAE,CAAC,CAAEV,UAAU,CAAEK,SAAU,CAAC,CAAC,CACtCG,OAAA,CAAAA,OACF,CAAC,CACH\",\"ignoreList\":[]}",
     version: "3.18.0"
   };
   function SimpleGallery(_ref) {
@@ -198108,6 +198115,7 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
       setIdx = _useState2[1];
     var translateX = (0, _reactNativeReanimated.useSharedValue)(0);
     var isSwiping = (0, _reactNativeReanimated.useSharedValue)(false);
+    var isSinglePointerGesture = (0, _reactNativeReanimated.useSharedValue)(false);
     var itemsLengthShared = (0, _reactNativeReanimated.useSharedValue)(items.length);
     (0, _react.useEffect)(function () {
       itemsLengthShared.value = items.length;
@@ -198155,8 +198163,24 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
       }());
     };
     var THRESHOLD = 50;
-    var panGesture = _$$_REQUIRE(_dependencyMap[6], "react-native-gesture-handler").Gesture.Pan().enabled(!disableScrolling).maxPointers(1) // ✌️ = no gallery
-    .activeOffsetX([-25, 25]) // ignore micro moves
+    var panGesture = _$$_REQUIRE(_dependencyMap[6], "react-native-gesture-handler").Gesture.Pan().enabled(!disableScrolling).maxPointers(1).onTouchesDown(function () {
+      var _e = [new global.Error(), -2, -27];
+      var indexTsx5 = function indexTsx5(event, stateManager) {
+        if (event.numberOfTouches > 1) {
+          isSinglePointerGesture.value = false;
+          stateManager.fail();
+        } else {
+          isSinglePointerGesture.value = true;
+        }
+      };
+      indexTsx5.__closure = {
+        isSinglePointerGesture: isSinglePointerGesture
+      };
+      indexTsx5.__workletHash = 12451128959438;
+      indexTsx5.__initData = _worklet_12451128959438_init_data;
+      indexTsx5.__stackDetails = _e;
+      return indexTsx5;
+    }()).activeOffsetX([-25, 25]) // ignore micro moves
     .failOffsetY([-20, 20]).onBegin(function () {
       var _e = [new global.Error(), 1, -27];
       var indexTsx4 = function indexTsx4() {};
@@ -198166,8 +198190,9 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
       indexTsx4.__stackDetails = _e;
       return indexTsx4;
     }()).onUpdate(function () {
-      var _e = [new global.Error(), -6, -27];
+      var _e = [new global.Error(), -7, -27];
       var indexTsx3 = function indexTsx3(e) {
+        if (!isSinglePointerGesture.value) return;
         if (!isSwiping.value && Math.abs(e.translationX) > THRESHOLD) {
           isSwiping.value = true;
           (0, _reactNativeReanimated.runOnJS)(setSwiping)(true);
@@ -198178,39 +198203,44 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
         }
       };
       indexTsx3.__closure = {
+        isSinglePointerGesture: isSinglePointerGesture,
         isSwiping: isSwiping,
         THRESHOLD: THRESHOLD,
         runOnJS: _reactNativeReanimated.runOnJS,
         setSwiping: setSwiping,
         translateX: translateX
       };
-      indexTsx3.__workletHash = 6399808055062;
-      indexTsx3.__initData = _worklet_6399808055062_init_data;
+      indexTsx3.__workletHash = 5584411971649;
+      indexTsx3.__initData = _worklet_5584411971649_init_data;
       indexTsx3.__stackDetails = _e;
       return indexTsx3;
     }()).onEnd(function () {
-      var _e = [new global.Error(), -10, -27];
+      var _e = [new global.Error(), -11, -27];
       var indexTsx2 = function indexTsx2(e) {
         var reset = function reset() {
           translateX.value = (0, _reactNativeReanimated.withTiming)(0, {
             duration: 150
           }, function () {
             var _e = [new global.Error(), -4, -27];
-            var indexTsx5 = function indexTsx5() {
+            var indexTsx6 = function indexTsx6() {
               isSwiping.value = false;
               (0, _reactNativeReanimated.runOnJS)(setSwiping)(false);
             };
-            indexTsx5.__closure = {
+            indexTsx6.__closure = {
               isSwiping: isSwiping,
               runOnJS: _reactNativeReanimated.runOnJS,
               setSwiping: setSwiping
             };
-            indexTsx5.__workletHash = 7262635346;
-            indexTsx5.__initData = _worklet_7262635346_init_data;
-            indexTsx5.__stackDetails = _e;
-            return indexTsx5;
+            indexTsx6.__workletHash = 6843927657649;
+            indexTsx6.__initData = _worklet_6843927657649_init_data;
+            indexTsx6.__stackDetails = _e;
+            return indexTsx6;
           }());
         };
+        if (!isSinglePointerGesture.value) {
+          reset();
+          return;
+        }
         if (e.translationX < 0 && Math.abs(e.translationX) > THRESHOLD) {
           var _sharedIndex$value;
           if (((_sharedIndex$value = sharedIndex.value) != null ? _sharedIndex$value : 0) < itemsLengthShared.value - 1) {
@@ -198234,13 +198264,14 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
         isSwiping: isSwiping,
         runOnJS: _reactNativeReanimated.runOnJS,
         setSwiping: setSwiping,
+        isSinglePointerGesture: isSinglePointerGesture,
         THRESHOLD: THRESHOLD,
         sharedIndex: sharedIndex,
         itemsLengthShared: itemsLengthShared,
         swipeTo: swipeTo
       };
-      indexTsx2.__workletHash = 6773715603859;
-      indexTsx2.__initData = _worklet_6773715603859_init_data;
+      indexTsx2.__workletHash = 14153216581773;
+      indexTsx2.__initData = _worklet_14153216581773_init_data;
       indexTsx2.__stackDetails = _e;
       return indexTsx2;
     }());
@@ -198248,49 +198279,26 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
     // === Animated Styles ===
     var currentStyle = (0, _reactNativeReanimated.useAnimatedStyle)(function () {
       var _e = [new global.Error(), -2, -27];
-      var indexTsx6 = function indexTsx6() {
+      var indexTsx7 = function indexTsx7() {
         return {
           transform: [{
             translateX: translateX.value
           }]
         };
       };
-      indexTsx6.__closure = {
+      indexTsx7.__closure = {
         translateX: translateX
       };
-      indexTsx6.__workletHash = 11597230056361;
-      indexTsx6.__initData = _worklet_11597230056361_init_data;
-      indexTsx6.__stackDetails = _e;
-      return indexTsx6;
-    }());
-    var prevStyle = (0, _reactNativeReanimated.useAnimatedStyle)(function () {
-      var _e = [new global.Error(), -5, -27];
-      var indexTsx7 = function indexTsx7() {
-        var translate = translateX.value - screen.width;
-        var opacity = (0, _reactNativeReanimated.interpolate)(translateX.value, [0, screen.width], [0.2, 1], _reactNativeReanimated.Extrapolation.CLAMP);
-        return {
-          transform: [{
-            translateX: translate
-          }],
-          opacity: opacity
-        };
-      };
-      indexTsx7.__closure = {
-        translateX: translateX,
-        screen: screen,
-        interpolate: _reactNativeReanimated.interpolate,
-        Extrapolation: _reactNativeReanimated.Extrapolation
-      };
-      indexTsx7.__workletHash = 17470106380844;
-      indexTsx7.__initData = _worklet_17470106380844_init_data;
+      indexTsx7.__workletHash = 9020210580488;
+      indexTsx7.__initData = _worklet_9020210580488_init_data;
       indexTsx7.__stackDetails = _e;
       return indexTsx7;
     }());
-    var nextStyle = (0, _reactNativeReanimated.useAnimatedStyle)(function () {
+    var prevStyle = (0, _reactNativeReanimated.useAnimatedStyle)(function () {
       var _e = [new global.Error(), -5, -27];
       var indexTsx8 = function indexTsx8() {
-        var translate = translateX.value + screen.width;
-        var opacity = (0, _reactNativeReanimated.interpolate)(translateX.value, [-screen.width, 0], [1, 0.2], _reactNativeReanimated.Extrapolation.CLAMP);
+        var translate = translateX.value - screen.width;
+        var opacity = (0, _reactNativeReanimated.interpolate)(translateX.value, [0, screen.width], [0.2, 1], _reactNativeReanimated.Extrapolation.CLAMP);
         return {
           transform: [{
             translateX: translate
@@ -198304,10 +198312,33 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
         interpolate: _reactNativeReanimated.interpolate,
         Extrapolation: _reactNativeReanimated.Extrapolation
       };
-      indexTsx8.__workletHash = 535106544904;
-      indexTsx8.__initData = _worklet_535106544904_init_data;
+      indexTsx8.__workletHash = 7635068452227;
+      indexTsx8.__initData = _worklet_7635068452227_init_data;
       indexTsx8.__stackDetails = _e;
       return indexTsx8;
+    }());
+    var nextStyle = (0, _reactNativeReanimated.useAnimatedStyle)(function () {
+      var _e = [new global.Error(), -5, -27];
+      var indexTsx9 = function indexTsx9() {
+        var translate = translateX.value + screen.width;
+        var opacity = (0, _reactNativeReanimated.interpolate)(translateX.value, [-screen.width, 0], [1, 0.2], _reactNativeReanimated.Extrapolation.CLAMP);
+        return {
+          transform: [{
+            translateX: translate
+          }],
+          opacity: opacity
+        };
+      };
+      indexTsx9.__closure = {
+        translateX: translateX,
+        screen: screen,
+        interpolate: _reactNativeReanimated.interpolate,
+        Extrapolation: _reactNativeReanimated.Extrapolation
+      };
+      indexTsx9.__workletHash = 3107831053481;
+      indexTsx9.__initData = _worklet_3107831053481_init_data;
+      indexTsx9.__stackDetails = _e;
+      return indexTsx9;
     }());
 
     // === Items to render ===
@@ -198393,8 +198424,8 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
       children: /*#__PURE__*/(0, _jsxRuntime.jsx)(_$$_REQUIRE(_dependencyMap[1], "./ImageZoom").ImageZoom, {
         uri: `file://${file.path}`,
         minScale: 0.5,
-        maxScale: 9,
-        doubleTapScale: 2
+        maxScale: 12,
+        doubleTapScale: 3
         // isSingleTapEnabled
         ,
         isDoubleTapEnabled: true,

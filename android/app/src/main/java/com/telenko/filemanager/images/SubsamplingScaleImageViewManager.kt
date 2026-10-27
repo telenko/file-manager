@@ -33,6 +33,7 @@ class NativeZoomImageView(context: ThemedReactContext) : SubsamplingScaleImageVi
     var onResetAnimationEnd: (() -> Unit)? = null
 
     private var zoomActive = false
+    private var activePointerCount = 0
 
     init {
         setMinimumScaleType(SCALE_TYPE_CENTER_INSIDE)
@@ -119,7 +120,8 @@ class NativeZoomImageView(context: ThemedReactContext) : SubsamplingScaleImageVi
 
         when (event.actionMasked) {
             MotionEvent.ACTION_DOWN, MotionEvent.ACTION_POINTER_DOWN -> {
-                val shouldDisallow = currentRelScale > 1.05f
+                activePointerCount = event.pointerCount
+                val shouldDisallow = currentRelScale > 1.05f || activePointerCount >= 2
                 Log.d(TAG, "-> requestDisallowInterceptTouchEvent($shouldDisallow)")
                 parent?.requestDisallowInterceptTouchEvent(shouldDisallow)
 
@@ -130,9 +132,11 @@ class NativeZoomImageView(context: ThemedReactContext) : SubsamplingScaleImageVi
                 }
             }
             MotionEvent.ACTION_POINTER_UP -> {
+                activePointerCount = event.pointerCount - 1
                 setPanEnabled(panGesturesEnabled && event.pointerCount - 1 >= minPanPointers)
             }
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                activePointerCount = 0
                 Log.d(TAG, "-> ACTION_UP/CANCEL: звільняємо батька requestDisallowInterceptTouchEvent(false)")
                 parent?.requestDisallowInterceptTouchEvent(false)
                 setPanEnabled(panGesturesEnabled)
@@ -150,6 +154,8 @@ class NativeZoomImageView(context: ThemedReactContext) : SubsamplingScaleImageVi
     }
 
     fun isZoomed(): Boolean = currentRelativeScale() > 1.05f
+
+    fun hasMultiplePointers(): Boolean = activePointerCount >= 2
 }
 
 class NativeZoomImageContainer(context: ThemedReactContext) : FrameLayout(context) {
@@ -163,7 +169,7 @@ class NativeZoomImageContainer(context: ThemedReactContext) : FrameLayout(contex
     }
 
     override fun requestDisallowInterceptTouchEvent(disallowIntercept: Boolean) {
-        if (imageView.isZoomed()) {
+        if (imageView.isZoomed() || imageView.hasMultiplePointers()) {
             super.requestDisallowInterceptTouchEvent(disallowIntercept)
         }
     }
