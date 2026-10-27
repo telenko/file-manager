@@ -3,6 +3,8 @@ package com.telenko.filemanager.images
 import android.graphics.PointF
 import android.util.Log
 import android.view.MotionEvent
+import android.view.ViewGroup
+import android.widget.FrameLayout
 import com.davemorrissey.labs.subscaleview.ImageSource
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import com.facebook.react.bridge.Arguments
@@ -30,7 +32,7 @@ class NativeZoomImageView(context: ThemedReactContext) : SubsamplingScaleImageVi
     var onDoubleTap: ((Boolean) -> Unit)? = null
     var onResetAnimationEnd: (() -> Unit)? = null
 
-    private var isZoomed = false
+    private var zoomActive = false
 
     init {
         setMinimumScaleType(SCALE_TYPE_CENTER_INSIDE)
@@ -42,18 +44,18 @@ class NativeZoomImageView(context: ThemedReactContext) : SubsamplingScaleImageVi
                 val relativeScale = currentRelativeScale(newScale)
                 Log.d(TAG, "onScaleChanged: newScale=$newScale, relativeScale=$relativeScale, origin=$origin")
                 
-                val isDoubleTapOrigin = (origin == 1 || origin == 2) 
+                val isDoubleTapOrigin = origin == ORIGIN_DOUBLE_TAP_ZOOM
 
                 if (relativeScale > 1.05f) {
-                    if (!isZoomed) {
-                        isZoomed = true
+                    if (!zoomActive) {
+                        zoomActive = true
                         Log.d(TAG, "Zoom activated -> isZoomed = true")
                         if (isDoubleTapOrigin) {
                             onDoubleTap?.invoke(true)
                         }
                     }
-                } else if (isZoomed) {
-                    isZoomed = false
+                } else if (zoomActive) {
+                    zoomActive = false
                     Log.d(TAG, "Zoom reset -> isZoomed = false")
                     if (isDoubleTapOrigin) {
                         onDoubleTap?.invoke(false)
@@ -81,7 +83,7 @@ class NativeZoomImageView(context: ThemedReactContext) : SubsamplingScaleImageVi
     fun setImageUri(uri: String?) {
         if (uri.isNullOrBlank()) return
         Log.d(TAG, "setImageUri: $uri")
-        isZoomed = false
+        zoomActive = false
         baseScale = null
         setImage(ImageSource.uri(uri))
     }
@@ -117,7 +119,6 @@ class NativeZoomImageView(context: ThemedReactContext) : SubsamplingScaleImageVi
 
         when (event.actionMasked) {
             MotionEvent.ACTION_DOWN, MotionEvent.ACTION_POINTER_DOWN -> {
-                // Якщо маємо збільшення — блокуємо батька. Якщо масштаб базовий — дозволяємо свайп галереї
                 val shouldDisallow = currentRelScale > 1.05f
                 Log.d(TAG, "-> requestDisallowInterceptTouchEvent($shouldDisallow)")
                 parent?.requestDisallowInterceptTouchEvent(shouldDisallow)
@@ -147,57 +148,83 @@ class NativeZoomImageView(context: ThemedReactContext) : SubsamplingScaleImageVi
         val fittedScale = baseScale ?: return 1f
         return if (fittedScale > 0f) currentScale / fittedScale else 1f
     }
+
+    fun isZoomed(): Boolean = currentRelativeScale() > 1.05f
 }
 
-class SubsamplingScaleImageViewManager : SimpleViewManager<NativeZoomImageView>() {
+class NativeZoomImageContainer(context: ThemedReactContext) : FrameLayout(context) {
+    val imageView = NativeZoomImageView(context)
+
+    init {
+        addView(
+            imageView,
+            LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT),
+        )
+    }
+
+    override fun requestDisallowInterceptTouchEvent(disallowIntercept: Boolean) {
+        if (imageView.isZoomed()) {
+            super.requestDisallowInterceptTouchEvent(disallowIntercept)
+        }
+    }
+}
+
+class SubsamplingScaleImageViewManager : SimpleViewManager<NativeZoomImageContainer>() {
     override fun getName(): String = NativeZoomImageView.REACT_CLASS
 
-    override fun createViewInstance(reactContext: ThemedReactContext): NativeZoomImageView {
-        val view = NativeZoomImageView(reactContext)
-        view.onPinchStart = { emitEvent(reactContext, view, "onPinchStart") }
+    override fun createViewInstance(reactContext: ThemedReactContext): NativeZoomImageContainer {
+        val container = NativeZoomImageContainer(reactContext)
+        val view = container.imageView
+        view.onPinchStart = { emitEvent(reactContext, container, "onPinchStart") }
         view.onDoubleTap = { zoomIn ->
             val event = Arguments.createMap().apply {
                 putString("zoomType", if (zoomIn) "ZOOM_IN" else "ZOOM_OUT")
             }
-            emitEvent(reactContext, view, "onDoubleTap", event)
+            emitEvent(reactContext, container, "onDoubleTap", event)
         }
-        view.onResetAnimationEnd = { emitEvent(reactContext, view, "onResetAnimationEnd") }
-        return view
+        view.onResetAnimationEnd = { emitEvent(reactContext, container, "onResetAnimationEnd") }
+        return container
     }
 
     @ReactProp(name = "uri")
-    fun setUri(view: NativeZoomImageView, uri: String?) = view.setImageUri(uri)
+    fun setUri(view: NativeZoomImageContainer, uri: String?) = view.imageView.setImageUri(uri)
 
     @ReactProp(name = "minScale", defaultFloat = 0.5f)
-    fun setMinScale(view: NativeZoomImageView, scale: Float) {
+    fun setMinScale(container: NativeZoomImageContainer, scale: Float) {
+        val view = container.imageView
         view.reactMinScale = scale
         if (view.isReady) view.applyScaleLimits()
     }
 
     @ReactProp(name = "maxScale", defaultFloat = 5f)
-    fun setMaxScale(view: NativeZoomImageView, scale: Float) {
+    fun setMaxScale(container: NativeZoomImageContainer, scale: Float) {
+        val view = container.imageView
         view.reactMaxScale = scale
         if (view.isReady) view.applyScaleLimits()
     }
 
     @ReactProp(name = "doubleTapScale", defaultFloat = 3f)
-    fun setDoubleTapScale(view: NativeZoomImageView, scale: Float) {
+    fun setDoubleTapScale(container: NativeZoomImageContainer, scale: Float) {
+        val view = container.imageView
         view.reactDoubleTapScale = scale
         if (view.isReady) view.applyScaleLimits()
     }
 
     @ReactProp(name = "minPanPointers", defaultInt = 1)
-    fun setMinPanPointers(view: NativeZoomImageView, pointers: Int) {
+    fun setMinPanPointers(container: NativeZoomImageContainer, pointers: Int) {
+        val view = container.imageView
         view.minPanPointers = pointers.coerceAtLeast(1)
     }
 
     @ReactProp(name = "isSingleTapEnabled", defaultBoolean = true)
-    fun setIsSingleTapEnabled(view: NativeZoomImageView, enabled: Boolean) {
+    fun setIsSingleTapEnabled(container: NativeZoomImageContainer, enabled: Boolean) {
+        val view = container.imageView
         view.isClickable = enabled
     }
 
     @ReactProp(name = "isDoubleTapEnabled", defaultBoolean = true)
-    fun setIsDoubleTapEnabled(view: NativeZoomImageView, enabled: Boolean) {
+    fun setIsDoubleTapEnabled(container: NativeZoomImageContainer, enabled: Boolean) {
+        val view = container.imageView
         view.doubleTapEnabled = enabled
         if (!enabled) {
             view.setDoubleTapZoomScale(0f)
@@ -205,13 +232,15 @@ class SubsamplingScaleImageViewManager : SimpleViewManager<NativeZoomImageView>(
     }
 
     @ReactProp(name = "isPanEnabled", defaultBoolean = true)
-    fun setIsPanEnabled(view: NativeZoomImageView, enabled: Boolean) {
+    fun setIsPanEnabled(container: NativeZoomImageContainer, enabled: Boolean) {
+        val view = container.imageView
         view.panGesturesEnabled = enabled
         view.setPanEnabled(enabled)
     }
 
     @ReactProp(name = "resizeMode")
-    fun setResizeMode(view: NativeZoomImageView, resizeMode: String?) {
+    fun setResizeMode(container: NativeZoomImageContainer, resizeMode: String?) {
+        val view = container.imageView
         view.setMinimumScaleType(when (resizeMode) {
             "cover" -> SubsamplingScaleImageView.SCALE_TYPE_CENTER_CROP
             "center" -> SubsamplingScaleImageView.SCALE_TYPE_CUSTOM
@@ -221,7 +250,7 @@ class SubsamplingScaleImageViewManager : SimpleViewManager<NativeZoomImageView>(
 
     private fun emitEvent(
         context: ThemedReactContext,
-        view: NativeZoomImageView,
+        view: NativeZoomImageContainer,
         eventName: String,
         params: WritableMap? = null
     ) {
