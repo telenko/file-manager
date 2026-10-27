@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { DirItem } from '../../../services/FileApi';
 import { StyleSheet, View } from 'react-native';
-import { ImageZoom, ZOOM_TYPE } from '@likashefqet/react-native-image-zoom';
+import { ImageZoom, ZOOM_TYPE } from './ImageZoom';
+export { ImageZoom } from './ImageZoom';
+export { ZOOM_TYPE } from './ImageZoomTypes';
+export type { ImageZoomProps, ZoomType } from './ImageZoomTypes';
 
 const ImageViewer: React.FC<{
   file: Partial<DirItem>;
@@ -21,12 +24,11 @@ const ImageViewer: React.FC<{
       <ImageZoom
         uri={`file://${file.path}`}
         minScale={0.5}
-        maxScale={5}
-        doubleTapScale={3}
-        // minPanPointers={1}
-        isSingleTapEnabled
+        maxScale={9}
+        doubleTapScale={2}
+        // isSingleTapEnabled
         isDoubleTapEnabled
-        isPanEnabled={zooming}
+        isPanEnabled
         onPinchStart={() => sendZooming(true)}
         onDoubleTap={zoomType => {
           if (zoomType === ZOOM_TYPE.ZOOM_IN) {
@@ -36,7 +38,7 @@ const ImageViewer: React.FC<{
           }
         }}
         onResetAnimationEnd={() => sendZooming(false)}
-        style={[styles.image, { width: '100%' }]}
+        style={[styles.image, { width: '100%', height: '100%' }]}
         resizeMode="contain"
       />
     </View>
