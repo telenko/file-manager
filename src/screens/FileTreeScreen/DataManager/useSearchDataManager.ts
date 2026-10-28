@@ -9,7 +9,7 @@ import type { AppDispatch, RootState } from '../../../store';
 
 import { setSearchFiles } from '../../../store/fileDataSlice';
 
-const { EmbeddingsModule } = NativeModules;
+const { SearchFilesModule } = NativeModules;
 
 export interface FileEmbeddingEntityRaw {
   id: number;
@@ -94,7 +94,7 @@ export const useSearchDataManager: DataManagerHookType = (
 
       try {
         const rawResults: FileEmbeddingEntityRaw[] =
-          await EmbeddingsModule.searchFiles(query, 'ALL', null, offset, size);
+          await SearchFilesModule.searchFiles(query, 'ALL', null, offset, size);
 
         // Ігноруємо результат, якщо запит уже не актуальний.
         if (

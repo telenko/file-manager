@@ -1,10 +1,13 @@
-package com.telenko.filemanager.embeddings
+package com.telenko.filemanager.search
 
 import android.util.Log
 import com.facebook.react.bridge.*
 import ai.onnxruntime.OrtEnvironment
 import ai.onnxruntime.OrtSession
 import ai.onnxruntime.OnnxTensor
+import com.telenko.filemanager.search.common.AndroidTokenizer
+import com.telenko.filemanager.search.common.SearchContext
+import com.telenko.filemanager.search.snapshot.TextEmbeddingIndexer
 import java.nio.FloatBuffer
 import java.nio.LongBuffer
 import kotlinx.coroutines.*
@@ -14,7 +17,7 @@ import kotlin.math.sqrt
 private const val TAG = "EMBEDDINGS_MODULE"
 private val moduleScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
-class EmbeddingsModule(private val reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
+class SearchFilesModule(private val reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
 
     init {
         PDFBoxResourceLoader.init(reactContext)
@@ -35,7 +38,7 @@ class EmbeddingsModule(private val reactContext: ReactApplicationContext) : Reac
     private val modelPath = "/storage/emulated/0/Download/model_embeddings/model_vision.onnx"
     private val textModelPath = "/storage/emulated/0/Download/model_embeddings/model_text.onnx"
 
-    override fun getName(): String = "EmbeddingsModule"
+    override fun getName(): String = "SearchFilesModule"
 
     // 1. ІНІЦІАЛІЗАЦІЯ МОДЕЛЕЙ
     @ReactMethod

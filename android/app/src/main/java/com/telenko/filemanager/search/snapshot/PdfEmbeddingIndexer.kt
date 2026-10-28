@@ -1,4 +1,4 @@
-package com.telenko.filemanager.embeddings
+package com.telenko.filemanager.search.snapshot
 
 import ai.onnxruntime.OrtSession
 import android.content.Context
@@ -7,6 +7,9 @@ import android.graphics.Color
 import android.graphics.pdf.PdfRenderer
 import android.os.ParcelFileDescriptor
 import android.util.Log
+import com.telenko.filemanager.search.common.ExtractionResult
+import com.telenko.filemanager.search.common.MediaType
+import com.telenko.filemanager.search.common.SearchIndexer
 import com.tom_roush.pdfbox.pdmodel.PDDocument
 import com.tom_roush.pdfbox.text.PDFTextStripper
 import com.tom_roush.pdfbox.text.TextPosition
@@ -22,7 +25,7 @@ private const val TAG = "PdfEmbeddingIndexer"
 
 class PdfEmbeddingIndexer(
     private val context: Context
-) : MediaEmbeddingIndexer {
+) : SearchIndexer {
 
     override val mediaType: MediaType = MediaType.PDF
 

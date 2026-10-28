@@ -1,7 +1,14 @@
-package com.telenko.filemanager.embeddings
+package com.telenko.filemanager.search
 
 import android.content.Context
 import android.util.Log
+import com.telenko.filemanager.search.common.MediaType
+import com.telenko.filemanager.search.common.SearchContext
+import com.telenko.filemanager.search.common.SearchResult
+import com.telenko.filemanager.search.snapshot.FileTextSnapshotEntity
+import com.telenko.filemanager.search.snapshot.FileTextSnapshotEntity_
+import com.telenko.filemanager.search.embeddings.FileEmbeddingEntity
+import com.telenko.filemanager.search.embeddings.FileEmbeddingEntity_
 import io.objectbox.Box
 import io.objectbox.query.QueryBuilder
 import kotlin.math.sqrt
@@ -80,7 +87,6 @@ class VectorSearchManager(context: Context) {
                     fileName = entity.fileName,
                     score = cosineSimilarity(queryVector, entity.embedding),
                     mediaType = entity.mediaType,
-                    embeddingType = entity.embeddingType,
                     pageIndex = entity.pageIndex,
                     frameTimeMs = entity.frameTimeMs
                 )
@@ -112,7 +118,6 @@ class VectorSearchManager(context: Context) {
                     fileName = snapshot.fileName,
                     score = matchScore,
                     mediaType = MediaType.PDF.name,
-                    embeddingType = EmbeddingType.NONE.name,
                     pageIndex = snapshot.pageIndex,
                     frameTimeMs = 0L
                 )

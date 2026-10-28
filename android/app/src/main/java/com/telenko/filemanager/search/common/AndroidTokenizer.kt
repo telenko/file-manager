@@ -1,4 +1,4 @@
-package com.telenko.filemanager.embeddings
+package com.telenko.filemanager.search.common
 
 import android.content.Context
 import org.json.JSONObject

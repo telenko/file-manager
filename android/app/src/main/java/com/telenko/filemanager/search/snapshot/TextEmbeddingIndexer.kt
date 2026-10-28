@@ -1,8 +1,9 @@
-package com.telenko.filemanager.embeddings
+package com.telenko.filemanager.search.snapshot
 
 import ai.onnxruntime.OnnxTensor
 import ai.onnxruntime.OrtEnvironment
 import ai.onnxruntime.OrtSession
+import com.telenko.filemanager.search.common.AndroidTokenizer
 import java.nio.LongBuffer
 import kotlin.math.sqrt
 

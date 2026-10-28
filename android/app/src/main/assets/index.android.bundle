@@ -98212,7 +98212,7 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
   var _this = this,
     _jsxFileName = "C:\\Projects\\file-manager\\App.tsx"; // @TODO Andrii get rid of unreliable library
   function _interopRequireWildcard(e, t) { if ("function" == typeof WeakMap) var r = new WeakMap(), n = new WeakMap(); return (_interopRequireWildcard = function _interopRequireWildcard(e, t) { if (!t && e && e.__esModule) return e; var o, i, f = { __proto__: null, default: e }; if (null === e || "object" != typeof e && "function" != typeof e) return f; if (o = t ? n : r) { if (o.has(e)) return o.get(e); o.set(e, f); } for (var _t in e) "default" !== _t && {}.hasOwnProperty.call(e, _t) && ((i = (o = Object.defineProperty) && Object.getOwnPropertyDescriptor(e, _t)) && (i.get || i.set) ? o(f, _t, i) : f[_t] = e[_t]); return f; })(e, t); }
-  var EmbeddingsModule = _reactNative.NativeModules.EmbeddingsModule;
+  var SearchFilesModule = _reactNative.NativeModules.SearchFilesModule;
   var MAX_SNACK = 2;
   var fontConfig = {
     customVariant: {
@@ -98278,7 +98278,7 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
       return _$$_REQUIRE(_dependencyMap[11], "./src/services/FileApi").FileApi.askForStoragePermission().then(function () {
         return dispatch((0, _$$_REQUIRE(_dependencyMap[12], "./src/store/appSlice").setPermissionGranted)(true));
       }).then(function () {
-        EmbeddingsModule.initModel().then(function () {
+        SearchFilesModule.initModel().then(function () {
           console.log('Model initialized successfully');
         }).catch(function (error) {
           console.error('Error initializing model:', error);
@@ -152667,7 +152667,7 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
   var _this = this,
     _jsxFileName = "C:\\Projects\\file-manager\\src\\screens\\FileTreeScreen\\MultiSelectActions\\index.tsx";
   function _interopRequireWildcard(e, t) { if ("function" == typeof WeakMap) var r = new WeakMap(), n = new WeakMap(); return (_interopRequireWildcard = function _interopRequireWildcard(e, t) { if (!t && e && e.__esModule) return e; var o, i, f = { __proto__: null, default: e }; if (null === e || "object" != typeof e && "function" != typeof e) return f; if (o = t ? n : r) { if (o.has(e)) return o.get(e); o.set(e, f); } for (var _t in e) "default" !== _t && {}.hasOwnProperty.call(e, _t) && ((i = (o = Object.defineProperty) && Object.getOwnPropertyDescriptor(e, _t)) && (i.get || i.set) ? o(f, _t, i) : f[_t] = e[_t]); return f; })(e, t); }
-  var EmbeddingsModule = _reactNative.NativeModules.EmbeddingsModule;
+  var SearchFilesModule = _reactNative.NativeModules.SearchFilesModule;
   function testSimilarity(_x, _x2) {
     return _testSimilarity.apply(this, arguments);
   }
@@ -152675,7 +152675,7 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
     _testSimilarity = (0, _asyncToGenerator2.default)(function* (filePath, queryText) {
       try {
         // 1. Отримуємо масив результатів з вашого модуля
-        var results = yield EmbeddingsModule.calculateSimilarity(filePath, queryText);
+        var results = yield SearchFilesModule.calculateSimilarity(filePath, queryText);
         if (!results || results.length === 0) {
           _reactNative.Alert.alert('Результат', 'Ембеддинги не знайдені.');
           return;
@@ -152745,7 +152745,7 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
         key: 'index',
         enabled: item.isDirectory,
         onPress: function onPress() {
-          EmbeddingsModule.indexFolder(item.path, false).then(function (r) {
+          SearchFilesModule.indexFolder(item.path, false).then(function (r) {
             console.log('Indexing result:', r);
           }).catch(function (e) {
             return console.error('Indexing error:', e);
@@ -196639,7 +196639,7 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
   var _slicedToArray2 = _interopRequireDefault(_$$_REQUIRE(_dependencyMap[3], "@babel/runtime/helpers/slicedToArray"));
   var _react = _$$_REQUIRE(_dependencyMap[4], "react");
   var _reactNative = _$$_REQUIRE(_dependencyMap[5], "react-native");
-  var EmbeddingsModule = _reactNative.NativeModules.EmbeddingsModule;
+  var SearchFilesModule = _reactNative.NativeModules.SearchFilesModule;
   var adaptEmbeddingItemIntoDirItem = exports.adaptEmbeddingItemIntoDirItem = function adaptEmbeddingItemIntoDirItem(entity) {
     var isFile = /\/[^/]+\.[a-zA-Z0-9]+$/.test(entity.filePath);
     return {
@@ -196701,7 +196701,7 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
       setIsLoading(true);
       setError(null);
       try {
-        var rawResults = yield EmbeddingsModule.searchFiles(query, 'ALL', null, offset, size);
+        var rawResults = yield SearchFilesModule.searchFiles(query, 'ALL', null, offset, size);
 
         // Ігноруємо результат, якщо запит уже не актуальний.
         if (requestId !== requestIdRef.current || latestQueryRef.current !== query) {
@@ -198180,8 +198180,7 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
       indexTsx5.__initData = _worklet_12451128959438_init_data;
       indexTsx5.__stackDetails = _e;
       return indexTsx5;
-    }()).activeOffsetX([-25, 25]) // ignore micro moves
-    .failOffsetY([-20, 20]).onBegin(function () {
+    }()).activeOffsetX([-25, 25]).failOffsetY([-20, 20]).onBegin(function () {
       var _e = [new global.Error(), 1, -27];
       var indexTsx4 = function indexTsx4() {};
       indexTsx4.__closure = {};
@@ -198430,9 +198429,7 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
         ,
         isDoubleTapEnabled: true,
         isPanEnabled: true,
-        onPinchStart: function onPinchStart() {
-          return sendZooming(true);
-        },
+        onZoomStateChange: sendZooming,
         onDoubleTap: function onDoubleTap(zoomType) {
           if (zoomType === _$$_REQUIRE(_dependencyMap[1], "./ImageZoom").ZOOM_TYPE.ZOOM_IN) {
             sendZooming(true);
@@ -198498,6 +198495,7 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
       isPanEnabled = _ref$isPanEnabled === void 0 ? true : _ref$isPanEnabled,
       onPinchStart = _ref.onPinchStart,
       _onDoubleTap = _ref.onDoubleTap,
+      onZoomStateChange = _ref.onZoomStateChange,
       onResetAnimationEnd = _ref.onResetAnimationEnd,
       style = _ref.style,
       _ref$resizeMode = _ref.resizeMode,
@@ -198515,6 +198513,9 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
       onPinchStart: onPinchStart,
       onDoubleTap: function onDoubleTap(event) {
         return _onDoubleTap == null ? void 0 : _onDoubleTap(event.nativeEvent.zoomType);
+      },
+      onZoomStateChanged: function onZoomStateChanged(event) {
+        return onZoomStateChange == null ? void 0 : onZoomStateChange(event.nativeEvent.zoomed);
       },
       onResetAnimationEnd: onResetAnimationEnd,
       style: style

@@ -1,6 +1,5 @@
-package com.telenko.filemanager.embeddings
-
-interface MediaEmbeddingIndexer {
+package com.telenko.filemanager.search.common
+interface SearchIndexer {
     /**
      * Тип медіа, який обробляє цей індексатор.
      */

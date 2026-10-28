@@ -1,4 +1,4 @@
-package com.telenko.filemanager.embeddings
+package com.telenko.filemanager.search.snapshot
 
 import io.objectbox.annotation.Entity
 import io.objectbox.annotation.Id

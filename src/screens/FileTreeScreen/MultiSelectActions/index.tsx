@@ -17,12 +17,12 @@ import { useTranslation } from 'react-i18next';
 import { useExceptionHandler } from '../../../common/components/ExceptionHandler';
 import { NativeModules } from 'react-native';
 
-const { EmbeddingsModule } = NativeModules;
+const { SearchFilesModule } = NativeModules;
 
 async function testSimilarity(filePath: string, queryText: string) {
   try {
     // 1. Отримуємо масив результатів з вашого модуля
-    const results = await EmbeddingsModule.calculateSimilarity(
+    const results = await SearchFilesModule.calculateSimilarity(
       filePath,
       queryText,
     );
@@ -82,7 +82,7 @@ const MultiSelectActions: React.FC<{
         key: 'index',
         enabled: item.isDirectory,
         onPress: () => {
-          EmbeddingsModule.indexFolder(item.path, false)
+          SearchFilesModule.indexFolder(item.path, false)
             .then((r: any) => {
               console.log('Indexing result:', r);
             })

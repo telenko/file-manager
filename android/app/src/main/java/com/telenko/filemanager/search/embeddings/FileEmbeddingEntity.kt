@@ -1,10 +1,16 @@
-package com.telenko.filemanager.embeddings
+package com.telenko.filemanager.search.embeddings
 
+import com.telenko.filemanager.search.common.MediaType
 import io.objectbox.annotation.Entity
 import io.objectbox.annotation.HnswIndex
 import io.objectbox.annotation.Id
 import io.objectbox.annotation.Index
 import io.objectbox.annotation.VectorDistanceType
+
+enum class EmbeddingType {
+    IMAGE,
+    NONE
+}
 
 @Entity
 data class FileEmbeddingEntity(

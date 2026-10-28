@@ -92,7 +92,7 @@ export default function SimpleGallery<T>({
         isSinglePointerGesture.value = true;
       }
     })
-    .activeOffsetX([-25, 25]) // ignore micro moves
+    .activeOffsetX([-25, 25])
     .failOffsetY([-20, 20])
     .onBegin(() => {})
     .onUpdate(e => {

@@ -1,4 +1,4 @@
-package com.telenko.filemanager.embeddings
+package com.telenko.filemanager.search.embeddings
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -6,6 +6,9 @@ import android.util.Log
 import ai.onnxruntime.OnnxTensor
 import ai.onnxruntime.OrtEnvironment
 import ai.onnxruntime.OrtSession
+import com.telenko.filemanager.search.common.ExtractionResult
+import com.telenko.filemanager.search.common.SearchIndexer
+import com.telenko.filemanager.search.common.MediaType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -16,7 +19,7 @@ private const val TAG = "ImageEmbeddingIndexer"
 class ImageEmbeddingIndexer(
     private val ortEnv: OrtEnvironment,
     private val visualSession: OrtSession?
-) : MediaEmbeddingIndexer {
+) : SearchIndexer {
 
     override val mediaType: MediaType = MediaType.IMAGE
 
@@ -37,9 +40,8 @@ class ImageEmbeddingIndexer(
                 FileEmbeddingEntity(
                     filePath = filePath,
                     fileName = fileName,
-                    embedding = vector, // Виправлено: embedding замість vector
-                    mediaType = MediaType.IMAGE.name, // Або mediaType.name, якщо це змінна класу
-                    embeddingType = EmbeddingType.IMAGE.name
+                    embedding = vector,
+                    mediaType = MediaType.IMAGE.name
                 )
             ),
             snapshots = emptyList()

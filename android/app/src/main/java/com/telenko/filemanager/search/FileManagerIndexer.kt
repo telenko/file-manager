@@ -1,8 +1,20 @@
-package com.telenko.filemanager.embeddings
+package com.telenko.filemanager.search
 
 import ai.onnxruntime.OrtEnvironment
 import ai.onnxruntime.OrtSession
 import android.content.Context
+import com.telenko.filemanager.search.common.ExtractionResult
+import com.telenko.filemanager.search.common.SearchIndexer
+import com.telenko.filemanager.search.common.MediaType
+import com.telenko.filemanager.search.common.AndroidTokenizer
+import com.telenko.filemanager.search.snapshot.FileTextSnapshotEntity
+import com.telenko.filemanager.search.snapshot.FileTextSnapshotEntity_
+import com.telenko.filemanager.search.snapshot.PdfEmbeddingIndexer
+import com.telenko.filemanager.search.snapshot.TextEmbeddingIndexer
+import com.telenko.filemanager.search.embeddings.FileEmbeddingEntity
+import com.telenko.filemanager.search.embeddings.FileEmbeddingEntity_
+import com.telenko.filemanager.search.embeddings.ImageEmbeddingIndexer
+import com.telenko.filemanager.search.embeddings.VideoEmbeddingIndexer
 import io.objectbox.Box
 import io.objectbox.query.QueryBuilder
 import kotlinx.coroutines.Dispatchers
@@ -31,7 +43,7 @@ class FileManagerIndexer(
     var textEmbeddingIndexer = TextEmbeddingIndexer(ortEnv, textSession, textTokenizer)
     val pdfIndexer = PdfEmbeddingIndexer(context)
 
-    private val indexers: List<MediaEmbeddingIndexer> = listOf(
+    private val indexers: List<SearchIndexer> = listOf(
         imageIndexer,
         videoIndexer,
         pdfIndexer

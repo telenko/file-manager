@@ -14,7 +14,7 @@ import com.telenko.filemanager.viewer.LocalFileViewerPackage
 import com.telenko.filemanager.thumbnail.ThumbnailPackage
 import com.telenko.filemanager.storage.StorageMetaReaderPackage
 import com.telenko.filemanager.picker.PickerActivityPackage
-import com.telenko.filemanager.embeddings.EmbeddingsPackage
+import com.telenko.filemanager.search.SearchFilesPackage
 import com.telenko.filemanager.indexer.FileIndexerPackage
 import com.telenko.filemanager.images.SubsamplingScaleImagePackage
  
@@ -31,7 +31,7 @@ class MainApplication : Application(), ReactApplication {
               add(ThumbnailPackage());
               add(StorageMetaReaderPackage());
               add(PickerActivityPackage());
-              add(EmbeddingsPackage());
+              add(SearchFilesPackage());
               add(FileIndexerPackage());
               add(SubsamplingScaleImagePackage());
             }

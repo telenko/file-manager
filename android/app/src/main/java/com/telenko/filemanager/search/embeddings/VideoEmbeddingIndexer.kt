@@ -1,7 +1,10 @@
-package com.telenko.filemanager.embeddings
+package com.telenko.filemanager.search.embeddings
 
 import ai.onnxruntime.OrtSession
 import android.media.MediaMetadataRetriever
+import com.telenko.filemanager.search.common.ExtractionResult
+import com.telenko.filemanager.search.common.SearchIndexer
+import com.telenko.filemanager.search.common.MediaType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -9,7 +12,7 @@ import java.io.File
 class VideoEmbeddingIndexer(
     private val imageIndexer: ImageEmbeddingIndexer,
     private val visualSession: OrtSession?
-) : MediaEmbeddingIndexer {
+) : SearchIndexer {
 
     override val mediaType: MediaType = MediaType.VIDEO
 
@@ -59,7 +62,6 @@ class VideoEmbeddingIndexer(
                                 fileName = fileName,
                                 embedding = vector,
                                 mediaType = MediaType.VIDEO.name,
-                                embeddingType = EmbeddingType.IMAGE.name,
                                 frameTimeMs = timeMs
                             )
                         )

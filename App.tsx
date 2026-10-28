@@ -22,9 +22,8 @@ import { AppDispatch, RootState, store } from './src/store';
 import { setPermissionGranted } from './src/store/appSlice';
 
 import { NativeModules } from 'react-native';
-import { useIndexedFiles } from './src/common/hooks/useIndexedFiles';
 
-const { EmbeddingsModule } = NativeModules;
+const { SearchFilesModule } = NativeModules;
 
 const MAX_SNACK = 2;
 
@@ -59,21 +58,14 @@ const FontsProvider: React.FC<PropsWithChildren> = ({ children }) => {
  * 1. delete in gallery behavior: keep gallery open
  * 2. add device details into error report
  * 3. video restart
- * - rename folder animations
- * [BUG?] - slow image opening on dev
- * reorientation better animations, video to not interrupt
+ * [BUG?] - slow image opening on dev, thumbnail ImageViewer 1st?
  * make cancelable long operations with percentage visible
- * refactor to Redux
  * bad animation when copy/move just started (navigated)
  * wrong total size of storage? some memory size is missing, system one?
  * blocking delete - looks like unkink operation is sync and blocking UI
  * more smart sorting (remember + folders sorting)
  * grid media view for images/videos
  * [IMP] video player - flushes of black background
-
- *
- * TEST:
- * 2. gallery sliding bug
  */
 
 const App = () => {
@@ -81,14 +73,13 @@ const App = () => {
   const permissionGranted = useSelector(
     (state: RootState) => state.app.permissionGranted,
   );
-  // useIndexedFiles();
   useDeviceLocale();
-  const { t } = useTranslation();
+  // const { t } = useTranslation();
   const askPermission = () =>
     FileApi.askForStoragePermission()
       .then(() => dispatch(setPermissionGranted(true)))
       .then(() => {
-        EmbeddingsModule.initModel()
+        SearchFilesModule.initModel()
           .then(() => {
             console.log('Model initialized successfully');
           })

@@ -1,4 +1,7 @@
-package com.telenko.filemanager.embeddings
+package com.telenko.filemanager.search.common
+
+import com.telenko.filemanager.search.embeddings.FileEmbeddingEntity
+import com.telenko.filemanager.search.snapshot.FileTextSnapshotEntity
 
 enum class MediaType {
     IMAGE,
@@ -16,15 +19,9 @@ data class SearchResult(
     val fileName: String,
     val score: Float,
     val mediaType: String,
-    val embeddingType: String = EmbeddingType.IMAGE.name,
     val pageIndex: Int = 0,
     val frameTimeMs: Long = 0L
 )
-
-enum class EmbeddingType {
-    IMAGE, // Вектор згенеровано візуальною моделлю (Vision/CLIP Image)
-    NONE
-}
 
 /**
  * Контекст пошуку для розділення векторних просторів
