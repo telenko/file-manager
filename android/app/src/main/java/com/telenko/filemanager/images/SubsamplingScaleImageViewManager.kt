@@ -8,6 +8,7 @@ import android.widget.FrameLayout
 import com.davemorrissey.labs.subscaleview.ImageSource
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import com.facebook.react.bridge.Arguments
+import com.facebook.react.bridge.ReadableArray
 import com.facebook.react.bridge.WritableMap
 import com.facebook.react.uimanager.SimpleViewManager
 import com.facebook.react.uimanager.ThemedReactContext
@@ -103,6 +104,16 @@ class NativeZoomImageView(context: ThemedReactContext) : SubsamplingScaleImageVi
         Log.d(TAG, "Scale limits applied: min=$minimum, max=$maximum, fitted=$fittedScale")
     }
 
+    fun zoomBy(scaleFactor: Float, focalX: Float, focalY: Float) {
+        if (!isReady || !scaleFactor.isFinite() || scaleFactor <= 0f) return
+
+        val targetScale = (scale * scaleFactor).coerceIn(minScale, maxScale)
+        val focusX = focalX.coerceIn(0f, width.toFloat())
+        val focusY = focalY.coerceIn(0f, height.toFloat())
+        val sourceFocus = viewToSourceCoord(focusX, focusY) ?: return
+        setScaleAndCenter(targetScale, sourceFocus)
+    }
+
     // Перевизначаємо головний перехоплювач подій дотику
     override fun onTouchEvent(event: MotionEvent): Boolean {
         val currentRelScale = currentRelativeScale()
@@ -177,6 +188,25 @@ class NativeZoomImageContainer(context: ThemedReactContext) : FrameLayout(contex
 
 class SubsamplingScaleImageViewManager : SimpleViewManager<NativeZoomImageContainer>() {
     override fun getName(): String = NativeZoomImageView.REACT_CLASS
+
+    override fun getCommandsMap(): MutableMap<String, Int> = mutableMapOf(
+        COMMAND_ZOOM_BY to COMMAND_ZOOM_BY_ID,
+    )
+
+    override fun receiveCommand(
+        root: NativeZoomImageContainer,
+        commandId: String,
+        args: ReadableArray?,
+    ) {
+        if (commandId != COMMAND_ZOOM_BY) return
+        requireNotNull(args) { "zoomBy command requires scale factor and focal coordinates" }
+        require(args.size() >= 3) { "zoomBy command requires scale factor and focal coordinates" }
+        root.imageView.zoomBy(
+            args.getDouble(0).toFloat(),
+            args.getDouble(1).toFloat() * root.resources.displayMetrics.density,
+            args.getDouble(2).toFloat() * root.resources.displayMetrics.density,
+        )
+    }
 
     override fun createViewInstance(reactContext: ThemedReactContext): NativeZoomImageContainer {
         val container = NativeZoomImageContainer(reactContext)
@@ -269,4 +299,9 @@ class SubsamplingScaleImageViewManager : SimpleViewManager<NativeZoomImageContai
         "onDoubleTap" to mapOf("registrationName" to "onDoubleTap"),
         "onResetAnimationEnd" to mapOf("registrationName" to "onResetAnimationEnd")
     )
+
+    companion object {
+        private const val COMMAND_ZOOM_BY = "zoomBy"
+        private const val COMMAND_ZOOM_BY_ID = 1
+    }
 }
