@@ -80,6 +80,7 @@ export default function SimpleGallery<T>({
       runOnJS(triggerRerender)();
     });
   };
+
   const THRESHOLD = 50;
   const panGesture = Gesture.Pan()
     .enabled(!disableScrolling)

@@ -1,24 +1,15 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { DirItem } from '../../../services/FileApi';
 import { StyleSheet, View } from 'react-native';
-import { ImageZoom, ZOOM_TYPE } from './ImageZoom';
+import { ImageZoom } from './ImageZoom';
 export { ImageZoom } from './ImageZoom';
 export { ZOOM_TYPE } from './ImageZoomTypes';
 export type { ImageZoomProps, ZoomType } from './ImageZoomTypes';
 
 const ImageViewer: React.FC<{
   file: Partial<DirItem>;
-  onActive?: (zooming: boolean) => void;
-}> = ({ file, onActive }) => {
-  const [zooming, setZooming] = useState<boolean>(false);
-  const sendZooming = (newZooming: boolean) => {
-    if (newZooming === zooming) {
-      return;
-    }
-    setZooming(newZooming);
-    onActive?.(newZooming);
-  };
-
+  onZoomChange?: (scale: number) => void;
+}> = ({ file, onZoomChange }) => {
   return (
     <View style={{ width: '100%', height: '100%', flexDirection: 'column' }}>
       <ImageZoom
@@ -29,15 +20,7 @@ const ImageViewer: React.FC<{
         // isSingleTapEnabled
         isDoubleTapEnabled
         isPanEnabled
-        onPinchStart={() => sendZooming(true)}
-        onDoubleTap={zoomType => {
-          if (zoomType === ZOOM_TYPE.ZOOM_IN) {
-            sendZooming(true);
-          } else {
-            sendZooming(false);
-          }
-        }}
-        onResetAnimationEnd={() => sendZooming(false)}
+        onZoomChange={onZoomChange}
         style={[styles.image, { width: '100%', height: '100%' }]}
         resizeMode="contain"
       />

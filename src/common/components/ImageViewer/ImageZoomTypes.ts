@@ -16,6 +16,7 @@ export interface ImageZoomProps {
   isSingleTapEnabled?: boolean;
   isDoubleTapEnabled?: boolean;
   isPanEnabled?: boolean;
+  onZoomChange?: (scale: number) => void;
   onPinchStart?: () => void;
   onDoubleTap?: (zoomType: ZoomType) => void;
   onResetAnimationEnd?: () => void;

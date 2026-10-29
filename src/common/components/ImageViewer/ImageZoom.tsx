@@ -24,6 +24,7 @@ interface NativeImageZoomProps {
   isPanEnabled: boolean;
   resizeMode: NonNullable<ImageZoomProps['resizeMode']>;
   style?: StyleProp<ViewStyle>;
+  onZoomChange?: (event: NativeSyntheticEvent<{ scale: number }>) => void;
   onPinchStart?: () => void;
   onDoubleTap?: (event: NativeSyntheticEvent<{ zoomType: ZoomType }>) => void;
   onResetAnimationEnd?: () => void;
@@ -44,6 +45,7 @@ export const ImageZoom: React.FC<ImageZoomProps> = ({
   isSingleTapEnabled = true,
   isDoubleTapEnabled = true,
   isPanEnabled = true,
+  onZoomChange,
   onPinchStart,
   onDoubleTap,
   onResetAnimationEnd,
@@ -83,6 +85,7 @@ export const ImageZoom: React.FC<ImageZoomProps> = ({
         isDoubleTapEnabled={isDoubleTapEnabled}
         isPanEnabled={isPanEnabled}
         resizeMode={resizeMode}
+        onZoomChange={event => onZoomChange?.(event.nativeEvent.scale)}
         onPinchStart={onPinchStart}
         onDoubleTap={event => onDoubleTap?.(event.nativeEvent.zoomType)}
         onResetAnimationEnd={onResetAnimationEnd}

@@ -29,12 +29,13 @@ export type ImageViewerScreenProps = {
 
 const ItemPreview: React.FC<{
   file: Partial<DirItem>;
-  onActive?: (zooming: boolean) => void;
+  onZoomChange?: (scale: number) => void;
   activeFile?: DirItem;
 }> = props => {
   // @ts-ignore
   if (FileApi.isFileVideo(props.file)) {
-    return <VideoViewer {...props} />;
+    const { onZoomChange, ...videoProps } = props;
+    return <VideoViewer {...videoProps} />;
   }
   return <ImageViewer {...props} />;
 };
@@ -133,11 +134,13 @@ const ImagePreviewScreen: React.FC<ImageViewerScreenProps> = ({
 
   useEffect(() => {
     const timeLocalized = file?.mtimeMs
-      ? `${file?.mtimeMs ? new Date(file.mtimeMs).toLocaleDateString() : ''} ${file?.mtimeMs
-          ? new Date(file.mtimeMs)
-              .toLocaleTimeString([], { hour12: false })
-              .replace(/^(\d{1}):/, '0$1:')
-          : ''}`
+      ? `${file?.mtimeMs ? new Date(file.mtimeMs).toLocaleDateString() : ''} ${
+          file?.mtimeMs
+            ? new Date(file.mtimeMs)
+                .toLocaleTimeString([], { hour12: false })
+                .replace(/^(\d{1}):/, '0$1:')
+            : ''
+        }`
       : '';
     navigation.setOptions({
       headerTitle: timeLocalized,
@@ -220,7 +223,7 @@ const ImagePreviewScreen: React.FC<ImageViewerScreenProps> = ({
               <ItemPreview
                 file={image}
                 activeFile={file ?? undefined}
-                onActive={setZooming}
+                onZoomChange={scale => setZooming(scale > 1.05)}
               />
             )}
             selectedItemKey={route}
@@ -229,7 +232,7 @@ const ImagePreviewScreen: React.FC<ImageViewerScreenProps> = ({
           />
         ) : (
           <ItemPreview
-            onActive={setZooming}
+            onZoomChange={scale => setZooming(scale > 1.05)}
             file={{
               path: route,
             }}

@@ -29,6 +29,7 @@ class NativeZoomImageView(context: ThemedReactContext) : SubsamplingScaleImageVi
     var panGesturesEnabled = true
     var doubleTapEnabled = true
     var baseScale: Float? = null
+    var onZoomChange: ((Float) -> Unit)? = null
     var onPinchStart: (() -> Unit)? = null
     var onDoubleTap: ((Boolean) -> Unit)? = null
     var onResetAnimationEnd: (() -> Unit)? = null
@@ -45,21 +46,19 @@ class NativeZoomImageView(context: ThemedReactContext) : SubsamplingScaleImageVi
         setOnStateChangedListener(object : OnStateChangedListener {
             override fun onScaleChanged(newScale: Float, origin: Int) {
                 val relativeScale = currentRelativeScale(newScale)
-                Log.d(TAG, "onScaleChanged: newScale=$newScale, relativeScale=$relativeScale, origin=$origin")
+                onZoomChange?.invoke(relativeScale)
                 
                 val isDoubleTapOrigin = origin == ORIGIN_DOUBLE_TAP_ZOOM
 
                 if (relativeScale > 1.05f) {
                     if (!zoomActive) {
                         zoomActive = true
-                        Log.d(TAG, "Zoom activated -> isZoomed = true")
                         if (isDoubleTapOrigin) {
                             onDoubleTap?.invoke(true)
                         }
                     }
                 } else if (zoomActive) {
                     zoomActive = false
-                    Log.d(TAG, "Zoom reset -> isZoomed = false")
                     if (isDoubleTapOrigin) {
                         onDoubleTap?.invoke(false)
                     }
@@ -67,12 +66,12 @@ class NativeZoomImageView(context: ThemedReactContext) : SubsamplingScaleImageVi
                 }
             }
 
-            override fun onCenterChanged(newCenter: PointF, origin: Int) = Unit
+            override fun onCenterChanged(newCenter: PointF, origin: Int) {
+            }
         })
 
         setOnImageEventListener(object : OnImageEventListener {
             override fun onReady() {
-                Log.d(TAG, "Image onReady, applying scale limits")
                 applyScaleLimits()
             }
             override fun onImageLoaded() = Unit
@@ -85,7 +84,6 @@ class NativeZoomImageView(context: ThemedReactContext) : SubsamplingScaleImageVi
 
     fun setImageUri(uri: String?) {
         if (uri.isNullOrBlank()) return
-        Log.d(TAG, "setImageUri: $uri")
         zoomActive = false
         baseScale = null
         setImage(ImageSource.uri(uri))
@@ -102,11 +100,12 @@ class NativeZoomImageView(context: ThemedReactContext) : SubsamplingScaleImageVi
         setMaxScale(maximum)
         setDoubleTapZoomScale((fittedScale * reactDoubleTapScale).coerceIn(minimum, maximum))
         setScaleAndCenter(fittedScale, PointF(sWidth / 2f, sHeight / 2f))
-        Log.d(TAG, "Scale limits applied: min=$minimum, max=$maximum, fitted=$fittedScale")
     }
 
     fun zoomBy(scaleFactor: Float, focalX: Float, focalY: Float) {
-        if (!isReady || !scaleFactor.isFinite() || scaleFactor <= 0f) return
+        if (!isReady || !scaleFactor.isFinite() || scaleFactor <= 0f) {
+            return
+        }
 
         val targetScale = (scale * scaleFactor).coerceIn(minScale, maxScale)
         val focusX = focalX.coerceIn(0f, width.toFloat())
@@ -128,13 +127,11 @@ class NativeZoomImageView(context: ThemedReactContext) : SubsamplingScaleImageVi
             else -> "OTHER(${event.actionMasked})"
         }
 
-        Log.d(TAG, "onTouchEvent: action=$actionStr, currentRelScale=$currentRelScale, pointerCount=${event.pointerCount}")
 
         when (event.actionMasked) {
             MotionEvent.ACTION_DOWN, MotionEvent.ACTION_POINTER_DOWN -> {
                 activePointerCount = event.pointerCount
                 val shouldDisallow = currentRelScale > 1.05f || activePointerCount >= 2
-                Log.d(TAG, "-> requestDisallowInterceptTouchEvent($shouldDisallow)")
                 parent?.requestDisallowInterceptTouchEvent(shouldDisallow)
 
                 setPanEnabled(panGesturesEnabled && event.pointerCount >= minPanPointers)
@@ -149,7 +146,6 @@ class NativeZoomImageView(context: ThemedReactContext) : SubsamplingScaleImageVi
             }
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                 activePointerCount = 0
-                Log.d(TAG, "-> ACTION_UP/CANCEL: звільняємо батька requestDisallowInterceptTouchEvent(false)")
                 parent?.requestDisallowInterceptTouchEvent(false)
                 setPanEnabled(panGesturesEnabled)
             }
@@ -212,6 +208,12 @@ class SubsamplingScaleImageViewManager : SimpleViewManager<NativeZoomImageContai
     override fun createViewInstance(reactContext: ThemedReactContext): NativeZoomImageContainer {
         val container = NativeZoomImageContainer(reactContext)
         val view = container.imageView
+        view.onZoomChange = { scale ->
+            val event = Arguments.createMap().apply {
+                putDouble("scale", scale.toDouble())
+            }
+            emitEvent(reactContext, container, "onZoomChange", event)
+        }
         view.onPinchStart = { emitEvent(reactContext, container, "onPinchStart") }
         view.onDoubleTap = { zoomIn ->
             val event = Arguments.createMap().apply {
@@ -296,6 +298,7 @@ class SubsamplingScaleImageViewManager : SimpleViewManager<NativeZoomImageContai
     }
 
     override fun getExportedCustomDirectEventTypeConstants(): MutableMap<String, Any> = mutableMapOf(
+        "onZoomChange" to mapOf("registrationName" to "onZoomChange"),
         "onPinchStart" to mapOf("registrationName" to "onPinchStart"),
         "onDoubleTap" to mapOf("registrationName" to "onDoubleTap"),
         "onResetAnimationEnd" to mapOf("registrationName" to "onResetAnimationEnd")
