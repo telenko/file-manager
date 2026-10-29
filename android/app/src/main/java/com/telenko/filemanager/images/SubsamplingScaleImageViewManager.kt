@@ -37,6 +37,7 @@ class NativeZoomImageView(context: ThemedReactContext) : SubsamplingScaleImageVi
     private var activePointerCount = 0
 
     init {
+        setOrientation(ORIENTATION_USE_EXIF)
         setMinimumScaleType(SCALE_TYPE_CENTER_INSIDE)
         setQuickScaleEnabled(true)
         setDoubleTapZoomScale(3f)
