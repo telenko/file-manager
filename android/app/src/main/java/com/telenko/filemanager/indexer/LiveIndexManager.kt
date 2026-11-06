@@ -4,7 +4,6 @@ import android.content.Context
 import android.os.FileObserver
 import com.telenko.filemanager.infiniteapi.MediaTypeResolver
 import io.objectbox.Box
-import io.objectbox.query.QueryBuilder.StringOrder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -25,18 +24,18 @@ class LiveIndexManager(
     private var mediaObserver: MediaContentObserver? = null
     private val documentObservers = mutableListOf<DocumentFileObserver>()
 
-    fun startListening(onEvent: ((eventName: String, count: Int) -> Unit)? = null) {
+    fun startListening(onEvent: ((IndexerEvent) -> Unit)? = null) {
         // Реєстрація у фоновому потоці IO
         scope.launch(Dispatchers.IO) {
             // 1. Старт спостерігача MediaStore
-            mediaObserver = MediaContentObserver(context) {
+            mediaObserver = MediaContentObserver(context) { _ ->
                 Log.d("MediaStoreImporter", "detected a change in media")
                 mediaDebounceJob?.cancel()
                 mediaDebounceJob = scope.launch(Dispatchers.IO) {
                     delay(2000)
                     // Імпортуємо лише нові файли, які з'явилися після збереженої дати
                     mediaStoreImporter.importMedia(isFirstScan = false)
-                    onEvent?.invoke("SCAN_RESYNC", 1)
+                    onEvent?.invoke(IndexerEvent("SCAN_RESYNC", count = 1))
                 }
             }
             mediaObserver?.register()
@@ -50,8 +49,13 @@ class LiveIndexManager(
             documentDirs.forEach { dir ->
                 if (dir.exists()) {
                     val observer = DocumentFileObserver(dir) { event, filePath ->
-                        handleDocumentEvent(event, filePath)
-                        onEvent?.invoke("SCAN_RESYNC", 1)
+                        val fileEvent = event and FileObserver.ALL_EVENTS
+                        val isRemoval = fileEvent == FileObserver.DELETE ||
+                            fileEvent == FileObserver.MOVED_FROM
+                        handleDocumentEvent(event, filePath, onEvent)
+                        if (!isRemoval) {
+                            onEvent?.invoke(IndexerEvent("SCAN_RESYNC", count = 1))
+                        }
                     }
                     observer.start()
                     documentObservers.add(observer)
@@ -61,13 +65,19 @@ class LiveIndexManager(
     }
 
     fun stopListening() {
+        mediaDebounceJob?.cancel()
+        mediaDebounceJob = null
         mediaObserver?.unregister()
         mediaObserver = null
         documentObservers.forEach { it.stop() }
         documentObservers.clear()
     }
 
-    private fun handleDocumentEvent(event: Int, filePath: String) {
+    private fun handleDocumentEvent(
+        event: Int,
+        filePath: String,
+        onEvent: ((IndexerEvent) -> Unit)?
+    ) {
         val file = File(filePath)
         
         when (event and FileObserver.ALL_EVENTS) {
@@ -85,11 +95,11 @@ class LiveIndexManager(
                 }
             }
             FileObserver.DELETE, FileObserver.MOVED_FROM -> {
-                fileIndexBox.query()
-                    .equal(FileIndexEntity_.filePath, filePath, StringOrder.CASE_SENSITIVE)
-                    .build()
-                    .remove()
+                onEvent?.invoke(
+                    IndexerEvent("SCAN_REMOVE", removedPaths = listOf(filePath))
+                )
             }
         }
     }
+
 }

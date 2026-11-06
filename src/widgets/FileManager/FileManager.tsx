@@ -17,15 +17,18 @@ import { useLayout, useSort } from './settings';
 import SettingsDialog from './dialogs/SettingsDialog';
 import { useInitialState } from './useInitialState';
 import { theme } from '../../theme';
-import { View } from 'react-native';
+import { AppState, DeviceEventEmitter, NativeModules, View } from 'react-native';
+import { useDispatch } from 'react-redux';
+import type { AppDispatch } from '../../store';
+import { removeFiles } from '../../store/fileDataSlice';
 import {
   SafeAreaView,
   useSafeAreaInsets,
 } from 'react-native-safe-area-context';
-import { useIndexedFiles } from '../../common/hooks/useIndexedFiles';
 
 const Stack = createNativeStackNavigator<FileManagerNavigation>();
 export default function FileManager() {
+  const dispatch = useDispatch<AppDispatch>();
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   useSort();
@@ -33,17 +36,40 @@ export default function FileManager() {
   const { refresh: refreshRoots, rootsReady, roots } = useFsRoots();
   const { state, ready: stateReady } = useInitialState(roots, rootsReady);
 
-  // const { files, isIndexing } = useIndexedFiles();
-
-  // useEffect(() => {
-  //   console.log('FILES', files);
-  //   console.log('IS INDEXING', isIndexing);
-  //   console.log('FILES leength', files?.length);
-  // }, [isIndexing, files]);
-
   useEffect(() => {
     refreshRoots();
   }, []);
+
+  useEffect(() => {
+    const { FileIndexer } = NativeModules;
+    const subscription = DeviceEventEmitter.addListener(
+      'onIndexingStatus',
+      (payload: { event?: string; removedPaths?: string[] }) => {
+        if (payload.event === 'SCAN_REMOVE' && payload.removedPaths?.length) {
+          console.log("HEAVY REMOVE", payload.removedPaths);
+          dispatch(removeFiles(payload.removedPaths));
+        }
+      },
+    );
+
+    FileIndexer.startIndexing();
+    const appStateSubscription = AppState.addEventListener(
+      'change',
+      nextAppState => {
+        if (nextAppState === 'active') {
+          FileIndexer.startIndexing();
+        } else {
+          FileIndexer.stopIndexing();
+        }
+      },
+    );
+
+    return () => {
+      subscription.remove();
+      appStateSubscription.remove();
+      FileIndexer.stopIndexing();
+    };
+  }, [dispatch]);
 
   if (!rootsReady || !stateReady) {
     return (

@@ -1,15 +1,21 @@
-import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useCallback, useMemo } from 'react';
 import { NativeModules } from 'react-native';
-import { DirItem } from '../../../services/FileApi';
+import { useTranslation } from 'react-i18next';
+import type { DirItem, IndexedFile } from '../../../services/FileApi';
 import type { DataManagerHookType, DataManagerType } from './DataManagerType';
-import { IndexedFile } from '../../../common/hooks/useIndexedFiles';
 import { AppDispatch, RootState } from '../../../store';
 import { useDispatch, useSelector } from 'react-redux';
-import { setIndexFiles } from '../../../store/fileDataSlice';
+import {
+  appendIndexFiles,
+  resolveFilePaths,
+  setIndexFiles,
+} from '../../../store/fileDataSlice';
 import { usePagedLoader } from './usePagedLoader';
-import { type DataProvider } from 'recyclerlistview';
+import { wrapDirItemsWithDates } from './wrapDirItemsWithDates';
 
 const { FileIndexer } = NativeModules;
+const EMPTY_PATHS: string[] = [];
+const EMPTY_FILE_RECORD: Record<string, DirItem> = {};
 
 /**
  * Адаптер для перетворення IndexedFile у DirItem.
@@ -31,25 +37,33 @@ export const adaptIndexedItemIntoDirItem = (
   };
 };
 
-export const useIndexDataManager: DataManagerHookType = (
-  route,
-): DataManagerType => {
-  const items = useSelector((state: RootState) => state.fileData.indexFiles);
-  const dirItems = items;
+export const useIndexDataManager: DataManagerHookType = ({
+  isActive = true,
+}): DataManagerType => {
+  const { i18n } = useTranslation();
+  const paths = useSelector((state: RootState) =>
+    isActive ? state.fileData.indexFiles : EMPTY_PATHS,
+  );
+  const fileRecord = useSelector(
+    (state: RootState) =>
+      (isActive && state.fileData.fileRecord) || EMPTY_FILE_RECORD,
+  );
+  const items = useMemo(
+    () => resolveFilePaths(paths, fileRecord),
+    [paths, fileRecord],
+  );
+  const language = i18n.resolvedLanguage ?? i18n.language;
+  const layoutItems = useMemo(
+    () => (isActive ? wrapDirItemsWithDates(items, language) : []),
+    [items, language, isActive],
+  );
   const dispatch = useDispatch<AppDispatch>();
 
   const setItems = useCallback(
-    (newItems: DirItem[]) => {
-      dispatch(setIndexFiles(newItems));
+    (newItems: DirItem[], append: boolean) => {
+      dispatch(append ? appendIndexFiles(newItems) : setIndexFiles(newItems));
     },
     [dispatch],
-  );
-
-  const updateItemsAndProvider = useCallback(
-    (newStoredItems: DirItem[]) => {
-      setItems(newStoredItems);
-    },
-    [setItems],
   );
 
   const fetcher = useCallback(async (offset: number, limit: number) => {
@@ -64,23 +78,18 @@ export const useIndexDataManager: DataManagerHookType = (
   const { load, isLoading, error, loadingDone } = usePagedLoader<IndexedFile>(
     fetcher,
     adaptIndexedItemIntoDirItem,
-    updateItemsAndProvider,
-    1000, // INITIAL_LOAD_SIZE (1-а порція)
-    5000, // BACKGROUND_PAGE_SIZE (наступні порції)
+    setItems,
+    1000,
+    5000,
+    100,
+    isActive,
   );
 
-  useEffect(() => {
-    FileIndexer.startIndexing();
-
-    // Д. Очищення при анмаунті
-    return () => {
-      FileIndexer.stopIndexing();
-    };
-  }, []);
-
   return {
+    isActive,
     load,
-    items: dirItems,
+    dirItems: items,
+    layoutItems,
     isLoading,
     error,
     loadingDone,

@@ -1,75 +1,85 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
-import { type DataProvider } from 'recyclerlistview';
 import { NativeModules } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 
-import type { DirItem } from '../../../services/FileApi';
+import type { DirItem, SearchFile } from '../../../services/FileApi';
 import type { DataManagerHookType, DataManagerType } from './DataManagerType';
 import type { AppDispatch, RootState } from '../../../store';
 
-import { setSearchFiles } from '../../../store/fileDataSlice';
+import {
+  appendSearchFiles,
+  resolveFilePaths,
+  setSearchFiles,
+} from '../../../store/fileDataSlice';
+import { wrapDirItemsWithDates } from './wrapDirItemsWithDates';
 
 const { SearchFilesModule } = NativeModules;
-
-export interface FileEmbeddingEntityRaw {
-  id: number;
-  filePath: string;
-  fileName: string;
-  mediaType: string;
-  embeddingType: string;
-  frameTimeMs: number;
-  pageIndex: number;
-}
+const EMPTY_PATHS: string[] = [];
+const EMPTY_FILE_RECORD: Record<string, DirItem> = {};
 
 export const adaptEmbeddingItemIntoDirItem = (
-  entity: FileEmbeddingEntityRaw,
-): DirItem => {
-  const isFile = /\/[^/]+\.[a-zA-Z0-9]+$/.test(entity.filePath);
+  entity: SearchFile,
+  fileRecord: Record<string, DirItem> = EMPTY_FILE_RECORD,
+): DirItem | null => {
+  const existingItem = fileRecord[entity.filePath];
+  if (existingItem) {
+    return existingItem;
+  }
 
-  return {
-    ctimeMs: undefined,
-    mtimeMs: undefined,
-    name: entity.fileName || entity.filePath.split('/').pop() || '',
-    path: entity.filePath,
-    size: 0,
-    isFile: isFile,
-    isDirectory: !isFile,
-  };
+  return null;
 };
 
-export const useSearchDataManager: DataManagerHookType = (
-  route,
-): DataManagerType => {
+export const useSearchDataManager: DataManagerHookType = ({
+  isActive = true,
+}): DataManagerType => {
+  const { i18n } = useTranslation();
   const dispatch = useDispatch<AppDispatch>();
 
   const searchText = useSelector(
     (state: RootState) => state.fileTree.searchQuery || '',
   );
 
-  const items = useSelector(
-    (state: RootState) => state.fileData.searchFiles || [],
+  const paths = useSelector((state: RootState) =>
+    isActive ? state.fileData.searchFiles : EMPTY_PATHS,
+  );
+  const fileRecord = useSelector(
+    (state: RootState) =>
+      (isActive && state.fileData.fileRecord) || EMPTY_FILE_RECORD,
+  );
+  const fileRecordRef = useRef(fileRecord);
+  fileRecordRef.current = fileRecord;
+  const items = useMemo(
+    () => resolveFilePaths(paths, fileRecord),
+    [paths, fileRecord],
   );
 
-  const dirItems = items;
+  const language = i18n.resolvedLanguage ?? i18n.language;
+  const layoutItems = useMemo(
+    () => (isActive ? wrapDirItemsWithDates(items, language) : []),
+    [items, language, isActive],
+  );
 
   const itemsRef = useRef(items);
   itemsRef.current = items;
 
   const latestQueryRef = useRef(searchText.trim());
   latestQueryRef.current = searchText.trim();
+  const isActiveRef = useRef(isActive);
+  isActiveRef.current = isActive;
 
   // Інвалідує результати старих запитів.
   const requestIdRef = useRef(0);
+  const nextSearchOffsetRef = useRef(0);
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [loadingDone, setLoadingDone] = useState(false);
 
   const updateItemsAndProvider = useCallback(
-    (newItems: DirItem[]) => {
-      itemsRef.current = newItems;
-
-      dispatch(setSearchFiles(newItems));
+    (newItems: DirItem[], append = false) => {
+      itemsRef.current = append ? [...itemsRef.current, ...newItems] : newItems;
+      dispatch(append ? appendSearchFiles(newItems) : setSearchFiles(newItems));
     },
     [dispatch],
   );
@@ -77,6 +87,10 @@ export const useSearchDataManager: DataManagerHookType = (
   const loadPage = useCallback(
     async (offset = 0, size = 50): Promise<DirItem[]> => {
       const query = latestQueryRef.current;
+
+      if (!isActiveRef.current) {
+        return [];
+      }
 
       // Без запиту нативний модуль не викликається.
       if (!query) {
@@ -93,33 +107,38 @@ export const useSearchDataManager: DataManagerHookType = (
       setError(null);
 
       try {
-        const rawResults: FileEmbeddingEntityRaw[] =
-          await SearchFilesModule.searchFiles(query, 'ALL', null, offset, size);
+        const rawResults: SearchFile[] = await SearchFilesModule.searchFiles(
+          query,
+          'ALL',
+          null,
+          offset,
+          size,
+        );
 
         // Ігноруємо результат, якщо запит уже не актуальний.
         if (
+          !isActiveRef.current ||
           requestId !== requestIdRef.current ||
           latestQueryRef.current !== query
         ) {
           return [];
         }
 
-        const formattedItems: DirItem[] = (rawResults || []).map(
-          adaptEmbeddingItemIntoDirItem,
-        );
+        const formattedItems = (rawResults || [])
+          .map(entity =>
+            adaptEmbeddingItemIntoDirItem(entity, fileRecordRef.current),
+          )
+          .filter((item): item is DirItem => item !== null);
 
-        const nextItems =
-          offset === 0
-            ? formattedItems
-            : [...itemsRef.current, ...formattedItems];
+        updateItemsAndProvider(formattedItems, offset !== 0);
 
-        updateItemsAndProvider(nextItems);
-
-        setLoadingDone(formattedItems.length < size);
+        nextSearchOffsetRef.current = offset + rawResults.length;
+        setLoadingDone(rawResults.length < size);
 
         return formattedItems;
       } catch (err: unknown) {
         if (
+          isActiveRef.current &&
           requestId === requestIdRef.current &&
           latestQueryRef.current === query
         ) {
@@ -133,7 +152,7 @@ export const useSearchDataManager: DataManagerHookType = (
 
         return [];
       } finally {
-        if (requestId === requestIdRef.current) {
+        if (isActiveRef.current && requestId === requestIdRef.current) {
           setIsLoading(false);
         }
       }
@@ -142,10 +161,17 @@ export const useSearchDataManager: DataManagerHookType = (
   );
 
   useEffect(() => {
+    if (!isActive) {
+      ++requestIdRef.current;
+      setIsLoading(false);
+      return;
+    }
+
     const query = searchText.trim();
 
     // Інвалідуємо попередній пошук відразу після зміни запиту.
     ++requestIdRef.current;
+    nextSearchOffsetRef.current = 0;
 
     if (!query) {
       updateItemsAndProvider([]);
@@ -168,10 +194,10 @@ export const useSearchDataManager: DataManagerHookType = (
     return () => {
       clearTimeout(timer);
     };
-  }, [searchText, loadPage, updateItemsAndProvider]);
+  }, [isActive, searchText, loadPage, updateItemsAndProvider]);
 
   const load = useCallback(() => {
-    if (!latestQueryRef.current) {
+    if (!isActiveRef.current || !latestQueryRef.current) {
       return Promise.resolve();
     }
 
@@ -179,17 +205,24 @@ export const useSearchDataManager: DataManagerHookType = (
   }, [loadPage]);
 
   const loadNext = useCallback(() => {
-    if (!latestQueryRef.current || isLoading || loadingDone) {
+    if (
+      !isActiveRef.current ||
+      !latestQueryRef.current ||
+      isLoading ||
+      loadingDone
+    ) {
       return Promise.resolve();
     }
 
-    return loadPage(itemsRef.current.length, 500).then(() => {});
+    return loadPage(nextSearchOffsetRef.current, 500).then(() => {});
   }, [loadPage, isLoading, loadingDone]);
 
   return {
+    isActive,
     load,
     loadNext,
-    items: dirItems,
+    dirItems: items,
+    layoutItems,
     isLoading,
     error,
     loadingDone,

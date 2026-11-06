@@ -73,7 +73,9 @@ const FileDetailsDialog: React.FC = () => {
     { label: t('filePath'), value: fileManager.fileDetails.path },
     {
       label: t('fileLastChange'),
-      value: `${fileManager.fileDetails.mtime?.toLocaleDateString()} ${fileManager.fileDetails.mtime?.toLocaleTimeString()}`,
+      value: fileManager.fileDetails.mtimeMs !== undefined
+        ? new Date(fileManager.fileDetails.mtimeMs).toLocaleString()
+        : '',
     },
     {
       label: t('fileSize'),

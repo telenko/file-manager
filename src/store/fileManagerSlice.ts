@@ -3,20 +3,20 @@ import type {
   FileManagerLayout,
   FileLongOperationType,
 } from '../widgets/FileManager/FileManagerContext';
-import { StoredFileItem } from './fileData';
+import type { DirItem, StorageItem } from '../services/FileApi';
 
 type FileManagerState = {
   sort: 'asc' | 'desc';
   layout: FileManagerLayout;
   storeLatestFolder: boolean;
   reloadRequired: boolean;
-  roots: StoredFileItem[];
+  roots: StorageItem[];
   rootsReady: boolean;
-  renameDialogItem: StoredFileItem | null;
+  renameDialogItem: DirItem | null;
   newDirName: string;
   newDirPath: string | null;
   settingsOpen: boolean;
-  fileDetails: StoredFileItem | null;
+  fileDetails: DirItem | null;
   longOperation: FileLongOperationType | null;
 };
 
@@ -54,11 +54,11 @@ const fileManagerSlice = createSlice({
     setReloadRequired(state, action: PayloadAction<boolean>) {
       state.reloadRequired = action.payload;
     },
-    setRoots(state, action: PayloadAction<StoredFileItem[]>) {
+    setRoots(state, action: PayloadAction<StorageItem[]>) {
       state.roots = action.payload;
       state.rootsReady = true;
     },
-    setRenameDialogItem(state, action: PayloadAction<StoredFileItem | null>) {
+    setRenameDialogItem(state, action: PayloadAction<DirItem | null>) {
       state.renameDialogItem = action.payload;
     },
     setNewDirName(state, action: PayloadAction<string>) {
@@ -70,7 +70,7 @@ const fileManagerSlice = createSlice({
     setSettingsOpen(state, action: PayloadAction<boolean>) {
       state.settingsOpen = action.payload;
     },
-    setFileDetails(state, action: PayloadAction<StoredFileItem | null>) {
+    setFileDetails(state, action: PayloadAction<DirItem | null>) {
       state.fileDetails = action.payload;
     },
     setLongOperation(

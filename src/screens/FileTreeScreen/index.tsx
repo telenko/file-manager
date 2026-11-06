@@ -1,11 +1,22 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { Searchbar } from 'react-native-paper';
-import { DirItem, FileApi } from '../../services/FileApi';
+import { FileApi } from '../../services/FileApi';
 import FilePathBreadCrumb from './FilePathBreadCrumb';
 import { useNavigation } from '../../common/hooks/useNavigation';
-import { View, StyleSheet, useWindowDimensions } from 'react-native';
+import {
+  NativeModules,
+  View,
+  StyleSheet,
+  useWindowDimensions,
+} from 'react-native';
 import { useFileTreeActions, useFileTreeContext } from './FileTreeContext';
-import { DataProvider, LayoutProvider } from 'recyclerlistview';
+import { LayoutProvider } from 'recyclerlistview';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../store';
 import {
@@ -24,7 +35,7 @@ import { useBackAction } from '../../common/hooks/useBackAction';
 import { useExceptionHandler } from '../../common/components/ExceptionHandler';
 import DefaultFolderActions from '../../widgets/FileManager/actions/DefaultFolderActions';
 import StorageSelect from './StorageSelect';
-import { ActivityIndicator, Button, TextInput } from 'react-native-paper';
+import { ActivityIndicator, Text } from 'react-native-paper';
 import SelectorAction from './SelectorAction';
 import {
   calcGridColumns,
@@ -42,6 +53,8 @@ import {
   useDataManager,
 } from './DataManager/useDataManager';
 import { DebouncedSearchbar } from './DebouncedSearchbar';
+import { isGroupHeaderItem, type LayoutItem } from './DataManager/LayoutItem';
+import { HeaderItem } from './HeaderItem';
 
 export type FileScreenProps = {
   route: {
@@ -82,6 +95,9 @@ const FileScreen: React.FC<FileScreenProps> = stackRoute => {
     source,
   });
   const dataProvider = useDataListProvider(dataManager);
+  const layoutItemsRef = useRef(dataManager.layoutItems);
+  layoutItemsRef.current = dataManager.layoutItems;
+  const { dirItems, layoutItems } = dataManager;
   const isOperational = ['copy', 'move'].includes(routeMetadatas.mode || '');
 
   useEffect(() => {
@@ -117,7 +133,7 @@ const FileScreen: React.FC<FileScreenProps> = stackRoute => {
           </View>
         ) : isMultiSelectActivated ? (
           <SelectorAction
-            dirItems={dataManager.items}
+            dirItems={dirItems}
             navigation={navigator}
             selectedPaths={selectedPaths}
             setSelectedPaths={setSelectedPathsExternal}
@@ -133,7 +149,7 @@ const FileScreen: React.FC<FileScreenProps> = stackRoute => {
     routeMetadatas.mode,
     navigator,
     selectedPaths,
-    dataManager.items,
+    dirItems,
     fileManager.longOperation,
     isStorageLevel,
   ]);
@@ -192,8 +208,14 @@ const FileScreen: React.FC<FileScreenProps> = stackRoute => {
   const layoutProvider = useMemo(
     () =>
       new LayoutProvider(
-        () => 1, // All items have the same layout type
+        index => (isGroupHeaderItem(layoutItemsRef.current[index]) ? 2 : 1),
         (type, dim) => {
+          if (type === 2) {
+            dim.width = SCREEN_WIDTH - 20;
+            dim.height = 40;
+            return;
+          }
+
           if (fileManager.layout === 'list') {
             dim.width = SCREEN_WIDTH;
             dim.height = LIST_HEIGHT;
@@ -207,14 +229,20 @@ const FileScreen: React.FC<FileScreenProps> = stackRoute => {
   );
 
   const rowRenderer = useCallback(
-    (type: any, item: DirItem) => (
-      <ItemWithSkeleton
-        key={item.path}
-        item={item}
-        layout={fileManager.layout}
-        isUserDragging={scrollIndicator.isUserDragging}
-      />
-    ),
+    (type: string | number, item: LayoutItem) => {
+      if (isGroupHeaderItem(item)) {
+        return <HeaderItem {...item} />;
+      }
+
+      return (
+        <ItemWithSkeleton
+          key={item.path}
+          item={item}
+          layout={fileManager.layout}
+          isUserDragging={scrollIndicator.isUserDragging}
+        />
+      );
+    },
     [fileManager.layout],
   );
 
@@ -229,8 +257,14 @@ const FileScreen: React.FC<FileScreenProps> = stackRoute => {
 
   const timestamps = useMemo(
     () =>
-      dataManager.items.map(item => (item.isFile ? item.mtimeMs : undefined)),
-    [dataManager.items],
+      layoutItems.map(item =>
+        isGroupHeaderItem(item)
+          ? item.dateTimeMs
+          : item.isFile
+          ? item.mtimeMs
+          : undefined,
+      ),
+    [layoutItems],
   );
 
   const listStyle = useMemo(
@@ -243,16 +277,22 @@ const FileScreen: React.FC<FileScreenProps> = stackRoute => {
     [fileManager.layout],
   );
 
+  const verifyVisibleFiles = useCallback((paths: string[]) => {
+    NativeModules.FileIndexer.verifyFilesExist(paths).catch((error: unknown) => {
+      console.error('Failed to verify visible indexed files', error);
+    });
+  }, []);
+
   // useEffect(() => {
   //   setSearchDirItems([]);
   // }, [searchText]);
 
-  const searchQuery = useSelector(
-    (state: RootState) => state.fileTree.searchQuery,
-  );
-  const searchContext = useSelector(
-    (state: RootState) => state.fileTree.serchContext,
-  );
+  // const searchQuery = useSelector(
+  //   (state: RootState) => state.fileTree.searchQuery,
+  // );
+  // const searchContext = useSelector(
+  //   (state: RootState) => state.fileTree.serchContext,
+  // );
 
   return (
     <>
@@ -289,7 +329,7 @@ const FileScreen: React.FC<FileScreenProps> = stackRoute => {
             justifyContent: 'space-between',
             marginBottom: 10,
           }}></View>
-        {dataManager.items.length === 0 ? (
+        {layoutItems.length === 0 ? (
           <ScrollView
             contentContainerStyle={{
               flex: 1,
@@ -319,6 +359,7 @@ const FileScreen: React.FC<FileScreenProps> = stackRoute => {
             timestamps={timestamps}
             scrollIndicator={scrollIndicator}
             loadNext={dataManager.loadNext}
+            verifyVisibleFiles={verifyVisibleFiles}
           />
         )}
         <View
@@ -397,7 +438,7 @@ const FileScreen: React.FC<FileScreenProps> = stackRoute => {
         </View>
         {isMultiSelectActivated ? (
           <MultiSelectActions
-            dirItems={dataManager.items}
+            dirItems={dirItems}
             navigation={navigator}
             selectedPaths={selectedPaths}
             setSelectedPaths={setSelectedPaths}
@@ -425,6 +466,17 @@ const styles = StyleSheet.create({
   },
   actionButton: {
     marginBottom: -5,
+  },
+  groupHeader: {
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
+    paddingHorizontal: 8,
+  },
+  groupHeaderText: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginTop: 15,
   },
   searchContainer: {
     // flex: 1,

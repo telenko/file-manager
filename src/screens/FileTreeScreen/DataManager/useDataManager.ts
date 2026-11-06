@@ -10,9 +10,6 @@ import { DataProvider } from 'recyclerlistview';
 import { useEffect, useState } from 'react';
 
 export const useDataManager: DataManagerHookType = (route): DataManagerType => {
-  const indexManager = useIndexDataManager(route);
-  const searchManager = useSearchDataManager(route);
-  const fileTreeManager = useFileTreeDataManager(route);
   const isSearchActivated = useSelector(
     (state: RootState) => !!state.fileTree.searchQuery?.trim(),
   );
@@ -20,10 +17,27 @@ export const useDataManager: DataManagerHookType = (route): DataManagerType => {
     (state: { fileTree: FileTreeState }) => state.fileTree.source,
   );
   const source = route.source || reduxSource;
+  const isSearchSource = source === 'search';
+  const isSearchManagerActive = isSearchSource && isSearchActivated;
+  const isIndexManagerActive = isSearchSource && !isSearchActivated;
+  const isFileTreeManagerActive = !isSearchSource;
+
+  const indexManager = useIndexDataManager({
+    ...route,
+    isActive: isIndexManagerActive,
+  });
+  const searchManager = useSearchDataManager({
+    ...route,
+    isActive: isSearchManagerActive,
+  });
+  const fileTreeManager = useFileTreeDataManager({
+    ...route,
+    isActive: isFileTreeManagerActive,
+  });
 
   const manager = (() => {
     if (source === 'search') {
-      if (isSearchActivated) {
+      if (isSearchManagerActive) {
         return searchManager;
       }
       return indexManager;
@@ -34,13 +48,15 @@ export const useDataManager: DataManagerHookType = (route): DataManagerType => {
   return manager;
 };
 
-export const useDataListProvider = (manager: DataManagerType) => {
+export const useDataListProvider = (
+  manager: DataManagerType,
+) => {
   const [dataProvider, setDataProvider] = useState<DataProvider>(
-    dataProviderBuilder(manager.items),
+    dataProviderBuilder(manager.layoutItems),
   );
   useEffect(() => {
-    setDataProvider(prev => prev.cloneWithRows(manager.items));
-  }, [manager.items]);
+    setDataProvider(prev => prev.cloneWithRows(manager.layoutItems));
+  }, [manager.layoutItems]);
 
   return dataProvider;
 };

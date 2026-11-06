@@ -48,7 +48,7 @@ const StorageSelect: React.FC<{ route: string }> = ({ route }) => {
             height: 35,
             maxWidth: width / 2,
           }}
-          onPress={() => setOpen(true)}>
+          onPress={() => setOpen(isOpen => !isOpen)}>
           <View style={{ marginRight: 5 }}>
             <Icon
               size={20}

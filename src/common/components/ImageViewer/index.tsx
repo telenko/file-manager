@@ -2,6 +2,7 @@ import React from 'react';
 import { DirItem } from '../../../services/FileApi';
 import { StyleSheet, View } from 'react-native';
 import { ImageZoom } from './ImageZoom';
+import GifViewer from './GifViewer';
 export { ImageZoom } from './ImageZoom';
 export { ZOOM_TYPE } from './ImageZoomTypes';
 export type { ImageZoomProps, ZoomType } from './ImageZoomTypes';
@@ -10,6 +11,10 @@ const ImageViewer: React.FC<{
   file: Partial<DirItem>;
   onZoomChange?: (scale: number) => void;
 }> = ({ file, onZoomChange }) => {
+  if (file.path?.toLowerCase().endsWith('.gif')) {
+    return <GifViewer file={file} />;
+  }
+
   return (
     <View style={{ width: '100%', height: '100%', flexDirection: 'column' }}>
       <ImageZoom

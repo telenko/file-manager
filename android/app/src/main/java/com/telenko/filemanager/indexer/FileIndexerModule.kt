@@ -9,6 +9,7 @@ import com.facebook.react.bridge.ReadableArray
 import com.facebook.react.modules.core.DeviceEventManagerModule
 import com.telenko.filemanager.indexer.FileIndexEntity
 import com.telenko.filemanager.indexer.FileIndexerFacade
+import com.telenko.filemanager.indexer.IndexerEvent
 import com.telenko.filemanager.indexer.IndexerStateEntity
 import com.telenko.filemanager.infiniteapi.MediaType
 import io.objectbox.Box
@@ -27,17 +28,59 @@ class FileIndexerModule(
 
     @ReactMethod
     fun startIndexing() {
-        indexerFacade.startIndexing { eventName, count ->
-            val params = Arguments.createMap().apply {
-                putString("event", eventName)
-                putInt("count", count)
-            }
-            sendEvent("onIndexingStatus", params)
-        }
+        indexerFacade.startIndexing(::sendIndexerEvent)
     }
 
-    // @ReactMethod
-    // fun 
+    @ReactMethod
+    fun forceRemoveIndex(paths: ReadableArray, promise: Promise) {
+        if (paths.size() == 0) {
+            promise.reject("INVALID_PATH", "At least one path is required")
+            return
+        }
+        val parsedPaths = (0 until paths.size()).map { index ->
+            paths.getString(index)
+        }
+        if (parsedPaths.any { it.isNullOrBlank() }) {
+            promise.reject("INVALID_PATH", "Paths must contain non-empty strings")
+            return
+        }
+
+        indexerFacade.forceRemoveIndex(
+            parsedPaths.filterNotNull(),
+            onEvent = { event ->
+                sendIndexerEvent(event)
+                promise.resolve(null)
+            },
+            onError = { error ->
+                promise.reject("REMOVE_INDEX_ERROR", error)
+            }
+        )
+    }
+
+    @ReactMethod
+    fun verifyFilesExist(paths: ReadableArray, promise: Promise) {
+        if (paths.size() > 30) {
+            promise.reject("TOO_MANY_PATHS", "At most 30 paths can be checked")
+            return
+        }
+
+        val parsedPaths = (0 until paths.size()).map { index ->
+            paths.getString(index)
+        }
+        if (parsedPaths.any { it.isNullOrBlank() }) {
+            promise.reject("INVALID_PATH", "Paths must contain non-empty strings")
+            return
+        }
+
+        indexerFacade.verifyFilesExist(
+            parsedPaths.filterNotNull(),
+            onEvent = ::sendIndexerEvent,
+            onComplete = { _, _ -> promise.resolve(null) },
+            onError = { error ->
+                promise.reject("VERIFY_FILES_ERROR", error)
+            }
+        )
+    }
 
     @ReactMethod
     fun stopIndexing() {
@@ -77,5 +120,16 @@ class FileIndexerModule(
         reactContext
             .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
             .emit(eventName, params)
+    }
+
+    private fun sendIndexerEvent(event: IndexerEvent) {
+        val params = Arguments.createMap().apply {
+            putString("event", event.name)
+            event.count?.let { putInt("count", it) }
+            event.removedPaths?.let {
+                putArray("removedPaths", Arguments.fromList(it))
+            }
+        }
+        sendEvent("onIndexingStatus", params)
     }
 }

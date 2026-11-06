@@ -1,5 +1,5 @@
 import RnfsQueued, { limitFileApi, ReadDirItem } from './RnfsQueued';
-import { NativeModules } from 'react-native';
+import { NativeModules, Platform } from 'react-native';
 import Share from 'react-native-share';
 import { FileOpener } from './FileOpener';
 import i18n from '../i18n/i18n';
@@ -19,6 +19,26 @@ export type DirItem = Omit<
   ctimeMs?: number;
   mtimeMs?: number;
 };
+export interface IndexedFile {
+  id: number;
+  filePath: string;
+  fileName: string;
+  mediaType: 'IMAGE' | 'VIDEO' | 'AUDIO' | 'TEXT' | 'OTHER' | 'ALL';
+  lastModified: number;
+  fileSize: number;
+  parentPath: string;
+}
+
+export interface SearchFile {
+  id: number;
+  filePath: string;
+  fileName: string;
+  mediaType: string;
+  frameTimeMs: number;
+  pageIndex: number;
+  lastModified: number;
+}
+
 export type StorageItem = {
   isMainDeviceStorage?: boolean;
   isSdCardStorage?: boolean;
@@ -180,6 +200,9 @@ const moveRecursive = async (
 const deleteItem = async (item: DirItem) => {
   try {
     await RnfsQueued.unlink(item.path);
+    if (Platform.OS === 'android') {
+      await NativeModules.FileIndexer.forceRemoveIndex([item.path]);
+    }
   } catch (e) {
     throw new FileManagerError(i18n.t('deleteFailed'), ErrorType.FILE_API, e);
   }

@@ -153,6 +153,10 @@ class SearchFilesModule(private val reactContext: ReactApplicationContext) : Rea
                     val map = WritableNativeMap().apply {
                         putString("filePath", res.filePath)
                         putString("fileName", res.fileName)
+                        putDouble(
+                            "lastModified",
+                            java.io.File(res.filePath).lastModified().toDouble()
+                        )
                         putDouble("score", res.score.toDouble())
                         putString("mediaType", res.mediaType)
                         if (res.pageIndex >= 0) putInt("pageIndex", res.pageIndex)

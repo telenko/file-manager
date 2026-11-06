@@ -1,46 +1,58 @@
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
-import { FileApi } from '../../services/FileApi';
+import { FileApi, type DirItem } from '../../services/FileApi';
 import { RootState } from '../../store';
+import { resolveFilePaths } from '../../store/fileDataSlice';
+
+const EMPTY_PATHS: string[] = [];
+const EMPTY_FILE_RECORD: Record<string, DirItem> = {};
 
 export const usePreviewableContextFiles = (
   route: string,
   sort: 'asc' | 'desc',
 ) => {
   const source = useSelector((state: RootState) => state.fileTree.source);
-  const indexData = useSelector(
+  const indexPaths = useSelector(
     (state: RootState) => state.fileData.indexFiles,
   );
   const isSearchQueried = useSelector(
     (state: RootState) => !!state.fileTree.searchQuery,
   );
-  const searchData = useSelector(
+  const searchPaths = useSelector(
     (state: RootState) => state.fileData.searchFiles,
+  );
+  const fileRecord = useSelector(
+    (state: RootState) => state.fileData.fileRecord || EMPTY_FILE_RECORD,
   );
 
   const parentPath = FileApi.getParentDirectoryPath(route);
-  const storedItems = useSelector(
-    (state: RootState) => state.fileData.directories[parentPath],
+  const storedPaths = useSelector(
+    (state: RootState) =>
+      state.fileData.directories[parentPath] || EMPTY_PATHS,
   );
 
   // Обчислюємо відфільтровані та відсортовані файли залежно від контексту
   const imagesInFolderSorted = useMemo(() => {
     if (source === 'search') {
-      const rawData = isSearchQueried ? searchData : indexData;
+      const rawPaths = isSearchQueried ? searchPaths : indexPaths;
+      const rawData = resolveFilePaths(rawPaths, fileRecord);
       return rawData
         .filter(item => FileApi.isFileViewable(item));
     }
 
-    // Для звичайної папки беремо з Redux (якщо є) або порожній масив (синхронно, асинхронне довантаження краще залишити в компоненті чи API за потреби)
-    if (!storedItems) {
-      return [];
-    }
-
-    const dirItems = storedItems;
+    const dirItems = resolveFilePaths(storedPaths, fileRecord);
     return FileApi.sortDirItems(dirItems, sort).filter(
       FileApi.isFileViewable,
     );
-  }, [source, isSearchQueried, searchData, indexData, storedItems, sort]);
+  }, [
+    source,
+    isSearchQueried,
+    searchPaths,
+    indexPaths,
+    storedPaths,
+    fileRecord,
+    sort,
+  ]);
 
   return {
     imagesInFolderSorted,

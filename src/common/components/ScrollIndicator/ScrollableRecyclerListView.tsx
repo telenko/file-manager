@@ -205,7 +205,11 @@ export const ScrollableRecyclerListView = forwardRef<
         onLayout: handleScrollViewLayout,
         onContentSizeChange: handleContentSizeChange,
       }),
-      [handleContentSizeChange, handleScrollViewLayout, props.scrollViewProps],
+      [
+        handleContentSizeChange,
+        handleScrollViewLayout,
+        props.scrollViewProps,
+      ],
     );
 
     return (

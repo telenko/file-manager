@@ -1,6 +1,7 @@
 package com.telenko.filemanager.indexer
 
 import android.content.Context
+import android.os.SystemClock
 import android.util.Log
 import com.telenko.filemanager.infiniteapi.MediaType
 import com.telenko.filemanager.infiniteapi.MediaTypeResolver
@@ -30,6 +31,9 @@ class FileIndexerFacade private constructor(
 
     companion object {
         private const val TAG = "FileIndexerFacade"
+        private const val GARBAGE_COLLECTION_BATCH_SIZE = 100
+        private const val GARBAGE_COLLECTION_CURSOR = "garbage_collection_cursor"
+        private const val GARBAGE_COLLECTION_PREFS = "file_indexer"
 
         @Volatile
         private var INSTANCE: FileIndexerFacade? = null
@@ -48,13 +52,26 @@ class FileIndexerFacade private constructor(
         }
     }
 
-    fun startIndexing(onEvent: ((eventName: String, count: Int) -> Unit)? = null) {
+    fun startIndexing(onEvent: ((IndexerEvent) -> Unit)? = null) {
         Log.d(TAG, "startIndexing called")
-        liveIndexManager.startListening(onEvent)
+        liveIndexManager.stopListening()
+        liveIndexManager.startListening { event ->
+            if (event.name == "SCAN_REMOVE" && !event.removedPaths.isNullOrEmpty()) {
+                forceRemoveIndex(
+                    event.removedPaths,
+                    onEvent,
+                    onError = { error ->
+                        Log.e(TAG, "Failed to remove detected paths from index", error)
+                    }
+                )
+            } else {
+                onEvent?.invoke(event)
+            }
+        }
         importFiles(onEvent)
     }
 
-    fun importFiles(onEvent: ((eventName: String, count: Int) -> Unit)? = null) {
+    fun importFiles(onEvent: ((IndexerEvent) -> Unit)? = null) {
         syncJob?.cancel()
         syncJob = scope.launch(Dispatchers.IO) {
             try {
@@ -81,9 +98,9 @@ class FileIndexerFacade private constructor(
                     stateBox.put(updatedState)
                     Log.d(TAG, "importFiles: First scan completed flag saved to database.")
 
-                    onEvent?.invoke("SCAN_COMPLETE", totalCount)
+                    onEvent?.invoke(IndexerEvent("SCAN_COMPLETE", count = totalCount))
                 } else {
-                    onEvent?.invoke("SCAN_RESYNC", totalCount)
+                    onEvent?.invoke(IndexerEvent("SCAN_RESYNC", count = totalCount))
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "importFiles: Error during indexing process", e)
@@ -133,13 +150,91 @@ class FileIndexerFacade private constructor(
         }
     }
 
-    fun removeFile(filePath: String) {
-        scope.launch {
-            Log.d(TAG, "removeFile: Removing file from index: $filePath")
-            fileIndexBox.query()
-                .equal(FileIndexEntity_.filePath, filePath, StringOrder.CASE_SENSITIVE)
-                .build()
-                .remove()
+    fun forceRemoveIndex(
+        paths: List<String>,
+        onEvent: ((IndexerEvent) -> Unit)? = null,
+        onError: ((error: Exception) -> Unit)? = null
+    ) {
+        scope.launch(Dispatchers.IO) {
+            try {
+                val normalizedPaths = paths
+                    .map { File(it).absolutePath.trimEnd(File.separatorChar) }
+                    .distinct()
+                val entitiesToRemove = normalizedPaths.flatMap { path ->
+                    val exactMatch = fileIndexBox.query()
+                        .equal(FileIndexEntity_.filePath, path, StringOrder.CASE_SENSITIVE)
+                        .build()
+                        .find()
+                    val descendants = fileIndexBox.query()
+                        .startsWith(
+                            FileIndexEntity_.filePath,
+                            "$path${File.separator}",
+                            StringOrder.CASE_SENSITIVE
+                        )
+                        .build()
+                        .find()
+                    exactMatch + descendants
+                }.distinctBy { it.id }
+
+                if (entitiesToRemove.isNotEmpty()) {
+                    fileIndexBox.remove(entitiesToRemove)
+                }
+                onEvent?.invoke(IndexerEvent("SCAN_REMOVE", removedPaths = normalizedPaths))
+            } catch (e: Exception) {
+                Log.e(TAG, "forceRemoveIndex: Failed to remove paths from index", e)
+                onError?.invoke(e)
+            }
+        }
+    }
+
+    fun verifyFilesExist(
+        paths: List<String>,
+        onEvent: ((IndexerEvent) -> Unit)? = null,
+        onComplete: ((checkedCount: Int, removedCount: Int) -> Unit)? = null,
+        onError: ((error: Exception) -> Unit)? = null
+    ) {
+        scope.launch(Dispatchers.IO) {
+            val startedAt = SystemClock.elapsedRealtime()
+            try {
+                val normalizedPaths = paths
+                    .map { File(it).absolutePath }
+                    .distinct()
+                val removedPaths = normalizedPaths.filterNot { File(it).exists() }
+                val removedEntities = removedPaths.flatMap { path ->
+                    val query = fileIndexBox.query()
+                        .equal(
+                            FileIndexEntity_.filePath,
+                            path,
+                            StringOrder.CASE_SENSITIVE
+                        )
+                        .build()
+                    try {
+                        query.find()
+                    } finally {
+                        query.close()
+                    }
+                }.distinctBy { it.id }
+
+                if (removedEntities.isNotEmpty()) {
+                    fileIndexBox.remove(removedEntities)
+                }
+                if (removedPaths.isNotEmpty()) {
+                    onEvent?.invoke(
+                        IndexerEvent("SCAN_REMOVE", removedPaths = removedPaths)
+                    )
+                }
+
+                onComplete?.invoke(normalizedPaths.size, removedPaths.size)
+                Log.d(
+                    TAG,
+                    "verifyFilesExist: checked=${normalizedPaths.size}, " +
+                        "removed=${removedPaths.size}, " +
+                        "totalMs=${SystemClock.elapsedRealtime() - startedAt}"
+                )
+            } catch (e: Exception) {
+                Log.e(TAG, "verifyFilesExist: Failed to verify indexed paths", e)
+                onError?.invoke(e)
+            }
         }
     }
 

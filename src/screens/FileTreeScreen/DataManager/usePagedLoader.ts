@@ -1,23 +1,36 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { DirItem } from '../../../services/FileApi';
 
 export const usePagedLoader = <TRawData>(
   fetchFunction: (offset: number, limit: number) => Promise<TRawData[]>,
   adapter: (rawData: TRawData) => DirItem,
-  onDataUpdate: (newItems: DirItem[]) => void,
+  onDataUpdate: (newItems: DirItem[], append: boolean) => void,
   initialLoadSize = 1000,
   backgroundPageSize = 5000,
   backgroundDelayMs = 100,
+  isActive = true,
 ) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
   const [loadingDone, setLoadingDone] = useState<boolean>(false);
 
   const isFetchingRef = useRef<boolean>(false);
+  const isActiveRef = useRef(isActive);
+  const generationRef = useRef(0);
+  isActiveRef.current = isActive;
+
+  useEffect(() => {
+    if (!isActive) {
+      generationRef.current += 1;
+      isFetchingRef.current = false;
+      setIsLoading(false);
+    }
+  }, [isActive]);
 
   const load = useCallback(async () => {
-    if (isFetchingRef.current) return;
+    if (!isActiveRef.current || isFetchingRef.current) return;
     isFetchingRef.current = true;
+    const generation = generationRef.current;
 
     setIsLoading(true);
     setError(null);
@@ -28,10 +41,13 @@ export const usePagedLoader = <TRawData>(
         `[PagedLoader] Завантаження першої порції: ${initialLoadSize}`,
       );
       const initialRawFiles = await fetchFunction(0, initialLoadSize);
+      if (!isActiveRef.current || generation !== generationRef.current) {
+        return;
+      }
 
       const initialAdapted = initialRawFiles.map(adapter);
 
-      onDataUpdate(initialAdapted);
+      onDataUpdate(initialAdapted, false);
       setIsLoading(false);
       setLoadingDone(true);
 
@@ -45,12 +61,21 @@ export const usePagedLoader = <TRawData>(
       const fetchRemainingInLoop = async () => {
         try {
           let hasMore = true;
-          let accumulatedItems = [...initialAdapted];
 
-          while (hasMore) {
+          while (
+            hasMore &&
+            isActiveRef.current &&
+            generation === generationRef.current
+          ) {
             await new Promise(resolve =>
               setTimeout(resolve, backgroundDelayMs),
             );
+            if (
+              !isActiveRef.current ||
+              generation !== generationRef.current
+            ) {
+              break;
+            }
 
             console.log(
               `[PagedLoader] Фонове довантаження offset: ${currentOffset}, limit: ${backgroundPageSize}`,
@@ -59,6 +84,12 @@ export const usePagedLoader = <TRawData>(
               currentOffset,
               backgroundPageSize,
             );
+            if (
+              !isActiveRef.current ||
+              generation !== generationRef.current
+            ) {
+              break;
+            }
 
             const batchAdapted = batchRawFiles.map(adapter);
 
@@ -66,8 +97,7 @@ export const usePagedLoader = <TRawData>(
               hasMore = false;
             } else {
               currentOffset += batchAdapted.length;
-              accumulatedItems = [...accumulatedItems, ...batchAdapted];
-              onDataUpdate(accumulatedItems);
+              onDataUpdate(batchAdapted, true);
 
               if (batchAdapted.length < backgroundPageSize) {
                 hasMore = false;
@@ -75,23 +105,37 @@ export const usePagedLoader = <TRawData>(
             }
           }
         } catch (bgErr) {
-          console.error(
-            '[PagedLoader] Помилка у фоновому циклі завантаження:',
-            bgErr,
-          );
+          if (
+            isActiveRef.current &&
+            generation === generationRef.current
+          ) {
+            console.error(
+              '[PagedLoader] Помилка у фоновому циклі завантаження:',
+              bgErr,
+            );
+          }
         } finally {
-          isFetchingRef.current = false;
+          if (generation === generationRef.current) {
+            isFetchingRef.current = false;
+          }
         }
       };
 
-      fetchRemainingInLoop();
-    } catch (err: any) {
-      setError(err);
+      void fetchRemainingInLoop();
+    } catch (err: unknown) {
+      if (
+        !isActiveRef.current ||
+        generation !== generationRef.current
+      ) {
+        return;
+      }
+      setError(err instanceof Error ? err : new Error('Index loading failed'));
       setIsLoading(false);
       isFetchingRef.current = false;
       console.error('[PagedLoader] Помилка load:', err);
     }
   }, [
+    isActive,
     fetchFunction,
     adapter,
     onDataUpdate,

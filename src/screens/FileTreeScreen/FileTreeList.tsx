@@ -1,4 +1,11 @@
-import React, { forwardRef, useImperativeHandle, useMemo, useRef } from 'react';
+import React, {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+} from 'react';
 import { StyleSheet, View, ViewStyle } from 'react-native';
 import {
   DataProvider,
@@ -6,9 +13,10 @@ import {
   RecyclerListView,
 } from 'recyclerlistview';
 import { RefreshControl } from 'react-native-gesture-handler';
-import { DirItem } from '../../services/FileApi';
+import type { LayoutItem } from './DataManager/LayoutItem';
 import { ScrollableRecyclerListView } from '../../common/components/ScrollIndicator';
 import { ScrollIndicatorContextType } from '../../common/components/ScrollIndicator/ScrollIndicatorProvider';
+import type { DirItem } from '../../services/FileApi';
 
 export type FileTreeListRef = {
   updateSelection: (selectedPaths: string[]) => void;
@@ -18,13 +26,14 @@ type FileTreeListProps = {
   scrollKey: string;
   dataProvider: DataProvider;
   layoutProvider: LayoutProvider;
-  rowRenderer: (type: string | number, item: DirItem) => React.ReactElement;
+  rowRenderer: (type: string | number, item: LayoutItem) => React.ReactElement;
   listStyle?: ViewStyle;
   dirLoading: boolean;
   reloadDir: () => void;
   timestamps: (number | undefined)[];
   scrollIndicator: ScrollIndicatorContextType;
   loadNext?: () => void;
+  verifyVisibleFiles: (paths: string[]) => void;
 };
 
 const FileTreeList = forwardRef<FileTreeListRef, FileTreeListProps>(
@@ -40,11 +49,67 @@ const FileTreeList = forwardRef<FileTreeListRef, FileTreeListProps>(
       timestamps,
       scrollIndicator,
       loadNext,
+      verifyVisibleFiles,
     },
     forwardedRef,
   ) => {
     const listRef = useRef<RecyclerListView<any, any>>(null);
     const extendedStateRef = useRef({ selectedPaths: [] as string[] });
+    const visibleIndicesRef = useRef<number[]>([]);
+    const verifyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const verifyCurrentVisibleFiles = useCallback(() => {
+      const visiblePaths = visibleIndicesRef.current
+        .slice()
+        .sort((first, second) => first - second)
+        .map(index => dataProvider.getDataForIndex(index))
+        .filter((item): item is DirItem => {
+          return (
+            typeof item === 'object' &&
+            item !== null &&
+            'path' in item &&
+            'isFile' in item &&
+            item.isFile === true
+          );
+        })
+        .slice(0, 30)
+        .map(item => item.path);
+
+      if (visiblePaths.length > 0) {
+        verifyVisibleFiles(visiblePaths);
+      }
+    }, [dataProvider, verifyVisibleFiles]);
+
+    const scheduleVisibleFilesVerification = useCallback(() => {
+      if (verifyTimerRef.current) {
+        clearTimeout(verifyTimerRef.current);
+      }
+      verifyTimerRef.current = setTimeout(() => {
+        verifyTimerRef.current = null;
+        verifyCurrentVisibleFiles();
+      }, 600);
+    }, [verifyCurrentVisibleFiles]);
+
+    const handleVisibleIndicesChanged = useCallback(
+      (indices: number[]) => {
+        visibleIndicesRef.current = indices;
+        scheduleVisibleFilesVerification();
+      },
+      [scheduleVisibleFilesVerification],
+    );
+
+    useEffect(() => {
+      scheduleVisibleFilesVerification();
+    }, [dataProvider, scrollKey, scheduleVisibleFilesVerification]);
+
+    useEffect(
+      () => () => {
+        if (verifyTimerRef.current) {
+          clearTimeout(verifyTimerRef.current);
+        }
+      },
+      [],
+    );
 
     useImperativeHandle(
       forwardedRef,
@@ -63,7 +128,9 @@ const FileTreeList = forwardRef<FileTreeListRef, FileTreeListProps>(
     );
 
     return (
-      <View style={styles.listContainer}>
+      <View
+        style={styles.listContainer}
+        onLayout={scheduleVisibleFilesVerification}>
         <ScrollableRecyclerListView
           ref={listRef}
           canChangeSize
@@ -78,6 +145,7 @@ const FileTreeList = forwardRef<FileTreeListRef, FileTreeListProps>(
           refreshControl={refreshControl}
           timestamps={timestamps}
           scrollIndicator={scrollIndicator}
+          onVisibleIndicesChanged={handleVisibleIndicesChanged}
           onEndReached={loadNext}
           onEndReachedThreshold={0.5}
         />
