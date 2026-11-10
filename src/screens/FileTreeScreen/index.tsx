@@ -42,7 +42,10 @@ import {
   GRID_HEIGHT,
   LIST_HEIGHT,
 } from '../../common/utils/layout';
-import { useStoreLatestFolder } from '../../widgets/FileManager/settings';
+import {
+  SEARCH_INDEX_PATH,
+  useStoreLatestFolder,
+} from '../../widgets/FileManager/settings';
 import { useFocusEffect } from '@react-navigation/native';
 import { ItemWithSkeleton } from './ItemWithSkeleton';
 import FileTreeList from './FileTreeList';
@@ -142,6 +145,7 @@ const FileScreen: React.FC<FileScreenProps> = stackRoute => {
           <DefaultFolderActions
             folderHasFiles={dataManager.hasFiles}
             isOperational={isOperational}
+            source={source}
           />
         ),
     });
@@ -181,8 +185,8 @@ const FileScreen: React.FC<FileScreenProps> = stackRoute => {
   useFocusEffect(
     useCallback(() => {
       setFileTree(route ?? FileApi.ROOT_PATH, routeMetadatas.mode ?? 'tree');
-      if (route && !isOperational && source !== 'search') {
-        saveLatestFolder(route);
+      if (route && !isOperational) {
+        saveLatestFolder(source === 'search' ? SEARCH_INDEX_PATH : route);
       }
     }, [
       route,

@@ -10,7 +10,7 @@ const SettingsButton: React.FC = () => {
     <IconButton
       onPress={() => fileManager.setSettingsOpen(true)}
       size={theme.sizes.HEADER_ICON}
-      style={{ height: theme.sizes.HEADER_ICON, marginLeft: -5 }}
+      style={{ height: theme.sizes.HEADER_ICON }}
       icon={'cog-outline'}
     />
   );

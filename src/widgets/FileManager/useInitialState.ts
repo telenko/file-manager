@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { FileApi, StorageItem } from '../../services/FileApi';
-import { useStoreLatestFolder } from './settings';
+import { useStoreLatestFolder, SEARCH_INDEX_PATH } from './settings';
+import { useDispatch } from 'react-redux';
+import { AppDispatch } from '../../store';
+import { setSource } from '../../store/fileTreeSlice';
 
 const getDefaultState = () => ({
   routes: [
@@ -8,6 +11,7 @@ const getDefaultState = () => ({
       name: 'FileTree',
       params: {
         route: FileApi.ROOT_PATH,
+        source: 'search',
       },
     },
   ],
@@ -36,6 +40,7 @@ const makeStateFromPath = async (
             name: 'FileTree',
             params: {
               route: matchingRoot.path,
+              source: 'storage',
             },
           },
         ],
@@ -48,6 +53,7 @@ const makeStateFromPath = async (
         name: 'FileTree',
         params: {
           route: matchingRoot.path,
+          source: 'storage',
         },
       },
     ];
@@ -57,6 +63,7 @@ const makeStateFromPath = async (
         name: 'FileTree',
         params: {
           route: aggregatedPath,
+          source: 'storage',
         },
       });
     });
@@ -71,6 +78,7 @@ const makeStateFromPath = async (
 };
 
 export const useInitialState = (roots: StorageItem[], rootsReady: boolean) => {
+  const dispatch = useDispatch<AppDispatch>();
   const [ready, setReady] = useState(false);
   const [state, setState] = useState<any>(null);
   const { storeLatestFolder, storedLatestFolder, latestFolderReady } =
@@ -85,23 +93,31 @@ export const useInitialState = (roots: StorageItem[], rootsReady: boolean) => {
     if (!latestFolderReady || !rootsReady) {
       return;
     }
-    if (storeLatestFolder && storedLatestFolder) {
+    if (storeLatestFolder && storedLatestFolder === SEARCH_INDEX_PATH) {
+      dispatch(setSource('search'));
+      setState(getDefaultState());
+      setReady(true);
+    } else if (storeLatestFolder && storedLatestFolder) {
       makeStateFromPath(storedLatestFolder, roots)
         .then(state => {
+          const route = state.routes[state.routes.length - 1];
+          dispatch(setSource(route?.params?.source ?? 'search'));
           setState(state);
         })
         .catch(() => {
+          dispatch(setSource('search'));
           setState(getDefaultState());
         })
         .finally(() => {
           setReady(true);
         });
     } else {
+      dispatch(setSource('search'));
       setState(getDefaultState());
       setReady(true);
     }
     configDone.current = true;
-  }, [latestFolderReady, rootsReady]);
+  }, [dispatch, latestFolderReady, rootsReady]);
 
   return {
     ready: ready && latestFolderReady && rootsReady,

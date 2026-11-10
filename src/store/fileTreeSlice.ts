@@ -14,7 +14,7 @@ export type FileTreeState = {
 const initialState: FileTreeState = {
   route: '',
   mode: 'tree',
-  source: 'storage',
+  source: 'search',
   selectedPaths: [],
 };
 

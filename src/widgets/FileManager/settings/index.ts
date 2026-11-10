@@ -9,6 +9,8 @@ import {
   setStoreLatestFolder as setStoreLatestFolderAction,
 } from '../../../store/fileManagerSlice';
 
+export const SEARCH_INDEX_PATH = 'search://index';
+
 export const useSort = (): ['asc' | 'desc', () => void] => {
   const dispatch = useDispatch<AppDispatch>();
   const sort = useSelector((state: RootState) => state.fileManager.sort);
