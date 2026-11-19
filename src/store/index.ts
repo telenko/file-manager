@@ -13,6 +13,10 @@ export const rootReducer = combineReducers({
 
 export type RootState = ReturnType<typeof rootReducer>;
 export type AppDispatch = typeof store.dispatch;
+export type AppThunk<ReturnType = void> = (
+  dispatch: AppDispatch,
+  getState: () => RootState,
+) => ReturnType;
 
 export const store = configureStore({
   reducer: rootReducer,

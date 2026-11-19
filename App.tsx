@@ -22,6 +22,7 @@ import { AppDispatch, RootState, store } from './src/store';
 import { setPermissionGranted } from './src/store/appSlice';
 
 import { NativeModules } from 'react-native';
+import { startSearchIndexProgressSync } from './src/store/searchIndexProgress';
 
 const { SearchFilesModule } = NativeModules;
 
@@ -90,6 +91,10 @@ const App = () => {
       .catch(e => {
         // do nothing here...
       });
+  useEffect(() => {
+    return dispatch(startSearchIndexProgressSync());
+  }, [dispatch]);
+
   useEffect(() => {
     askPermission();
   }, []);

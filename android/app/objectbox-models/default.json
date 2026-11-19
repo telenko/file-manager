@@ -94,7 +94,7 @@
     },
     {
       "id": "4:8711431975065846805",
-      "lastPropertyId": "7:5660366566074224020",
+      "lastPropertyId": "8:8290015822142149918",
       "name": "FileIndexEntity",
       "properties": [
         {
@@ -136,6 +136,11 @@
           "indexId": "7:7721810984512901512",
           "type": 9,
           "flags": 2048
+        },
+        {
+          "id": "8:8290015822142149918",
+          "name": "searchTimeStamp",
+          "type": 6
         }
       ],
       "relations": []

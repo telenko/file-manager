@@ -6,6 +6,7 @@ import {
   Dialog,
   IconButton,
   Portal,
+  ProgressBar,
   Switch,
   Text,
 } from 'react-native-paper';
@@ -13,13 +14,18 @@ import { Linking, View } from 'react-native';
 import { APP_LINK_SELF_URL } from '../settings';
 import { theme } from '../../../theme';
 import Popover from 'react-native-popover-view';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../../store';
 
 const SettingsDialog: React.FC = () => {
   const fileManager = useFileManager();
   const { t } = useTranslation();
+  const searchProgress = useSelector(
+    (state: RootState) => state.fileManager.searchIndexProgress,
+  );
 
   if (!fileManager.settingsOpen) {
-    return;
+    return null;
   }
 
   const hideDialog = () => fileManager.setSettingsOpen(false);
@@ -35,6 +41,19 @@ const SettingsDialog: React.FC = () => {
           style={{
             minHeight: 120,
           }}>
+          <View style={{ marginBottom: 16 }}>
+            <Text>
+              {t('searchIndexingProgress', {
+                percentage: searchProgress.percentage,
+              })}
+            </Text>
+            <ProgressBar
+              progress={searchProgress.percentage / 100}
+              color={theme.selectionColor}
+              style={{ marginTop: 8 }}
+            />
+          </View>
+
           <View
             style={{
               flexDirection: 'row',

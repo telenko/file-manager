@@ -15,6 +15,7 @@ import com.tom_roush.pdfbox.text.PDFTextStripper
 import com.tom_roush.pdfbox.text.TextPosition
 import io.objectbox.Box
 import io.objectbox.query.QueryBuilder
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -59,33 +60,40 @@ class PdfEmbeddingIndexer(
             )
         }
 
-        val fileDescriptor = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
-        val pdfRenderer = PdfRenderer(fileDescriptor)
-
         try {
-            val pageCount = pdfRenderer.pageCount
-            if (pageCount == 0) return@withContext ExtractionResult(embeddings = emptyList(), snapshots = emptyList())
-            val pagesToProcess = calculatePagesToProcess(pageCount)
+            val fileDescriptor = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
+            try {
+                val pdfRenderer = PdfRenderer(fileDescriptor)
+                try {
+                    val pageCount = pdfRenderer.pageCount
+                    val pagesToProcess = calculatePagesToProcess(pageCount)
 
-            // Обробимо кожну вибрану сторінку
-            for (pageIndex in pagesToProcess) {
-                val textSnapshot = extractPageTextSnapshot(file, pageIndex, MAX_SNAPSHOT_CHARS)
-                Log.d(TAG, "1st 30 chars of text snapshot for page $pageIndex: ${textSnapshot.take(30)}")
-                if (textSnapshot.isNotBlank()) {
-                    snapshots.add(
-                        FileTextSnapshotEntity(
-                            filePath = filePath,
-                            fileName = file.name,
-                            pageIndex = pageIndex,
-                            text = textSnapshot
-                        )
-                    )
+                    for (pageIndex in pagesToProcess) {
+                        val textSnapshot = extractPageTextSnapshot(file, pageIndex, MAX_SNAPSHOT_CHARS)
+                        Log.d(TAG, "1st 30 chars of text snapshot for page $pageIndex: ${textSnapshot.take(30)}")
+                        if (textSnapshot.isNotBlank()) {
+                            snapshots.add(
+                                FileTextSnapshotEntity(
+                                    filePath = filePath,
+                                    fileName = file.name,
+                                    pageIndex = pageIndex,
+                                    text = textSnapshot
+                                )
+                            )
+                        }
+                    }
+                } finally {
+                    pdfRenderer.close()
                 }
+            } finally {
+                fileDescriptor.close()
             }
-        } finally {
-            pdfRenderer.close()
-            fileDescriptor.close()
+        } catch (error: CancellationException) {
+            throw error
+        } catch (error: Exception) {
+            Log.e(TAG, "Failed to extract PDF page snapshots; retaining filename snapshot for $filePath", error)
         }
+
         ExtractionResult(
             embeddings = emptyList(), // PDF не має власних векторів, лише текстові знімки
             snapshots = snapshots

@@ -66,6 +66,7 @@
     "more": "More",
 
     "settings": "Settings",
+    "searchIndexingProgress": "Search indexing: {{percentage}}%",
     "storeLatestFolder": "Remember latest folder",
     "storeLatestFolderInfo": "If you wish, we can remember the last folder you opened. The next time you use the app, it will automatically reopen that folder for you.",
     "checkForUpdates": "Check for updates"

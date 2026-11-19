@@ -24,6 +24,8 @@ data class FileIndexEntity(
 
     var lastModified: Long = 0L,
 
+    var searchTimeStamp: Long? = null,
+
     var fileSize: Long = 0L,
 
     @Index

@@ -287,17 +287,6 @@ const FileScreen: React.FC<FileScreenProps> = stackRoute => {
     });
   }, []);
 
-  // useEffect(() => {
-  //   setSearchDirItems([]);
-  // }, [searchText]);
-
-  // const searchQuery = useSelector(
-  //   (state: RootState) => state.fileTree.searchQuery,
-  // );
-  // const searchContext = useSelector(
-  //   (state: RootState) => state.fileTree.serchContext,
-  // );
-
   return (
     <>
       <View style={styles.container}>

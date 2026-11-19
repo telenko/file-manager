@@ -34,8 +34,10 @@ class LiveIndexManager(
                 mediaDebounceJob = scope.launch(Dispatchers.IO) {
                     delay(2000)
                     // Імпортуємо лише нові файли, які з'явилися після збереженої дати
-                    mediaStoreImporter.importMedia(isFirstScan = false)
-                    onEvent?.invoke(IndexerEvent("SCAN_RESYNC", count = 1))
+                    val importedCount = mediaStoreImporter.importMedia(isFirstScan = false)
+                    if (importedCount > 0) {
+                        onEvent?.invoke(IndexerEvent("SCAN_RESYNC", count = importedCount))
+                    }
                 }
             }
             mediaObserver?.register()
@@ -52,8 +54,8 @@ class LiveIndexManager(
                         val fileEvent = event and FileObserver.ALL_EVENTS
                         val isRemoval = fileEvent == FileObserver.DELETE ||
                             fileEvent == FileObserver.MOVED_FROM
-                        handleDocumentEvent(event, filePath, onEvent)
-                        if (!isRemoval) {
+                        val indexed = handleDocumentEvent(event, filePath, onEvent)
+                        if (!isRemoval && indexed) {
                             onEvent?.invoke(IndexerEvent("SCAN_RESYNC", count = 1))
                         }
                     }
@@ -77,7 +79,7 @@ class LiveIndexManager(
         event: Int,
         filePath: String,
         onEvent: ((IndexerEvent) -> Unit)?
-    ) {
+    ): Boolean {
         val file = File(filePath)
         
         when (event and FileObserver.ALL_EVENTS) {
@@ -92,6 +94,7 @@ class LiveIndexManager(
                         parentPath = file.parent ?: ""
                     )
                     fileIndexBox.put(entity) // Завдяки @Unique оновиться або створиться
+                    return true
                 }
             }
             FileObserver.DELETE, FileObserver.MOVED_FROM -> {
@@ -100,6 +103,7 @@ class LiveIndexManager(
                 )
             }
         }
+        return false
     }
 
 }

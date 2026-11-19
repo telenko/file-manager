@@ -16,6 +16,7 @@ import com.telenko.filemanager.storage.StorageMetaReaderPackage
 import com.telenko.filemanager.picker.PickerActivityPackage
 import com.telenko.filemanager.search.SearchFilesPackage
 import com.telenko.filemanager.indexer.FileIndexerPackage
+import com.telenko.filemanager.search.SearchIndexWorkScheduler
 import com.telenko.filemanager.images.SubsamplingScaleImagePackage
  
 class MainApplication : Application(), ReactApplication {
@@ -49,6 +50,7 @@ class MainApplication : Application(), ReactApplication {
  
   override fun onCreate() {
     super.onCreate()
+    SearchIndexWorkScheduler.enqueue(this)
     loadReactNative(this)
   }
 }

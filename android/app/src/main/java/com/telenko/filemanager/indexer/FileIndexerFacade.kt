@@ -3,18 +3,28 @@ package com.telenko.filemanager.indexer
 import android.content.Context
 import android.os.SystemClock
 import android.util.Log
+import com.telenko.filemanager.db.ObjectBoxStore
 import com.telenko.filemanager.infiniteapi.MediaType
 import com.telenko.filemanager.infiniteapi.MediaTypeResolver
 import com.telenko.filemanager.infiniteapi.PagedFileRepository
 import com.telenko.filemanager.infiniteapi.UiFileEntity
+import com.telenko.filemanager.search.SearchIndexWorkScheduler
 import io.objectbox.Box
 import io.objectbox.query.QueryBuilder.StringOrder
 import io.objectbox.kotlin.inValues
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.File
+import kotlin.math.abs
+
+enum class SearchIndexMarkResult {
+    UPDATED,
+    ENTITY_MISSING,
+    CHANGED_DURING_INDEXING
+}
 
 class FileIndexerFacade private constructor(
     private val context: Context,
@@ -28,12 +38,15 @@ class FileIndexerFacade private constructor(
     private val liveIndexManager = LiveIndexManager(context, fileIndexBox, mediaImporter)
 
     private var syncJob: Job? = null
+    private var liveSearchIndexEnqueueJob: Job? = null
 
     companion object {
         private const val TAG = "FileIndexerFacade"
         private const val GARBAGE_COLLECTION_BATCH_SIZE = 100
         private const val GARBAGE_COLLECTION_CURSOR = "garbage_collection_cursor"
         private const val GARBAGE_COLLECTION_PREFS = "file_indexer"
+        private const val LIVE_SEARCH_INDEX_DEBOUNCE_MS = 500L
+        private const val SEARCH_INDEX_PAGE_SIZE = 200
 
         @Volatile
         private var INSTANCE: FileIndexerFacade? = null
@@ -50,7 +63,91 @@ class FileIndexerFacade private constructor(
                 }
             }
         }
+
+        fun getInstance(context: Context): FileIndexerFacade {
+            val store = ObjectBoxStore.get(context.applicationContext)
+            return getInstance(
+                context,
+                store.boxFor(FileIndexEntity::class.java),
+                store.boxFor(IndexerStateEntity::class.java)
+            )
+        }
     }
+
+    fun countAllIndexes(): Long = fileIndexBox.count()
+
+    fun countPendingSearchIndexes(): Long = countSearchIndexes(::isPending)
+
+    fun countCompletedSearchIndexes(): Long = countSearchIndexes {
+        it.searchTimeStamp?.let { timestamp -> timestamp >= it.lastModified } == true
+    }
+
+    fun getSearchIndexPage(offset: Long): List<FileIndexEntity> {
+        val query = fileIndexBox.query().build()
+        return try {
+            query.find(offset, SEARCH_INDEX_PAGE_SIZE.toLong())
+        } finally {
+            query.close()
+        }
+    }
+
+    fun isPendingSearchIndex(entity: FileIndexEntity): Boolean = isPending(entity)
+
+    fun searchIndexPercentage(indexedCount: Long, totalCount: Long): Int =
+        if (totalCount == 0L) 100 else ((indexedCount * 100) / totalCount).toInt().coerceIn(0, 100)
+
+    fun markSearchIndexCompleted(
+        entity: FileIndexEntity,
+        timestampToleranceMs: Long
+    ): SearchIndexMarkResult {
+        val current = fileIndexBox.get(entity.id) ?: return SearchIndexMarkResult.ENTITY_MISSING
+        val file = File(current.filePath)
+        val isFile = file.isFile
+        val fileLastModified = if (isFile) file.lastModified() else null
+        val databaseTimestampChanged = current.lastModified != entity.lastModified
+        val fileTimestampDifferenceMs = fileLastModified?.let { abs(it - entity.lastModified) }
+        val fileTimestampChanged = fileTimestampDifferenceMs == null ||
+            fileTimestampDifferenceMs > timestampToleranceMs
+
+        if (databaseTimestampChanged || !isFile || fileTimestampChanged) {
+            Log.d(
+                TAG,
+                "Skipping changed file after search indexing: id=${entity.id}, path=${entity.filePath}, " +
+                    "databaseTimestampChanged=$databaseTimestampChanged, " +
+                    "storedLastModified=${entity.lastModified}, " +
+                    "currentLastModified=${current.lastModified}, isFile=$isFile, " +
+                    "fileLastModified=${fileLastModified ?: "unavailable"}, " +
+                    "fileTimestampDifferenceMs=${fileTimestampDifferenceMs ?: "unavailable"}, " +
+                    "allowedDifferenceMs=$timestampToleranceMs"
+            )
+            return SearchIndexMarkResult.CHANGED_DURING_INDEXING
+        }
+
+        current.searchTimeStamp = System.currentTimeMillis()
+        fileIndexBox.put(current)
+        return SearchIndexMarkResult.UPDATED
+    }
+
+    private fun countSearchIndexes(predicate: (FileIndexEntity) -> Boolean): Long {
+        val query = fileIndexBox.query().build()
+        try {
+            var offset = 0L
+            var matchingCount = 0L
+            val totalCount = query.count()
+            while (offset < totalCount) {
+                val rows = query.find(offset, SEARCH_INDEX_PAGE_SIZE.toLong())
+                if (rows.isEmpty()) break
+                matchingCount += rows.count(predicate)
+                offset += rows.size
+            }
+            return matchingCount
+        } finally {
+            query.close()
+        }
+    }
+
+    private fun isPending(entity: FileIndexEntity): Boolean =
+        entity.searchTimeStamp?.let { it < entity.lastModified } ?: true
 
     fun startIndexing(onEvent: ((IndexerEvent) -> Unit)? = null) {
         Log.d(TAG, "startIndexing called")
@@ -65,6 +162,13 @@ class FileIndexerFacade private constructor(
                     }
                 )
             } else {
+                if (event.name == "SCAN_RESYNC" && event.count?.let { it > 0 } == true) {
+                    liveSearchIndexEnqueueJob?.cancel()
+                    liveSearchIndexEnqueueJob = scope.launch {
+                        delay(LIVE_SEARCH_INDEX_DEBOUNCE_MS)
+                        SearchIndexWorkScheduler.enqueue(context, appendIfRunning = true)
+                    }
+                }
                 onEvent?.invoke(event)
             }
         }
@@ -105,6 +209,7 @@ class FileIndexerFacade private constructor(
             } catch (e: Exception) {
                 Log.e(TAG, "importFiles: Error during indexing process", e)
             }
+            SearchIndexWorkScheduler.enqueue(context)
         }
     }
 
@@ -176,6 +281,11 @@ class FileIndexerFacade private constructor(
                     exactMatch + descendants
                 }.distinctBy { it.id }
 
+                IndexRemovalEventBridge.emit(
+                    IndexRemovalEvent(
+                        paths = (entitiesToRemove.map { it.filePath } + normalizedPaths).distinct()
+                    )
+                )
                 if (entitiesToRemove.isNotEmpty()) {
                     fileIndexBox.remove(entitiesToRemove)
                 }
@@ -215,6 +325,13 @@ class FileIndexerFacade private constructor(
                     }
                 }.distinctBy { it.id }
 
+                if (removedPaths.isNotEmpty()) {
+                    IndexRemovalEventBridge.emit(
+                        IndexRemovalEvent(
+                            paths = (removedEntities.map { it.filePath } + removedPaths).distinct()
+                        )
+                    )
+                }
                 if (removedEntities.isNotEmpty()) {
                     fileIndexBox.remove(removedEntities)
                 }

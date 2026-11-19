@@ -18,6 +18,14 @@ type FileManagerState = {
   settingsOpen: boolean;
   fileDetails: DirItem | null;
   longOperation: FileLongOperationType | null;
+  searchIndexProgress: SearchIndexProgress;
+};
+
+export type SearchIndexProgress = {
+  percentage: number;
+  indexedFiles: number;
+  totalFiles: number;
+  status: string;
 };
 
 const initialState: FileManagerState = {
@@ -33,6 +41,12 @@ const initialState: FileManagerState = {
   settingsOpen: false,
   fileDetails: null,
   longOperation: null,
+  searchIndexProgress: {
+    percentage: 0,
+    indexedFiles: 0,
+    totalFiles: 0,
+    status: 'idle',
+  },
 };
 
 const fileManagerSlice = createSlice({
@@ -79,6 +93,12 @@ const fileManagerSlice = createSlice({
     ) {
       state.longOperation = action.payload;
     },
+    setSearchIndexProgress(state, action: PayloadAction<SearchIndexProgress>) {
+      state.searchIndexProgress = {
+        ...action.payload,
+        percentage: Math.max(0, Math.min(100, action.payload.percentage)),
+      };
+    },
   },
 });
 
@@ -95,5 +115,6 @@ export const {
   setSettingsOpen,
   setFileDetails,
   setLongOperation,
+  setSearchIndexProgress,
 } = fileManagerSlice.actions;
 export default fileManagerSlice.reducer;
