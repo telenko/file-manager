@@ -41,17 +41,37 @@ const SettingsDialog: React.FC = () => {
           style={{
             minHeight: 120,
           }}>
-          <View style={{ marginBottom: 16 }}>
+          <View>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                width: '100%',
+              }}>
+              <View style={{ flex: 1 }}>
+                <ProgressBar
+                  progress={searchProgress.percentage / 100}
+                  color={theme.selectionColor}
+                />
+              </View>
+              <Popover
+                from={
+                  <IconButton
+                    icon="lightning-bolt"
+                    accessibilityLabel={t('searchIndexChargingInfo')}
+                    style={{ margin: 0, width: 30, marginLeft: 10 }}
+                  />
+                }>
+                <View style={{ padding: 10, borderRadius: theme.radiusMedium }}>
+                  <Text>{t('searchIndexChargingInfo')}</Text>
+                </View>
+              </Popover>
+            </View>
             <Text>
               {t('searchIndexingProgress', {
                 percentage: searchProgress.percentage,
               })}
             </Text>
-            <ProgressBar
-              progress={searchProgress.percentage / 100}
-              color={theme.selectionColor}
-              style={{ marginTop: 8 }}
-            />
           </View>
 
           <View

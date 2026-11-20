@@ -62,6 +62,8 @@
     "nameAlreadyExists": "Name existiert bereits",
     "more": "Mehr",
     "settings": "Einstellungen",
+    "searchIndexingProgress": "Suchindexierung: {{percentage}}%",
+    "searchIndexChargingInfo": "Mit angeschlossenem Ladegerät geht es besser! Für eine bessere und schnellere KI-Suche empfehlen wir, das Telefon während der Einrichtung ans Ladegerät anzuschließen.",
     "storeLatestFolder": "Letzten Ordner merken",
     "storeLatestFolderInfo": "Wenn Sie möchten, können wir uns den zuletzt geöffneten Ordner merken. Beim nächsten Öffnen der App wird dieser Ordner automatisch wieder geöffnet.",
     "checkForUpdates": "Nach Updates suchen"

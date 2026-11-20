@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Searchbar } from 'react-native-paper'; // Або звідки ти імпортуєш Searchbar
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../store';
@@ -28,11 +28,11 @@ export const DebouncedSearchbar: React.FC<DebouncedSearchbarProps> = ({
   const [localQuery, setLocalQuery] = useState(globalSearchQuery);
 
   // Синхронізуємо локальний стейт, якщо globalSearchQuery змінився ззовні
-  useEffect(() => {
-    if (globalSearchQuery !== localQuery) {
-      setLocalQuery(globalSearchQuery);
-    }
-  }, [globalSearchQuery]);
+  // useEffect(() => {
+  //   if (globalSearchQuery !== localQuery) {
+  //     setLocalQuery(globalSearchQuery);
+  //   }
+  // }, [globalSearchQuery]);
 
   const handleChangeText = async (query: string) => {
     setLocalQuery(query); // Миттєво оновлюємо UI

@@ -66,6 +66,8 @@
     "more": "Plus",
 
     "settings": "Paramètres",
+    "searchIndexingProgress": "Indexation de recherche : {{percentage}}%",
+    "searchIndexChargingInfo": "C'est mieux avec le téléphone en charge ! Pour une recherche IA meilleure et plus rapide, nous recommandons de brancher le téléphone pendant la configuration.",
     "storeLatestFolder": "Se souvenir du dernier dossier",
     "storeLatestFolderInfo": "Si vous le souhaitez, nous pouvons mémoriser le dernier dossier que vous avez ouvert. La prochaine fois que vous utilisez l'application, ce dossier s'ouvrira automatiquement.",
     "checkForUpdates": "Vérifier les mises à jour"

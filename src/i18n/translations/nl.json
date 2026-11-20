@@ -66,6 +66,8 @@
      "more": "Meer",
 
      "settings": "Instellingen",
+    "searchIndexingProgress": "Zoekindexering: {{percentage}}%",
+    "searchIndexChargingInfo": "Beter met de telefoon aan de oplader! Voor sneller en beter zoeken met AI raden we aan de telefoon tijdens het instellen op te laden.",
     "storeLatestFolder": "Onthoud laatste map",
     "storeLatestFolderInfo": "Als je wilt, kunnen we de laatste map die je hebt geopend onthouden. De volgende keer dat je de app gebruikt, wordt die map automatisch opnieuw geopend.",
     "checkForUpdates": "Controleer op updates"

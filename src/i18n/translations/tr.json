@@ -66,6 +66,8 @@
     "more": "Daha fazla",
 
     "settings": "Ayarlar",
+    "searchIndexingProgress": "Arama dizini oluşturuluyor: {{percentage}}%",
+    "searchIndexChargingInfo": "Şarjdayken daha iyi! Daha iyi ve hızlı yapay zekâ araması için kurulum sırasında telefonu şarja takmanızı öneririz.",
     "storeLatestFolder": "Son klasörü hatırla",
     "storeLatestFolderInfo": "İsterseniz, en son açtığınız klasörü hatırlayabiliriz. Uygulamayı bir sonraki kullanışınızda, o klasör otomatik olarak açılacaktır.",
     "checkForUpdates": "Güncellemeleri kontrol et"

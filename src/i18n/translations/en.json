@@ -67,6 +67,7 @@
 
     "settings": "Settings",
     "searchIndexingProgress": "Search indexing: {{percentage}}%",
+    "searchIndexChargingInfo": "Better while charging! For better and faster AI search, we recommend plugging your phone in while indexing is being set up.",
     "storeLatestFolder": "Remember latest folder",
     "storeLatestFolderInfo": "If you wish, we can remember the last folder you opened. The next time you use the app, it will automatically reopen that folder for you.",
     "checkForUpdates": "Check for updates"

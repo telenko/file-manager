@@ -66,6 +66,8 @@
      "more": "Di più",
 
      "settings": "Impostazioni",
+    "searchIndexingProgress": "Indicizzazione della ricerca: {{percentage}}%",
+    "searchIndexChargingInfo": "Meglio con il telefono in carica! Per una ricerca IA migliore e più veloce, consigliamo di collegare il telefono al caricabatterie durante la configurazione.",
     "storeLatestFolder": "Ricorda l'ultima cartella",
     "storeLatestFolderInfo": "Se lo desideri, possiamo ricordare l'ultima cartella che hai aperto. La prossima volta che usi l'app, si aprirà automaticamente quella cartella.",
     "checkForUpdates": "Controlla aggiornamenti"
