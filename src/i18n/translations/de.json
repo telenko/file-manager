@@ -66,5 +66,17 @@
     "searchIndexChargingInfo": "Mit angeschlossenem Ladegerät geht es besser! Für eine bessere und schnellere KI-Suche empfehlen wir, das Telefon während der Einrichtung ans Ladegerät anzuschließen.",
     "storeLatestFolder": "Letzten Ordner merken",
     "storeLatestFolderInfo": "Wenn Sie möchten, können wir uns den zuletzt geöffneten Ordner merken. Beim nächsten Öffnen der App wird dieser Ordner automatisch wieder geöffnet.",
+    "mediaTypeImages": "Bilder",
+    "mediaTypeVideos": "Videos",
+    "mediaTypeMusic": "Musik",
+    "mediaTypeText": "Dokumente",
+    "mediaTypeOther": "Sonstiges",
+    "clearSearch": "Suche löschen",
+    "mediaFilterTitle": "Medienfilter",
+    "mediaFilterDescription": "Dateitypen zur Anzeige auswählen",
+    "mediaFilterAllFiles": "Alle Dateien",
+    "mediaFilterSelectionSummary": "Ausgewählte Kategorien: {{selected}} von {{total}}",
+    "mediaFilterReset": "Zurücksetzen",
+    "mediaFilterApply": "Anwenden",
     "checkForUpdates": "Nach Updates suchen"
 }

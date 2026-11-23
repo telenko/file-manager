@@ -70,5 +70,17 @@
     "searchIndexChargingInfo": "Lepiej z ładowarką! Aby wyszukiwanie AI było lepsze i szybsze, zalecamy podłączenie telefonu do ładowarki na czas konfiguracji.",
     "storeLatestFolder": "Zapamiętaj ostatni folder",
     "storeLatestFolderInfo": "Jeśli chcesz, możemy zapamiętać ostatni otwarty folder. Przy następnym uruchomieniu aplikacji folder zostanie automatycznie otwarty.",
+    "mediaTypeImages": "Obrazy",
+    "mediaTypeVideos": "Filmy",
+    "mediaTypeMusic": "Muzyka",
+    "mediaTypeText": "Dokumenty",
+    "mediaTypeOther": "Inne",
+    "clearSearch": "Wyczyść wyszukiwanie",
+    "mediaFilterTitle": "Filtr plików multimedialnych",
+    "mediaFilterDescription": "Wybierz typy plików do wyświetlenia",
+    "mediaFilterAllFiles": "Wszystkie pliki",
+    "mediaFilterSelectionSummary": "Wybrane kategorie: {{selected}} z {{total}}",
+    "mediaFilterReset": "Resetuj",
+    "mediaFilterApply": "Zastosuj",
     "checkForUpdates": "Sprawdź aktualizacje"
 }

@@ -3,7 +3,8 @@ package com.telenko.filemanager.search
 import android.util.Log
 import android.content.Context
 import com.facebook.react.bridge.*
-import com.telenko.filemanager.search.common.SearchContext
+import com.telenko.filemanager.infiniteapi.MediaType
+import com.telenko.filemanager.search.common.SearchFilter
 import kotlinx.coroutines.*
 
 private const val TAG = "EMBEDDINGS_MODULE"
@@ -43,11 +44,11 @@ class SearchFilesModule(private val reactContext: ReactApplicationContext) : Rea
         }
     }
 
-    // 3. ПОШУК ФАЙЛІВ З ПАГІНАЦІЄЮ ТА CONTEXT.ALL
+    // ПОШУК ПО ВСІХ ПОШУКОВИХ ФАСАДАХ З ПАГІНАЦІЄЮ
     @ReactMethod
     fun searchFiles(
         queryText: String,
-        searchContextString: String,
+        searchFilterMap: ReadableMap?,
         targetFolder: String?,
         offset: Int,
         size: Int,
@@ -56,19 +57,15 @@ class SearchFilesModule(private val reactContext: ReactApplicationContext) : Rea
         moduleScope.launch {
             try {
                 val runtime = SearchIndexRuntimeProvider.getOrInitialize(reactContext)
-
-                val searchContext = try {
-                    SearchContext.valueOf(searchContextString.uppercase())
-                } catch (e: IllegalArgumentException) {
-                    throw IllegalArgumentException("Invalid search context: $searchContextString. Supported values: VISUAL, TEXT, ALL.")
-                }
+                val mediaTypes = parseMediaTypes(searchFilterMap)
+                val searchFilter = SearchFilter(mediaTypes)
 
                 val queryEmbedding = runtime.textEmbeddingIndexer.getTextEmbedding(queryText)
 
-                val results = runtime.vectorSearchManager.searchTopK(
+                val results = runtime.searchIndexManager.searchTopK(
                     queryVector = queryEmbedding,
                     queryText = queryText,
-                    searchContext = searchContext,
+                    filter = searchFilter,
                     offset = offset,
                     size = size,
                     targetFolder = targetFolder
@@ -93,9 +90,23 @@ class SearchFilesModule(private val reactContext: ReactApplicationContext) : Rea
 
                 promise.resolve(resultArray)
             } catch (e: Exception) {
-                Log.e(TAG, "Search error for query: $queryText with context: $searchContextString", e)
+                Log.e(TAG, "Search error for query: $queryText", e)
                 promise.reject("SEARCH_ERROR", e.message, e)
             }
         }
+    }
+
+    private fun parseMediaTypes(searchFilterMap: ReadableMap?): List<MediaType> {
+        val mediaTypesArray = searchFilterMap?.getArray("mediaTypes") ?: return emptyList()
+        val mediaTypes = mutableListOf<MediaType>()
+        for (index in 0 until mediaTypesArray.size()) {
+            val value = mediaTypesArray.getString(index)?.uppercase() ?: continue
+            try {
+                mediaTypes.add(MediaType.valueOf(value))
+            } catch (_: IllegalArgumentException) {
+                // Ignore unknown media types.
+            }
+        }
+        return mediaTypes.distinct()
     }
 }

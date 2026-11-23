@@ -48,6 +48,7 @@ export const useIndexDataManager: DataManagerHookType = ({
     (state: RootState) =>
       (isActive && state.fileData.fileRecord) || EMPTY_FILE_RECORD,
   );
+  const selectedMediaTypes = useSelector((state: RootState) => state.fileTree.selectedMediaTypes || []);
   const items = useMemo(
     () => resolveFilePaths(paths, fileRecord),
     [paths, fileRecord],
@@ -67,12 +68,16 @@ export const useIndexDataManager: DataManagerHookType = ({
   );
 
   const fetcher = useCallback(async (offset: number, limit: number) => {
+    if (selectedMediaTypes.length === 0) {
+      return [];
+    }
+
     return await FileIndexer.getFilesPaged(
-      ['IMAGE', 'VIDEO', 'AUDIO', 'TEXT'],
+      selectedMediaTypes,
       offset,
       limit,
     );
-  }, []);
+  }, [selectedMediaTypes]);
 
   // Викликаємо універсальний хук, передаючи адаптер як аргумент
   const { load, isLoading, error, loadingDone } = usePagedLoader<IndexedFile>(

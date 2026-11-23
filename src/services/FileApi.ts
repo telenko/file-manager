@@ -23,7 +23,7 @@ export interface IndexedFile {
   id: number;
   filePath: string;
   fileName: string;
-  mediaType: 'IMAGE' | 'VIDEO' | 'AUDIO' | 'TEXT' | 'OTHER' | 'ALL';
+  mediaType: 'IMAGE' | 'VIDEO' | 'MUSIC' | 'TEXT' | 'OTHER';
   lastModified: number;
   fileSize: number;
   parentPath: string;

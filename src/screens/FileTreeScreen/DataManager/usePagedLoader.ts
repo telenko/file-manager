@@ -17,7 +17,21 @@ export const usePagedLoader = <TRawData>(
   const isFetchingRef = useRef<boolean>(false);
   const isActiveRef = useRef(isActive);
   const generationRef = useRef(0);
+  const fetchFunctionRef = useRef(fetchFunction);
   isActiveRef.current = isActive;
+
+  useEffect(() => {
+    if (fetchFunctionRef.current === fetchFunction) {
+      return;
+    }
+
+    fetchFunctionRef.current = fetchFunction;
+    generationRef.current += 1;
+    isFetchingRef.current = false;
+    setIsLoading(false);
+    setLoadingDone(false);
+    setError(null);
+  }, [fetchFunction]);
 
   useEffect(() => {
     if (!isActive) {

@@ -70,5 +70,17 @@
     "searchIndexChargingInfo": "З зарядкою краще! Для кращого і швидшого AI-пошуку рекомендуємо на час налаштування під’єднати зарядний пристрій до телефона.",
     "storeLatestFolder": "Запам’ятати останню папку",
     "storeLatestFolderInfo": "Якщо бажаєте, ми можемо запам’ятати останню відкриту папку. Наступного разу, коли ви відкриєте додаток, вона відкриється автоматично.",
+    "mediaTypeImages": "Зображення",
+    "mediaTypeVideos": "Відео",
+    "mediaTypeMusic": "Музика",
+    "mediaTypeText": "Документи",
+    "mediaTypeOther": "Інше",
+    "clearSearch": "Очистити пошук",
+    "mediaFilterTitle": "Фільтр медіафайлів",
+    "mediaFilterDescription": "Оберіть типи файлів для відображення",
+    "mediaFilterAllFiles": "Усі файли",
+    "mediaFilterSelectionSummary": "Обрано категорій: {{selected}} з {{total}}",
+    "mediaFilterReset": "Скинути",
+    "mediaFilterApply": "Застосувати",
     "checkForUpdates": "Перевірити оновлення"
 }

@@ -8,7 +8,7 @@ import ai.onnxruntime.OrtEnvironment
 import ai.onnxruntime.OrtSession
 import com.telenko.filemanager.search.common.ExtractionResult
 import com.telenko.filemanager.search.common.SearchIndexer
-import com.telenko.filemanager.search.common.MediaType
+import com.telenko.filemanager.infiniteapi.MediaType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File

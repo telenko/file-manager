@@ -3,7 +3,7 @@ import { NativeModules } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 
-import type { DirItem, SearchFile } from '../../../services/FileApi';
+import { FileApi, type DirItem, type SearchFile } from '../../../services/FileApi';
 import type { DataManagerHookType, DataManagerType } from './DataManagerType';
 import type { AppDispatch, RootState } from '../../../store';
 
@@ -30,6 +30,26 @@ export const adaptEmbeddingItemIntoDirItem = (
   return null;
 };
 
+export const resolveSearchResultIntoDirItem = async (
+  entity: SearchFile,
+  fileRecord: Record<string, DirItem> = EMPTY_FILE_RECORD,
+): Promise<DirItem | null> => {
+  const cachedItem = adaptEmbeddingItemIntoDirItem(entity, fileRecord);
+  if (cachedItem) {
+    return cachedItem;
+  }
+
+  try {
+    return await FileApi.getMetadata(entity.filePath);
+  } catch (error) {
+    console.error(
+      `Failed to load metadata for search result: ${entity.filePath}`,
+      error,
+    );
+    return null;
+  }
+};
+
 export const useSearchDataManager: DataManagerHookType = ({
   isActive = true,
 }): DataManagerType => {
@@ -47,6 +67,11 @@ export const useSearchDataManager: DataManagerHookType = ({
     (state: RootState) =>
       (isActive && state.fileData.fileRecord) || EMPTY_FILE_RECORD,
   );
+
+  const selectedMediaTypes = useSelector(
+    (state: RootState) => state.fileTree.selectedMediaTypes || [],
+  );
+
   const fileRecordRef = useRef(fileRecord);
   fileRecordRef.current = fileRecord;
   const items = useMemo(
@@ -101,6 +126,15 @@ export const useSearchDataManager: DataManagerHookType = ({
         return [];
       }
 
+      if (selectedMediaTypes.length === 0) {
+        ++requestIdRef.current;
+        updateItemsAndProvider([]);
+        setIsLoading(false);
+        setLoadingDone(true);
+        setError(null);
+        return [];
+      }
+
       const requestId = ++requestIdRef.current;
 
       setIsLoading(true);
@@ -109,7 +143,7 @@ export const useSearchDataManager: DataManagerHookType = ({
       try {
         const rawResults: SearchFile[] = await SearchFilesModule.searchFiles(
           query,
-          'ALL',
+          { mediaTypes: selectedMediaTypes },
           null,
           offset,
           size,
@@ -124,11 +158,20 @@ export const useSearchDataManager: DataManagerHookType = ({
           return [];
         }
 
-        const formattedItems = (rawResults || [])
-          .map(entity =>
-            adaptEmbeddingItemIntoDirItem(entity, fileRecordRef.current),
-          )
+        const formattedItems = (await Promise.all(
+          (rawResults || []).map(entity =>
+            resolveSearchResultIntoDirItem(entity, fileRecordRef.current),
+          ),
+        ))
           .filter((item): item is DirItem => item !== null);
+
+        if (
+          !isActiveRef.current ||
+          requestId !== requestIdRef.current ||
+          latestQueryRef.current !== query
+        ) {
+          return [];
+        }
 
         updateItemsAndProvider(formattedItems, offset !== 0);
 
@@ -157,7 +200,7 @@ export const useSearchDataManager: DataManagerHookType = ({
         }
       }
     },
-    [updateItemsAndProvider],
+    [updateItemsAndProvider, selectedMediaTypes],
   );
 
   useEffect(() => {
@@ -181,6 +224,11 @@ export const useSearchDataManager: DataManagerHookType = ({
       return;
     }
 
+    if (selectedMediaTypes.length === 0) {
+      void loadPage(0, 50);
+      return;
+    }
+
     setIsLoading(true);
     setLoadingDone(false);
 
@@ -194,7 +242,13 @@ export const useSearchDataManager: DataManagerHookType = ({
     return () => {
       clearTimeout(timer);
     };
-  }, [isActive, searchText, loadPage, updateItemsAndProvider]);
+  }, [
+    isActive,
+    searchText,
+    selectedMediaTypes,
+    loadPage,
+    updateItemsAndProvider,
+  ]);
 
   const load = useCallback(() => {
     if (!isActiveRef.current || !latestQueryRef.current) {

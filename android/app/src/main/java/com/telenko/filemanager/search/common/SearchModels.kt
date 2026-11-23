@@ -2,12 +2,7 @@ package com.telenko.filemanager.search.common
 
 import com.telenko.filemanager.search.embeddings.FileEmbeddingEntity
 import com.telenko.filemanager.search.snapshot.FileTextSnapshotEntity
-
-enum class MediaType {
-    IMAGE,
-    PDF,
-    VIDEO
-}
+import com.telenko.filemanager.infiniteapi.MediaType
 
 data class ExtractionResult(
     val embeddings: List<FileEmbeddingEntity>,
@@ -23,11 +18,12 @@ data class SearchResult(
     val frameTimeMs: Long = 0L
 )
 
-/**
- * Контекст пошуку для розділення векторних просторів
- */
-enum class SearchContext {
-    VISUAL,
-    TEXT,
-    ALL
+data class SearchFilter(
+    val mediaTypes: List<MediaType> = emptyList()
+)
+
+interface SearchFacade<Q> {
+    val searchFactor: Int
+
+    fun search(query: Q, filter: SearchFilter): List<SearchResult>
 }

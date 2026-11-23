@@ -1,14 +1,14 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-export type FileSearchContext = 'VISUAL' | 'TEXT' | 'ALL';
+export type MediaType = 'IMAGE' | 'VIDEO' | 'MUSIC' | 'TEXT' | 'OTHER';
 
 export type FileTreeState = {
   route: string;
   searchQuery?: string;
-  serchContext?: FileSearchContext;
   source: 'storage' | 'search';
   mode: 'tree' | 'move' | 'copy';
   selectedPaths: string[];
+  selectedMediaTypes?: MediaType[];
 };
 
 const initialState: FileTreeState = {
@@ -16,6 +16,13 @@ const initialState: FileTreeState = {
   mode: 'tree',
   source: 'search',
   selectedPaths: [],
+  selectedMediaTypes: [
+    'IMAGE',
+    'VIDEO',
+    'MUSIC',
+    'TEXT',
+    'OTHER',
+  ],
 };
 
 const fileTreeSlice = createSlice({
@@ -52,8 +59,27 @@ const fileTreeSlice = createSlice({
     setSearchQuery(state, action: PayloadAction<string | undefined>) {
       state.searchQuery = action.payload;
     },
-    setSearchContext(state, action: PayloadAction<FileSearchContext | undefined>) {
-      state.serchContext = action.payload;
+    setSelectedMediaTypes(state, action: PayloadAction<MediaType[] | undefined>) {
+      state.selectedMediaTypes = action.payload;
+    },
+    setMediaTypeSelected(
+      state,
+      action: PayloadAction<{ mediaType: MediaType; selected: boolean }>,
+    ) {
+      const selectedMediaTypes = state.selectedMediaTypes ?? [];
+      const { mediaType, selected } = action.payload;
+
+      if (selected) {
+        if (!selectedMediaTypes.includes(mediaType)) {
+          selectedMediaTypes.push(mediaType);
+        }
+        state.selectedMediaTypes = selectedMediaTypes;
+        return;
+      }
+
+      state.selectedMediaTypes = selectedMediaTypes.filter(
+        type => type !== mediaType,
+      );
     },
   },
 });
@@ -65,6 +91,7 @@ export const {
   toggleSelectedPath,
   setSource,
   setSearchQuery,
-  setSearchContext,
+  setSelectedMediaTypes,
+  setMediaTypeSelected,
 } = fileTreeSlice.actions;
 export default fileTreeSlice.reducer;

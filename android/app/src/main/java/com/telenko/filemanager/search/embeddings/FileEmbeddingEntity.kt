@@ -1,6 +1,6 @@
 package com.telenko.filemanager.search.embeddings
 
-import com.telenko.filemanager.search.common.MediaType
+import com.telenko.filemanager.infiniteapi.MediaType
 import io.objectbox.annotation.Entity
 import io.objectbox.annotation.HnswIndex
 import io.objectbox.annotation.Id
@@ -23,7 +23,6 @@ data class FileEmbeddingEntity(
     var embeddingType: String = EmbeddingType.IMAGE.name,
 
     var frameTimeMs: Long = 0L,  // Для відео
-    var pageIndex: Int = 0,       // Для PDF (-1 для FILENAME)
 
     @HnswIndex(dimensions = 512, distanceType = VectorDistanceType.COSINE)
     var embedding: FloatArray = FloatArray(0)

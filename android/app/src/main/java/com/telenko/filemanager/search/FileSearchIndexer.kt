@@ -7,11 +7,11 @@ import com.telenko.filemanager.indexer.IndexRemovalEvent
 import com.telenko.filemanager.indexer.IndexRemovalEventBridge
 import com.telenko.filemanager.search.common.ExtractionResult
 import com.telenko.filemanager.search.common.SearchIndexer
-import com.telenko.filemanager.search.common.MediaType
 import com.telenko.filemanager.search.common.AndroidTokenizer
 import com.telenko.filemanager.search.snapshot.FileTextSnapshotEntity
 import com.telenko.filemanager.search.snapshot.FileTextSnapshotEntity_
 import com.telenko.filemanager.search.snapshot.PdfEmbeddingIndexer
+import com.telenko.filemanager.search.snapshot.FilenameSnapshotIndexer
 import com.telenko.filemanager.search.snapshot.TextEmbeddingIndexer
 import com.telenko.filemanager.search.embeddings.FileEmbeddingEntity
 import com.telenko.filemanager.search.embeddings.FileEmbeddingEntity_
@@ -48,12 +48,14 @@ class FileSearchIndexer(
     val imageIndexer = ImageEmbeddingIndexer(ortEnv, visualSession)
     val videoIndexer = VideoEmbeddingIndexer(imageIndexer, visualSession)
     var textEmbeddingIndexer = TextEmbeddingIndexer(ortEnv, textSession, textTokenizer)
-    val pdfIndexer = PdfEmbeddingIndexer(context)
+    val pdfIndexer = PdfEmbeddingIndexer()
+    val filenameSnapshotIndexer = FilenameSnapshotIndexer()
 
     private val indexers: List<SearchIndexer> = listOf(
         imageIndexer,
         videoIndexer,
-        pdfIndexer
+        pdfIndexer,
+        filenameSnapshotIndexer
     )
 
     private val removalEventsJob = CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
@@ -94,11 +96,17 @@ class FileSearchIndexer(
         val file = File(filePath)
         removeFileCache(filePath)
         if (!file.exists() || !file.isFile) return@withContext false
-        // Знаходимо індексатор, який підтримує цей тип файлу
-        val indexer = indexers.firstOrNull { it.supports(filePath) } ?: return@withContext true
+        val matchingIndexers = indexers.filter { it.supports(filePath) }
+        if (matchingIndexers.isEmpty()) return@withContext true
         try {
-            val (embeddings, snapshots) = indexer.indexFile(filePath)
-            storeFileCache(embeddings, snapshots) 
+            val embeddings = mutableListOf<FileEmbeddingEntity>()
+            val snapshots = mutableListOf<FileTextSnapshotEntity>()
+            matchingIndexers.forEach { indexer ->
+                val (indexerEmbeddings, indexerSnapshots) = indexer.indexFile(filePath)
+                embeddings += indexerEmbeddings
+                snapshots += indexerSnapshots
+            }
+            storeFileCache(embeddings, snapshots)
             true
         } catch (e: CancellationException) {
             throw e

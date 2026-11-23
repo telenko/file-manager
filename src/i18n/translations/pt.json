@@ -70,5 +70,17 @@
     "searchIndexChargingInfo": "Melhor com o telefone carregando! Para uma pesquisa com IA melhor e mais rápida, recomendamos conectar o telefone ao carregador durante a configuração.",
     "storeLatestFolder": "Lembrar da última pasta",
     "storeLatestFolderInfo": "Se desejar, podemos lembrar da última pasta que você abriu. Na próxima vez que usar o aplicativo, essa pasta será aberta automaticamente.",
+    "mediaTypeImages": "Imagens",
+    "mediaTypeVideos": "Vídeos",
+    "mediaTypeMusic": "Música",
+    "mediaTypeText": "Documentos",
+    "mediaTypeOther": "Outros",
+    "clearSearch": "Limpar pesquisa",
+    "mediaFilterTitle": "Filtro de ficheiros multimédia",
+    "mediaFilterDescription": "Escolha os tipos de ficheiro a apresentar",
+    "mediaFilterAllFiles": "Todos os ficheiros",
+    "mediaFilterSelectionSummary": "Categorias selecionadas: {{selected}} de {{total}}",
+    "mediaFilterReset": "Repor",
+    "mediaFilterApply": "Aplicar",
     "checkForUpdates": "Verificar atualizações"
 }

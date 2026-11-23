@@ -13,7 +13,7 @@ import java.nio.FloatBuffer
 internal data class SearchIndexRuntime(
     val fileSearchIndexer: FileSearchIndexer,
     val textEmbeddingIndexer: TextEmbeddingIndexer,
-    val vectorSearchManager: VectorSearchManager
+    val searchIndexManager: SearchIndexManager
 )
 
 internal object SearchIndexRuntimeProvider {
@@ -70,7 +70,7 @@ internal object SearchIndexRuntimeProvider {
             val nextRuntime = SearchIndexRuntime(
                 fileSearchIndexer = fileSearchIndexer,
                 textEmbeddingIndexer = TextEmbeddingIndexer(ortEnv, textSession, tokenizer),
-                vectorSearchManager = VectorSearchManager(appContext)
+                searchIndexManager = SearchIndexManager(appContext)
             )
 
             runtime = nextRuntime

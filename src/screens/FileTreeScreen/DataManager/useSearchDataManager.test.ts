@@ -1,11 +1,20 @@
-import type { DirItem, SearchFile } from '../../../services/FileApi';
+import { FileApi, type DirItem, type SearchFile } from '../../../services/FileApi';
 
 jest.mock('react-redux', () => ({
   useDispatch: jest.fn(),
   useSelector: jest.fn(),
 }));
 
-import { adaptEmbeddingItemIntoDirItem } from './useSearchDataManager';
+jest.mock('../../../services/FileApi', () => ({
+  FileApi: {
+    getMetadata: jest.fn(),
+  },
+}));
+
+import {
+  adaptEmbeddingItemIntoDirItem,
+  resolveSearchResultIntoDirItem,
+} from './useSearchDataManager';
 
 const createSearchFile = (filePath: string): SearchFile => ({
   id: 1,
@@ -41,5 +50,25 @@ describe('adaptEmbeddingItemIntoDirItem', () => {
         createSearchFile('/storage/photos/image.jpg'),
       ),
     ).toBeNull();
+  });
+
+  it('loads metadata for search results missing from the current file list', async () => {
+    const filePath = '/storage/photos/image.jpg';
+    const item: DirItem = {
+      name: 'image.jpg',
+      path: filePath,
+      size: 1024,
+      isFile: true,
+      isDirectory: false,
+    };
+    const getMetadata = jest.mocked(FileApi.getMetadata);
+    getMetadata.mockResolvedValue(item);
+
+    await expect(
+      resolveSearchResultIntoDirItem(createSearchFile(filePath)),
+    ).resolves.toBe(item);
+    expect(getMetadata).toHaveBeenCalledWith(filePath);
+
+    getMetadata.mockReset();
   });
 });

@@ -70,5 +70,17 @@
     "searchIndexChargingInfo": "Şarjdayken daha iyi! Daha iyi ve hızlı yapay zekâ araması için kurulum sırasında telefonu şarja takmanızı öneririz.",
     "storeLatestFolder": "Son klasörü hatırla",
     "storeLatestFolderInfo": "İsterseniz, en son açtığınız klasörü hatırlayabiliriz. Uygulamayı bir sonraki kullanışınızda, o klasör otomatik olarak açılacaktır.",
+    "mediaTypeImages": "Resimler",
+    "mediaTypeVideos": "Videolar",
+    "mediaTypeMusic": "Müzik",
+    "mediaTypeText": "Belgeler",
+    "mediaTypeOther": "Diğer",
+    "clearSearch": "Aramayı temizle",
+    "mediaFilterTitle": "Medya dosyası filtresi",
+    "mediaFilterDescription": "Görüntülenecek dosya türlerini seçin",
+    "mediaFilterAllFiles": "Tüm dosyalar",
+    "mediaFilterSelectionSummary": "Seçilen kategoriler: {{selected}} / {{total}}",
+    "mediaFilterReset": "Sıfırla",
+    "mediaFilterApply": "Uygula",
     "checkForUpdates": "Güncellemeleri kontrol et"
 }

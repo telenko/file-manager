@@ -4,7 +4,7 @@ import ai.onnxruntime.OrtSession
 import android.media.MediaMetadataRetriever
 import com.telenko.filemanager.search.common.ExtractionResult
 import com.telenko.filemanager.search.common.SearchIndexer
-import com.telenko.filemanager.search.common.MediaType
+import com.telenko.filemanager.infiniteapi.MediaType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File

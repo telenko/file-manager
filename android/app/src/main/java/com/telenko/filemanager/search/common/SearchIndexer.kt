@@ -1,4 +1,7 @@
 package com.telenko.filemanager.search.common
+
+import com.telenko.filemanager.infiniteapi.MediaType
+
 interface SearchIndexer {
     /**
      * Тип медіа, який обробляє цей індексатор.

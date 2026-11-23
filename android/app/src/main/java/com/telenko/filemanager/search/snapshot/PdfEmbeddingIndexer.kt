@@ -1,38 +1,26 @@
 package com.telenko.filemanager.search.snapshot
 
 import ai.onnxruntime.OrtSession
-import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.pdf.PdfRenderer
 import android.os.ParcelFileDescriptor
 import android.util.Log
 import com.telenko.filemanager.search.common.ExtractionResult
-import com.telenko.filemanager.search.common.MediaType
+import com.telenko.filemanager.infiniteapi.MediaType
 import com.telenko.filemanager.search.common.SearchIndexer
 import com.tom_roush.pdfbox.pdmodel.PDDocument
 import com.tom_roush.pdfbox.text.PDFTextStripper
-import com.tom_roush.pdfbox.text.TextPosition
-import io.objectbox.Box
-import io.objectbox.query.QueryBuilder
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
 
-import com.telenko.filemanager.db.ObjectBoxStore
-
 private const val TAG = "PdfEmbeddingIndexer"
 
-class PdfEmbeddingIndexer(
-    private val context: Context
-) : SearchIndexer {
+class PdfEmbeddingIndexer : SearchIndexer {
 
-    override val mediaType: MediaType = MediaType.PDF
-
-    private val snapshotBox: Box<FileTextSnapshotEntity> by lazy {
-        ObjectBoxStore.get(context).boxFor(FileTextSnapshotEntity::class.java)
-    }
+    override val mediaType: MediaType = MediaType.TEXT
 
     override fun supports(filePath: String): Boolean {
         return filePath.endsWith(".pdf", ignoreCase = true)
@@ -45,20 +33,6 @@ class PdfEmbeddingIndexer(
         }
         Log.d(TAG, "Starting indexing for PDF file: $filePath")
         val snapshots = mutableListOf<FileTextSnapshotEntity>()
-
-        // 1. ЕМБЕДДІНГ НАЗВИ ФАЙЛУ (EmbeddingType.FILENAME)
-        val cleanFileName = extractCleanFileName(file.name)
-        if (cleanFileName.isNotBlank()) {
-            Log.d(TAG, "Extracted filename embedding for $cleanFileName")
-            snapshots.add(
-                FileTextSnapshotEntity(
-                    filePath = filePath,
-                    fileName = file.name,
-                    pageIndex = -1,
-                    text = cleanFileName
-                )
-            )
-        }
 
         try {
             val fileDescriptor = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
@@ -77,7 +51,9 @@ class PdfEmbeddingIndexer(
                                     filePath = filePath,
                                     fileName = file.name,
                                     pageIndex = pageIndex,
-                                    text = textSnapshot
+                                    text = textSnapshot,
+                                    mediaType = MediaType.TEXT.name,
+                                    snapshotType = SnapshotType.TEXT_CONTENT.name
                                 )
                             )
                         }
@@ -114,15 +90,6 @@ class PdfEmbeddingIndexer(
             Log.e(TAG, "Error extracting text snapshot for page $pageIndex", e)
             ""
         }
-    }
-
-    private fun extractCleanFileName(fileNameWithExtension: String): String {
-        val nameWithoutExtension = fileNameWithExtension.substringBeforeLast('.')
-        return nameWithoutExtension
-            .replace("[_\\-\\.\\,\\;\\:\\/\\\\|]+".toRegex(), " ")
-            .split("\\s+".toRegex())
-            .filter { it.isNotBlank() }
-            .joinToString(" ")
     }
 
     private fun calculatePagesToProcess(pageCount: Int): List<Int> {

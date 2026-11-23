@@ -71,5 +71,17 @@
     "searchIndexChargingInfo": "¡Mejor con el teléfono cargando! Para una búsqueda con IA mejor y más rápida, recomendamos conectar el teléfono al cargador durante la configuración.",
     "storeLatestFolder": "Recordar última carpeta",
     "storeLatestFolderInfo": "Si lo deseas, podemos recordar la última carpeta que abriste. La próxima vez que uses la app, se abrirá automáticamente esa carpeta.",
+    "mediaTypeImages": "Imágenes",
+    "mediaTypeVideos": "Vídeos",
+    "mediaTypeMusic": "Música",
+    "mediaTypeText": "Documentos",
+    "mediaTypeOther": "Otros",
+    "clearSearch": "Borrar búsqueda",
+    "mediaFilterTitle": "Filtro de archivos multimedia",
+    "mediaFilterDescription": "Elige los tipos de archivo que se mostrarán",
+    "mediaFilterAllFiles": "Todos los archivos",
+    "mediaFilterSelectionSummary": "Categorías seleccionadas: {{selected}} de {{total}}",
+    "mediaFilterReset": "Restablecer",
+    "mediaFilterApply": "Aplicar",
     "checkForUpdates": "Buscar actualizaciones"
 }
